@@ -1,0 +1,3 @@
+defmodule SlackCoder.Github.PullRequest.PR do
+  defstruct slack_user: nil, html_url: nil, watcher: nil, commits_url: nil, statuses_url: nil, title: nil, number: nil
+end
