@@ -19,7 +19,7 @@ defmodule SlackCoder.Github.PullRequest do
   def handle_info({:pr_response, prs}, {repo, old_prs}) do
     prs = prs
           |> Enum.map fn
-               %PR{number: number} = pr ->
+               %PR{} = pr ->
                  watcher = SlackCoder.Github.Supervisor.start_watcher(pr)
                  %PR{ pr | watcher: watcher}
              end
@@ -27,7 +27,13 @@ defmodule SlackCoder.Github.PullRequest do
     {:noreply, {repo, prs}}
   end
 
-  defp close_prs(new_prs, []), do: nil
+  def handle_info(:update_prs, {repo, existing_prs}) do
+    pulls(repo, existing_prs)
+    # State doesn't change until :pr_response message is received
+    {:noreply, {repo, existing_prs}}
+  end
+
+  defp close_prs(_new_prs, []), do: nil
   defp close_prs(new_prs, old_prs) do
     closed_prs =  (old_prs |> Enum.map(&(&1.number))) -- (new_prs |> Enum.map(&(&1.number)))
     if closed_prs != [] do
@@ -38,12 +44,6 @@ defmodule SlackCoder.Github.PullRequest do
         SlackCoder.Github.Supervisor.stop_watcher(pr)
       end
     end
-  end
-
-  def handle_info(:update_prs, {repo, existing_prs}) do
-    pulls(repo, existing_prs)
-    # State doesn't change until :pr_response message is received
-    {:noreply, {repo, existing_prs}}
   end
 
 end

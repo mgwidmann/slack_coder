@@ -26,7 +26,7 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
     {:noreply, commit}
   end
 
-  defp report_status(%Commit{id: id} = commit, %Commit{id: id} = old_commit), do: nil
+  defp report_status(%Commit{id: id} = _commit, %Commit{id: id} = _old_commit), do: nil
   defp report_status(commit, _old_commit) do
     case commit.status do
       :failure ->
