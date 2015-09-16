@@ -5,10 +5,11 @@ defmodule SlackCoder do
   # for more information on OTP Applications
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
-    IO.puts "#{__MODULE__}.start"
+
     children = [
       # Define workers and child supervisors to be supervised
       worker(SlackCoder.Slack, [Application.get_env(:slack_coder, :slack_api_token), []]),
+      worker(SlackCoder.Repo, []),
       supervisor(SlackCoder.Github.Supervisor, [])
     ]
 

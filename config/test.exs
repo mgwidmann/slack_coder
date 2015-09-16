@@ -3,6 +3,13 @@ use Mix.Config
 config :logger, :console,
   level: :error
 
+config :slack_coder, SlackCoder.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  database: "slack_coder_test",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost"
+
 config :slack_coder,
   slack_api_token: "a-token",
   github: [

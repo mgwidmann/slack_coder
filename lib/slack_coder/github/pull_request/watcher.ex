@@ -2,6 +2,8 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
   use GenServer
   import SlackCoder.Github.Helper
   alias SlackCoder.Github.PullRequest.Commit
+  alias SlackCoder.Repo
+  alias SlackCoder.Models.ReportedCommit
   require Logger
 
   @poll_interval 60_000
@@ -28,19 +30,36 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
 
   defp report_status(%Commit{id: id} = _commit, %Commit{id: id} = _old_commit), do: nil
   defp report_status(commit, _old_commit) do
-    case commit.status do
-      :failure ->
-        message = ":facepalm: *BUILD FAILURE* #{commit.pr.title} :-1:\n#{commit.travis_url}\n#{commit.pr.html_url}"
-        Logger.info message
-        SlackCoder.Slack.send_to(commit.pr.slack_user, message)
-      :success ->
-        message = ":bananadance: #{commit.pr.title} :success:"
-        Logger.info message
-        SlackCoder.Slack.send_to(commit.pr.slack_user, message)
-      :pending ->
-        nil
+    unless reported?(commit) do
+      %ReportedCommit{}
+      |> ReportedCommit.changeset(%{
+        repo: commit.pr.repo,
+        sha: commit.sha,
+        status_id: commit.id,
+        status: to_string(commit.status),
+        github_user: to_string(commit.pr.github_user),
+        pr: to_string(commit.pr.number)
+      })
+      |> Repo.insert
+
+      case commit.status do
+        :failure ->
+          message = ":facepalm: *BUILD FAILURE* #{commit.pr.title} :-1:\n#{commit.travis_url}\n#{commit.pr.html_url}"
+          Logger.info message
+          SlackCoder.Slack.send_to(commit.pr.slack_user, message)
+        :success ->
+          message = ":bananadance: #{commit.pr.title} :success:"
+          Logger.info message
+          SlackCoder.Slack.send_to(commit.pr.slack_user, message)
+        :pending ->
+          nil
+      end
     end
     commit
+  end
+
+  def reported?(commit) do
+    Repo.get_by(ReportedCommit, status_id: commit.id)
   end
 
 end

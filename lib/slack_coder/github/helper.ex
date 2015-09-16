@@ -88,7 +88,9 @@ defmodule SlackCoder.Github.Helper do
       html_url: pr["_links"]["html"]["href"],
       commits_url: String.replace(pr["_links"]["commits"]["href"], ~r/.*github\.com\//, ""),
       statuses_url: "repos/#{owner}/#{repo}/statuses/",
-      slack_user: slack_user
+      slack_user: slack_user,
+      github_user: github_user,
+      repo: "#{owner}/#{repo}"
     }
   end
 

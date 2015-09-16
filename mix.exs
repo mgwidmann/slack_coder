@@ -14,7 +14,7 @@ defmodule SlackCoder.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :slack, :httpoison],
+    [applications: [:logger, :slack, :httpoison, :postgrex],
      mod: mod(Mix.env)]
   end
 
@@ -36,6 +36,8 @@ defmodule SlackCoder.Mixfile do
       {:websocket_client, git: "https://github.com/jeremyong/websocket_client"},
       {:httpoison, "~> 0.7.2"},
       {:exjsx, "~> 3.1"},
+      {:ecto, "~> 1.0.0"},
+      {:postgrex, ">= 0.0.0"},
       {:pavlov, "~> 0.2.3", only: :test}
     ]
   end
