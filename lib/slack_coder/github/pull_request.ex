@@ -16,17 +16,28 @@ defmodule SlackCoder.Github.PullRequest do
     {:ok, {repo, []}}
   end
 
-  def handle_info({:pr_response, prs}, {repo, _prs}) do
+  def handle_info({:pr_response, prs}, {repo, old_prs}) do
     prs = prs
           |> Enum.map fn
-               %PR{watcher: nil} = pr ->
-                 Logger.debug "Starting watcher for: PR-#{pr.number} #{pr.title}"
-                 {:ok, watcher} = SlackCoder.Github.Supervisor.start_watcher(pr)
+               %PR{number: number} = pr ->
+                 watcher = SlackCoder.Github.Supervisor.start_watcher(pr)
                  %PR{ pr | watcher: watcher}
-               pr ->
-                 pr
              end
+    close_prs(prs, old_prs)
     {:noreply, {repo, prs}}
+  end
+
+  defp close_prs(new_prs, []), do: nil
+  defp close_prs(new_prs, old_prs) do
+    closed_prs =  (old_prs |> Enum.map(&(&1.number))) -- (new_prs |> Enum.map(&(&1.number)))
+    if closed_prs != [] do
+      Logger.debug "Closed PRs: #{inspect closed_prs}"
+      Enum.each closed_prs, fn(pr_number)->
+        pr = Enum.find(old_prs, &( &1.number == pr_number))
+        Logger.debug "Stopping watcher for: PR-#{pr.number} #{pr.title}"
+        SlackCoder.Github.Supervisor.stop_watcher(pr)
+      end
+    end
   end
 
   def handle_info(:update_prs, {repo, existing_prs}) do

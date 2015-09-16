@@ -1,5 +1,6 @@
 defmodule SlackCoder.Github.Supervisor do
   import Supervisor.Spec
+  require Logger
 
   def start_link() do
     IO.puts "#{__MODULE__}.start_link"
@@ -13,8 +14,18 @@ defmodule SlackCoder.Github.Supervisor do
   end
 
   def start_watcher(pr) do
-    Supervisor.start_child(SlackCoder.Github.Supervisor,
-      worker(SlackCoder.Github.PullRequest.Watcher, [pr], id: "PR-#{pr.number}"))
+    case Supervisor.start_child(SlackCoder.Github.Supervisor,
+      worker(SlackCoder.Github.PullRequest.Watcher, [pr], id: "PR-#{pr.number}")) do
+        {:ok, watcher} ->
+          Logger.debug "Starting watcher for: PR-#{pr.number} #{pr.title}"
+          watcher
+        {:error, {:already_started, watcher}} ->
+          watcher
+    end
+  end
+
+  def stop_watcher(pr) do
+    Supervisor.terminate_child(SlackCoder.Github.Supervisor, "PR-#{pr.number}")
   end
 
 end

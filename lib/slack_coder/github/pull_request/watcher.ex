@@ -21,31 +21,19 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
     {:noreply, commit}
   end
 
-  def handle_info({:commit_results, commit}, _old_commit) do
-    Logger.debug "Status of PR-#{commit.pr.number} #{String.slice(commit.sha, -8, 8)} #{commit.status}"
-    if commit.sha in Dict.keys(commit.reported_shas) do
-      if Dict.get(commit.reported_shas, commit.sha) != commit.status do
-        commit = report_status(commit)
-      end
-    else
-      commit = report_status(commit)
-    end
+  def handle_info({:commit_results, commit}, old_commit) do
+    report_status(commit, old_commit)
     {:noreply, commit}
   end
 
-  defp add_reported_sha(commit) do
-    %Commit{ commit | reported_shas: Dict.put(commit.reported_shas, commit.sha, commit.status) }
-  end
-
-  defp report_status(commit) do
+  defp report_status(%Commit{id: id} = commit, %Commit{id: id} = old_commit), do: nil
+  defp report_status(commit, _old_commit) do
     case commit.status do
       :failure ->
-        commit = add_reported_sha(commit)
         message = ":facepalm: *BUILD FAILURE* #{commit.pr.title} :-1:\n#{commit.travis_url}\n#{commit.pr.html_url}"
         Logger.info message
         SlackCoder.Slack.send_to(commit.pr.slack_user, message)
       :success ->
-        commit = add_reported_sha(commit)
         message = ":bananadance: #{commit.pr.title} :success:"
         Logger.info message
         SlackCoder.Slack.send_to(commit.pr.slack_user, message)

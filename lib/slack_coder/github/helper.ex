@@ -68,7 +68,8 @@ defmodule SlackCoder.Github.Helper do
     commit = %Commit{ commit |
                 status: String.to_atom(last_status["state"]),
                 travis_url: last_status["target_url"],
-                sha: last_commit
+                sha: last_commit,
+                id: last_status["id"]
              }
     commit
   end
