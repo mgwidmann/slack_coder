@@ -1,7 +1,12 @@
 defmodule SlackCoder.Slack do
   use Slack
   import SlackCoder.Slack.Helper
+  alias SlackCoder.Config
   require Logger
+  @online_message """
+  :slack: *Slack* :computer: *Coder* online!
+  Reporting on any PRs since last online...
+  """
 
   def send_to(user, message) do
     send :slack, {user, message}
@@ -9,19 +14,13 @@ defmodule SlackCoder.Slack do
 
   def handle_info({user, message}, slack) do
     user = user(slack, user)
-    group_name = Application.get_env(:slack_coder, :group)
-    channel_name = Application.get_env(:slack_coder, :channel)
-    group_or_channel = cond do
-                         channel = channel(slack, channel_name) -> channel
-                         group = group(slack, group_name) -> group
-                         true -> raise "Could not find either channel #{channel_name} or group #{group_name}"
-                       end
-    send_message("<@#{user.id}> #{message}", group_or_channel.id, slack)
+    send_message("<@#{user.id}> #{message}", Config.channel(slack).id, slack)
     {:ok, slack}
   end
 
-  def handle_connect(_slack, state) do
+  def handle_connect(slack, state) do
     Process.register(self, :slack)
+    send_message(@online_message, Config.channel(slack).id, slack)
     {:ok, state}
   end
 
