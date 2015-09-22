@@ -66,7 +66,7 @@ defmodule SlackCoder.Github.Helper do
                   |> get
                   |> List.first # The actual status is always the first, (the rest are bogus) who knows why...
     commit = %Commit{ commit |
-                status: String.to_atom(last_status["state"]),
+                status: String.to_atom(last_status["state"] || "pending"),
                 travis_url: last_status["target_url"],
                 sha: last_commit,
                 id: last_status["id"]
