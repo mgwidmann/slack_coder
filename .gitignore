@@ -1,5 +1,18 @@
+# App artifacts
+/db
 /_build
 /deps
 erl_crash.dump
 *.ez
 *.secret.exs
+
+# Generate on crash by the VM
+erl_crash.dump
+
+# Static artifacts
+/node_modules
+
+# Since we are building assets from web/static,
+# we ignore priv/static. You may want to comment
+# this depending on your deployment strategy.
+/priv/static/

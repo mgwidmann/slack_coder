@@ -1,8 +1,5 @@
 use Mix.Config
 
-config :logger, :console,
-  level: :error
-
 config :slack_coder, SlackCoder.Repo,
   adapter: Ecto.Adapters.Postgres,
   database: "slack_coder_test",
@@ -34,3 +31,24 @@ config :slack_coder,
   ],
   channel: "slack_coder_channel",
   group: "slack_coder_group"
+
+# We don't run a server during test. If one is required,
+# you can enable the server option below.
+config :slack_coder, SlackCoder.Endpoint,
+  http: [port: 4001],
+  server: false
+
+# Print only warnings and errors during test
+config :logger, level: :warn
+
+# Set a higher stacktrace during test
+config :phoenix, :stacktrace_depth, 20
+
+# Configure your database
+config :slack_coder, SlackCoder.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  username: "postgres",
+  password: "postgres",
+  database: "slack_coder_test",
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox
