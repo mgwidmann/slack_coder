@@ -4,7 +4,7 @@
       <%= for commit <- @prs[user] do %>
         <tr class="">
           <td>
-            <img src="<%= commit.github_user_avatar %>" width="32" height="32" />
+            <img src="<%= commit.github_user_avatar %>" style="width: 32px; height: 32px;" />
             <%= user %>
           </td>
           <td><%= link "Travis", to: commit.travis_url %></td>
