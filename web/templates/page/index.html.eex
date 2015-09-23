@@ -7,8 +7,8 @@
             <img src="<%= commit.github_user_avatar %>" style="width: 32px; height: 32px;" />
             <%= user %>
           </td>
-          <td><%= link "Travis", to: commit.travis_url %></td>
-          <td><%= link "Github", to: commit.pr.html_url %></td>
+          <td><%= link "Travis", [{:to, commit.travis_url}] %></td>
+          <td><%= link "Github", [{:to, commit.pr.html_url}] %></td>
           <td>
             <span class="label label-<%= status_class(commit.status) %> text-uppercase">
               <%= to_string(commit.status) %>
