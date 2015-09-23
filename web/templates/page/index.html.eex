@@ -10,8 +10,12 @@
           <td>
             <%= commit.pr.title %>
           </td>
-          <td><%= link("Travis", to: commit.travis_url) %></td>
-          <td><%= link("Github", to: commit.pr.html_url) %></td>
+          <td>
+            <a href="<%= commit.travis_url %>">Travis</a>
+          </td>
+          <td>
+            <a href="<%= commit.pr.html_url %>">Github</a>
+          </td>
           <td>
             <span class="label label-<%= status_class(commit.status) %> text-uppercase">
               <%= to_string(commit.status) %>
