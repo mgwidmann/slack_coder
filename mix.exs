@@ -43,7 +43,7 @@ defmodule SlackCoder.Mixfile do
       {:phoenix, "~> 1.0.0"},
       {:phoenix_ecto, "~> 1.1"},
       {:postgrex, ">= 0.0.0"},
-      {:phoenix_html, github: "mgwidmann/phoenix_html", override: true, branch: "link_to_missing"},
+      {:phoenix_html, "~> 2.2"},
       {:cowboy, "~> 1.0"},
       {:slack, "~> 0.2.0"},
       {:websocket_client, git: "https://github.com/jeremyong/websocket_client"},
