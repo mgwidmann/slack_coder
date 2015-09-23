@@ -7,6 +7,9 @@
             <img src="<%= commit.github_user_avatar %>" style="width: 32px; height: 32px;" />
             <%= user %>
           </td>
+          <td>
+            <%= commit.pr.title %>
+          </td>
           <td><%= link("Travis", to: commit.travis_url) %></td>
           <td><%= link("Github", to: commit.pr.html_url) %></td>
           <td>
