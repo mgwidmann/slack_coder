@@ -45,7 +45,7 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
         sha: commit.sha,
         status_id: commit.id,
         status: to_string(commit.status),
-        github_user: to_string(commit.pr.github_user),
+        github_user: to_string(commit.github_user),
         pr: to_string(commit.pr.number)
       })
       |> Repo.insert
