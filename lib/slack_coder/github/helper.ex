@@ -30,9 +30,9 @@ defmodule SlackCoder.Github.Helper do
 
   def pulls(repo, existing_prs \\ []) do
     me = self
-    spawn_link fn->
+    # spawn_link fn->
       send(me, {:pr_response, _pulls(repo, existing_prs)})
-    end
+    # end
   end
 
   defp _pulls(repo, existing_prs) do
@@ -55,20 +55,22 @@ defmodule SlackCoder.Github.Helper do
 
   def status(commit) do
     me = self
-    spawn_link fn ->
+    # spawn_link fn ->
       send(me, {:commit_results, _status(commit)})
-    end
+    # end
   end
 
   defp _status(commit) do
-    last_commit = (get(commit.pr.commits_url) |> List.last)["sha"]
-    last_status = (commit.pr.statuses_url <> "#{last_commit}")
+    last_commit = (get(commit.pr.commits_url) |> List.last)
+    last_status = (commit.pr.statuses_url <> "#{last_commit["sha"]}")
                   |> get
                   |> List.first # The actual status is always the first, (the rest are bogus) who knows why...
     commit = %Commit{ commit |
                 status: String.to_atom(last_status["state"] || "pending"),
                 travis_url: last_status["target_url"],
-                sha: last_commit,
+                sha: last_commit["sha"],
+                github_user: String.to_atom(last_commit["author"]["login"]),
+                github_user_avatar: last_commit["author"]["avatar_url"],
                 id: last_status["id"]
              }
     commit
@@ -89,7 +91,6 @@ defmodule SlackCoder.Github.Helper do
       commits_url: String.replace(pr["_links"]["commits"]["href"], ~r/.*github\.com\//, ""),
       statuses_url: "repos/#{owner}/#{repo}/statuses/",
       slack_user: slack_user,
-      github_user: github_user,
       repo: "#{owner}/#{repo}"
     }
   end

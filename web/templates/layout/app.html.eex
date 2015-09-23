@@ -9,15 +9,19 @@
 
     <title>Slack Coder</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
   </head>
 
   <body>
     <div class="container" role="main">
       <div class="header">
-        <ul class="nav nav-pills pull-right">
-          <li><a href="http://www.phoenixframework.org/docs">Get Started</a></li>
-        </ul>
-        <span class="logo"></span>
+        <div class="jumbotron">
+          <h2>
+            <span class="logo"></span>
+            Slack Coder
+          </h2>
+          <p class="lead">Monitoring your pull requests</p>
+        </div>
       </div>
 
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>

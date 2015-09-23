@@ -28,6 +28,14 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
     {:noreply, commit}
   end
 
+  def handle_call(:fetch, _from, last_commit) do
+    {:reply, last_commit, last_commit}
+  end
+
+  def fetch(pid) do
+    GenServer.call(pid, :fetch)
+  end
+
   defp report_status(%Commit{id: id} = _commit, %Commit{id: id} = _old_commit), do: nil
   defp report_status(commit, _old_commit) do
     unless reported?(commit) do

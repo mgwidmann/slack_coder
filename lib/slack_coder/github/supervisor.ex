@@ -1,5 +1,6 @@
 defmodule SlackCoder.Github.Supervisor do
   import Supervisor.Spec
+  alias SlackCoder.Github.PullRequest.Commit
   require Logger
 
   def start_link() do
@@ -26,6 +27,23 @@ defmodule SlackCoder.Github.Supervisor do
 
   def stop_watcher(pr) do
     Supervisor.terminate_child(SlackCoder.Github.Supervisor, "PR-#{pr.number}")
+  end
+
+  def pull_requests() do
+    Supervisor.which_children(SlackCoder.Github.Supervisor)
+    |> Stream.filter(fn
+      {"PR-" <> number, _, _, _} -> true
+      _ -> false
+    end)
+    |> Stream.map(fn
+      {_, pid, _, _} ->
+        SlackCoder.Github.PullRequest.Watcher.fetch(pid)
+    end)
+    |> Enum.reduce(%{}, fn
+      %Commit{github_user: user} = commit, prs ->
+        list = prs[user] || []
+        Map.put(prs, user, [commit | list])
+    end)
   end
 
 end
