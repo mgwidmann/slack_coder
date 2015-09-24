@@ -39,7 +39,7 @@ defmodule SlackCoder.Github.Supervisor do
       {_, pid, _, _} ->
         SlackCoder.Github.PullRequest.Watcher.fetch(pid)
     end)
-    |> Stream.filter(&(!&1)) # Remove nils
+    |> Stream.filter(&(&1)) # Remove nils
     |> Enum.reduce(%{}, fn
       %Commit{github_user: user} = commit, prs ->
         list = prs[user] || []
