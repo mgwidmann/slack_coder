@@ -32,6 +32,8 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
     {:reply, last_commit, last_commit}
   end
 
+  def fetch(:undefined), do: nil
+
   def fetch(pid) do
     GenServer.call(pid, :fetch)
   end
