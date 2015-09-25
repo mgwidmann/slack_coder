@@ -52,7 +52,8 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
       })
       |> Repo.insert
 
-      SlackCoder.Endpoint.broadcast "pr:all", "pr:update", %{pr: commit.pr.number, html: SlackCoder.PageView.render("pull_request.html", commit: commit)}
+      {:safe, html} = SlackCoder.PageView.render("pull_request.html", commit: commit)
+      SlackCoder.Endpoint.broadcast "pr:all", "pr:update", %{pr: commit.pr.number, html: :erlang.iolist_to_binary(html)}
 
       case commit.status do
         status when status in [:failure, :error] ->
