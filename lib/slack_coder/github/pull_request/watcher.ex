@@ -52,6 +52,8 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
       })
       |> Repo.insert
 
+      SlackCoder.Endpoint.broadcast "pr:all", "pr:update", %{pr: commit.pr.number, html: SlackCoder.PageView.render("pull_request.html", commit: commit)}
+
       case commit.status do
         status when status in [:failure, :error] ->
           message = ":facepalm: *BUILD FAILURE* #{commit.pr.title} :-1:\n#{commit.travis_url}\n#{commit.pr.html_url}"
