@@ -2,7 +2,7 @@ defmodule SlackCoder.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  channel "prs:*", SlackCoder.RoomChannel
+  channel "prs:*", SlackCoder.PRChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket

@@ -1,5 +1,5 @@
 <table class="table table-striped">
-  <tbody>
+  <tbody id="pull-requests">
     <%= for user <- Map.keys(@prs) do %>
       <%= for commit <- @prs[user] do %>
         <%= render "pull_request.html", commit: commit %>
