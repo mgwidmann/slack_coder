@@ -1,0 +1,11 @@
+.user-avatar {
+  width: 32px;
+  height: 32px;
+}
+
+.code-climate {
+  background-image: url("/images/code-climate-grey.svg");
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}

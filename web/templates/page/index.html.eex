@@ -2,24 +2,27 @@
   <tbody>
     <%= for user <- Map.keys(@prs) do %>
       <%= for commit <- @prs[user] do %>
-        <tr class="">
+        <tr>
           <td>
-            <img src="<%= commit.github_user_avatar %>" style="width: 32px; height: 32px;" />
+            <img src="<%= commit.github_user_avatar %>" class="user-avatar" />
+          </td>
+          <td>
             <%= user %>
           </td>
           <td>
-            <%= commit.pr.title %>
+            <a href="<%= commit.pr.html_url %>"><%= commit.pr.title %></a>
           </td>
           <td>
-            <a href="<%= commit.travis_url %>">Travis</a>
-          </td>
-          <td>
-            <a href="<%= commit.pr.html_url %>">Github</a>
-          </td>
-          <td>
-            <span class="label label-<%= status_class(commit.status) %> text-uppercase">
+            <%= link_if to: commit.travis_url, class: "label label-#{status_class(commit.status)} text-uppercase" do %>
               <%= to_string(commit.status) %>
-            </span>
+            <% end %>
+          </td>
+          <td>
+            <%= if commit.code_climate_url do %>
+              <%= link to: commit.code_climate_url do %>
+                <i class="code-climate"></i>
+              <% end %>
+            <% end %>
           </td>
         </tr>
       <% end %>

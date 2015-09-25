@@ -53,7 +53,7 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
       |> Repo.insert
 
       case commit.status do
-        :failure ->
+        status when status in [:failure, :error] ->
           message = ":facepalm: *BUILD FAILURE* #{commit.pr.title} :-1:\n#{commit.travis_url}\n#{commit.pr.html_url}"
           Logger.info message
           SlackCoder.Slack.send_to(commit.pr.slack_user, message)

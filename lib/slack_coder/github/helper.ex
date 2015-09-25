@@ -62,12 +62,21 @@ defmodule SlackCoder.Github.Helper do
 
   defp _status(commit) do
     last_commit = (get(commit.pr.commits_url) |> List.last)
-    last_status = (commit.pr.statuses_url <> "#{last_commit["sha"]}")
-                  |> get
-                  |> List.first # The actual status is always the first, (the rest are bogus) who knows why...
+    statuses = (commit.pr.statuses_url <> "#{last_commit["sha"]}")
+                 |> get
+    last_status = statuses
+                  |> Stream.filter(&( &1["context"] =~ ~r/travis/ ))
+                  |> Enum.take(1) # List is already sorted, first is the latest
+                  |> List.first
+    code_climate = statuses
+                  |> Stream.filter(&( &1["context"] =~ ~r/codeclimate/ ))
+                  |> Enum.take(1) # List is already sorted, first is the latest
+                  |> List.first
     commit = %Commit{ commit |
                 status: String.to_atom(last_status["state"] || "pending"),
+                code_climate_status: String.to_atom(code_climate["state"] || "pending"),
                 travis_url: last_status["target_url"],
+                code_climate_url: code_climate["target_url"],
                 sha: last_commit["sha"],
                 github_user: String.to_atom(last_commit["author"]["login"]),
                 github_user_avatar: last_commit["author"]["avatar_url"],
