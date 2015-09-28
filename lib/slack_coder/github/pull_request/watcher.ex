@@ -43,7 +43,7 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
     unless reported?(commit) do
       %ReportedCommit{}
       |> ReportedCommit.changeset(%{
-        repo: commit.pr.repo,
+        repo: "#{commit.pr.owner}/#{commit.pr.repo}",
         sha: commit.sha,
         status_id: commit.id,
         status: to_string(commit.status),

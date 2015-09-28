@@ -61,7 +61,7 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp _status(commit) do
-    last_commit = (get(commit.pr.commits_url) |> List.last)
+    last_commit = (get("repos/#{commit.pr.github_user}/#{commit.pr.repo}/commits?sha=#{commit.pr.branch}") |> List.first)
     statuses = (commit.pr.statuses_url <> "#{last_commit["sha"]}")
                  |> get
     last_status = statuses
@@ -97,10 +97,12 @@ defmodule SlackCoder.Github.Helper do
       number: pr["number"],
       title: pr["title"],
       html_url: pr["_links"]["html"]["href"],
-      commits_url: String.replace(pr["_links"]["commits"]["href"], ~r/.*github\.com\//, ""),
       statuses_url: "repos/#{owner}/#{repo}/statuses/",
       slack_user: slack_user,
-      repo: "#{owner}/#{repo}"
+      github_user: github_user,
+      owner: owner,
+      repo: repo,
+      branch: pr["head"]["ref"]
     }
   end
 
