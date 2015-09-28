@@ -64,7 +64,8 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
           message = ":bananadance: #{commit.pr.title} :success:"
           Logger.info message
           SlackCoder.Slack.send_to(commit.pr.slack_user, message)
-        :pending ->
+        # :pending or ignoring any other unknown statuses
+        _ ->
           nil
       end
     end
