@@ -53,7 +53,12 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
       |> Repo.insert
 
       {:safe, html} = SlackCoder.PageView.render("pull_request.html", commit: commit)
-      SlackCoder.Endpoint.broadcast "pr:all", "pr:update", %{pr: commit.pr.number, html: :erlang.iolist_to_binary(html)}
+      case SlackCoder.Endpoint.broadcast("pr:all", "pr:update", %{pr: commit.pr.number, html: :erlang.iolist_to_binary(html)}) do
+        :ok -> nil
+        error ->
+          Logger.error "Error broadcasting pr:update -- #{inspect error}"
+      end
+
 
       case commit.status do
         status when status in [:failure, :error] ->
