@@ -71,7 +71,6 @@ defmodule SlackCoder.Github.HelperTest do
       Helper.pulls(:cool_project)
       assert_receive {:pr_response, [
         %PR{
-          commits_url: "commits",
           slack_user: :slack_coder,
           statuses_url: "repos/slack_coder/cool_project/statuses/",
           title: "A new idea"

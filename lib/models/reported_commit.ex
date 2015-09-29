@@ -1,6 +1,5 @@
 defmodule SlackCoder.Models.ReportedCommit do
   use Ecto.Model
-  @derive Access
 
   schema "reported_commits" do
     field :repo, :string

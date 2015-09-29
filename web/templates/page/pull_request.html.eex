@@ -6,7 +6,7 @@
     <%= @commit.github_user %>
   </td>
   <td>
-    <a href="<%= @commit.pr[:html_url] %>"><%= @commit.pr[:title] %></a>
+    <a href="<%= @commit.pr.html_url %>"><%= @commit.pr.title %></a>
   </td>
   <td>
     <%= link_if to: @commit.travis_url, class: "label label-#{status_class(@commit.status)} text-uppercase" do %>

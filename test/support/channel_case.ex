@@ -19,16 +19,16 @@ defmodule SlackCoder.ChannelCase do
     quote do
       use Pavlov.Case, async: true
       import Pavlov.Syntax.Expect
+
+      # The default endpoint for testing
+      @endpoint SlackCoder.Endpoint
+      
       # Import conveniences for testing with channels
       use Phoenix.ChannelTest
 
       alias SlackCoder.Repo
       import Ecto.Model
       import Ecto.Query, only: [from: 2]
-
-
-      # The default endpoint for testing
-      @endpoint SlackCoder.Endpoint
     end
   end
 

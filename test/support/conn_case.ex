@@ -19,6 +19,10 @@ defmodule SlackCoder.ConnCase do
     quote do
       use Pavlov.Case, async: true
       import Pavlov.Syntax.Expect
+
+      # The default endpoint for testing
+      @endpoint SlackCoder.Endpoint
+      
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
 
@@ -27,9 +31,6 @@ defmodule SlackCoder.ConnCase do
       import Ecto.Query, only: [from: 2]
 
       import SlackCoder.Router.Helpers
-
-      # The default endpoint for testing
-      @endpoint SlackCoder.Endpoint
     end
   end
 
