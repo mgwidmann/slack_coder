@@ -22,11 +22,26 @@ defmodule SlackCoder.Github.Supervisor do
           watcher
         {:error, {:already_started, watcher}} ->
           watcher
+        {:error, :already_present} ->
+          find_watcher(pr)
     end
   end
 
   def stop_watcher(pr) do
     Supervisor.terminate_child(SlackCoder.Github.Supervisor, "PR-#{pr.number}")
+  end
+
+  def find_watcher(pr) do
+    number = pr.number
+    child = Supervisor.which_children(SlackCoder.Github.Supervisor)
+            |> Enum.find(fn
+              {"PR-" <> number, _, _, _} -> true
+              _ -> false
+            end)
+    case child do
+      nil -> nil
+      {_, worker, _, _} -> worker
+    end
   end
 
   def pull_requests() do
