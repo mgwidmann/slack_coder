@@ -77,6 +77,7 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
     commit
   end
 
+  def reported?(%Commit{id: nil}), do: true # Will cause an error if we attempt to insert
   def reported?(commit) do
     Repo.get_by(ReportedCommit, status_id: commit.id)
   end
