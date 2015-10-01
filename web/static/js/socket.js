@@ -68,6 +68,9 @@ $(document).ready(()=> {
       $('#pull-requests').append(resp.html)
     }
   })
+  channel.on("pr:remove", resp => {
+    $(`#pr-${resp.pr}`).remove()
+  })
 })
 
 export default socket

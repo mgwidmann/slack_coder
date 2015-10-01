@@ -42,6 +42,7 @@ defmodule SlackCoder.Github.PullRequest do
         pr = Enum.find(old_prs, &( &1.number == pr_number))
         Logger.debug "Stopping watcher for: PR-#{pr.number} #{pr.title}"
         SlackCoder.Github.Supervisor.stop_watcher(pr)
+        SlackCoder.Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
       end
     end
   end
