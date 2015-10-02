@@ -41,4 +41,6 @@ config :slack_coder, SlackCoder.Repo,
   hostname: "localhost",
   pool_size: 10
 
-import_config "dev.secret.exs"
+if File.exists? "config/dev.secret.exs" do
+  import_config "dev.secret.exs"
+end
