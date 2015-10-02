@@ -3,8 +3,8 @@ use Mix.Config
 config :slack_coder, SlackCoder.Repo,
   adapter: Ecto.Adapters.Postgres,
   database: "slack_coder_test",
-  username: "postgres",
-  password: "postgres",
+  username: System.get_env("DATABASE_POSTGRESQL_USERNAME") || "postgres",
+  password: System.get_env("DATABASE_POSTGRESQL_PASSWORD") || "postgres",
   hostname: "localhost"
 
 config :slack_coder,
