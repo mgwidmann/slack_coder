@@ -5,7 +5,8 @@ config :slack_coder, SlackCoder.Repo,
   database: "slack_coder_test",
   username: System.get_env("DATABASE_POSTGRESQL_USERNAME") || "postgres",
   password: System.get_env("DATABASE_POSTGRESQL_PASSWORD") || "postgres",
-  hostname: "localhost"
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox
 
 config :slack_coder,
   slack_api_token: "a-token",
@@ -43,12 +44,3 @@ config :logger, level: :warn
 
 # Set a higher stacktrace during test
 config :phoenix, :stacktrace_depth, 20
-
-# Configure your database
-config :slack_coder, SlackCoder.Repo,
-  adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "slack_coder_test",
-  hostname: "localhost",
-  pool: Ecto.Adapters.SQL.Sandbox
