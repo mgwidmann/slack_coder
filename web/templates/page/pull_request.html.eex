@@ -6,16 +6,16 @@
     <%= @commit.github_user %>
   </td>
   <td>
-    <a href="<%= @commit.pr.html_url %>"><%= @commit.pr.title %></a>
+    <%= link @commit.pr.title, to: @commit.pr.html_url, target: "_blank" %>
   </td>
   <td>
-    <%= link_if to: @commit.travis_url, class: "label label-#{status_class(@commit.status)} text-uppercase" do %>
+    <%= link_if to: @commit.travis_url, class: "label label-#{status_class(@commit.status)} text-uppercase", target: "_blank" do %>
       <%= to_string(@commit.status) %>
     <% end %>
   </td>
   <td>
     <%= if @commit.code_climate_url do %>
-      <%= link to: @commit.code_climate_url do %>
+      <%= link to: @commit.code_climate_url, target: "_blank" do %>
         <i class="code-climate"></i>
       <% end %>
     <% end %>
