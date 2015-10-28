@@ -6,8 +6,8 @@ defmodule SlackCoder.PageViewTest do
 
   describe "pull_request.html" do
 
-    it "blank commit" do
-      expect {:safe, _} = PageView.render("pull_request.html", commit: %Commit{})
+    it "bare minimum commit data" do
+      expect {:safe, _} = PageView.render("pull_request.html", commit: %Commit{pr: %PR{html_url: "http://github.com/", title: "Github"}})
     end
 
     it "populated commit with a PR" do
