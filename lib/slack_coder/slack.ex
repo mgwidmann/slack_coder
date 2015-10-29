@@ -12,15 +12,16 @@ defmodule SlackCoder.Slack do
     send :slack, {user, message}
   end
 
-  def handle_info({user, message}, slack) do
+  def handle_info({user, message}, slack, state) do
     user = user(slack, user)
-    send_message("<@#{user.id}> #{message}", Config.channel(slack).id, slack)
+    send_message(message_for(user, message), Config.route_message(slack, user).id, slack)
     {:ok, slack}
   end
 
   def handle_connect(slack, state) do
     Process.register(self, :slack)
-    send_message(@online_message, Config.channel(slack).id, slack)
+    channel = Config.channel(slack)
+    if channel, do: send_message(@online_message, channel.id, slack)
     {:ok, state}
   end
 
@@ -28,9 +29,9 @@ defmodule SlackCoder.Slack do
     {:ok, state}
   end
 
-  def websocket_info(msg, _connection, state) do
-    {:ok, slack} = SlackCoder.Slack.handle_info(msg, state.slack)
-    {:ok, %{ state | slack: slack}}
+  def websocket_info(message, _connection, %{slack: slack, state: state}) do
+    handle_info(message, slack, state)
+    {:ok, %{slack: slack, state: state}}
   end
 
 end

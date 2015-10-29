@@ -15,19 +15,20 @@ config :slack_coder,
     user: "slack_coder",
   ],
   users: [
-    cool_project: [
-      slack_coder: [slack: :slack_coder]
-    ],
-    some_idea: [
-      slack_coder: [slack: :slack_coder]
-    ]
+    slack_coder: [slack: :slack_coder]
   ],
   repos: [
     cool_project: [
-      owner: :slack_coder
+      owner: :slack_coder,
+      users: [
+        :slack_coder
+      ]
     ],
     some_idea: [
-      owner: :slack_coder
+      owner: :slack_coder,
+      users: [
+        :slack_coder
+      ]
     ]
   ],
   channel: "slack_coder_channel",

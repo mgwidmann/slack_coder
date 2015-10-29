@@ -36,8 +36,7 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp _pulls(repo, existing_prs) do
-    users = Application.get_env(:slack_coder, :users, [])[repo]
-            |> Keyword.keys
+    users = Application.get_env(:slack_coder, :repos, [])[repo][:users]
             |> Enum.map(&(to_string(&1)))
     owner = Application.get_env(:slack_coder, :repos, [])[repo][:owner]
     Logger.debug "Pulling #{owner}/#{repo} PRs with #{length(existing_prs)} existing"
@@ -92,7 +91,7 @@ defmodule SlackCoder.Github.Helper do
     github_user = pr["user"]["login"] |> String.to_atom
     repo = pr["base"]["repo"]["name"] |> String.to_atom
     owner = pr["base"]["repo"]["owner"]["login"]
-    slack_user = Application.get_env(:slack_coder, :users, [])[repo][github_user][:slack]
+    slack_user = Application.get_env(:slack_coder, :users, [])[github_user][:slack]
     %PR{ existing |
       number: pr["number"],
       title: pr["title"],
