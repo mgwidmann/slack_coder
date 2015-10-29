@@ -46,7 +46,7 @@ defmodule SlackCoder.Mixfile do
       {:phoenix_html, "~> 2.2"},
       {:cowboy, "~> 1.0"},
       # {:slack, "~> 0.2.0"},
-      {:slack, git: "https://github.com/mgwidmann/Elixir-Slack.git", branch: "im_list"},
+      {:slack, git: "https://github.com/mgwidmann/Elixir-Slack", branch: "im_list"},
       {:websocket_client, git: "https://github.com/jeremyong/websocket_client.git"},
       {:httpoison, "~> 0.7.2"},
       {:exjsx, "~> 3.1"},

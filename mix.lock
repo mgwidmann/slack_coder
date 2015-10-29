@@ -20,7 +20,7 @@
   "poolboy": {:hex, :poolboy, "1.5.1"},
   "postgrex": {:hex, :postgrex, "0.9.1"},
   "ranch": {:hex, :ranch, "1.1.0"},
-  "slack": {:git, "https://github.com/mgwidmann/Elixir-Slack.git", "71a0d49103dfabc35534bf18c31bbfa9be40e598", [branch: "im_list"]},
+  "slack": {:git, "https://github.com/mgwidmann/Elixir-Slack", "ca3072c6df38475c93bd4a1939605577e26010d6", [branch: "im_list"]},
   "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.5"},
   "timex": {:hex, :timex, "0.17.0"},
   "tzdata": {:hex, :tzdata, "0.1.7"},
