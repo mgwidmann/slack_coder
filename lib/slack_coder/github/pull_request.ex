@@ -69,7 +69,7 @@ defmodule SlackCoder.Github.PullRequest do
     now = Timex.Date.local
     day_name = now |> Timex.Date.weekday |> Timex.Date.day_name
     if day_name in @weekdays && now.hour >= 8 && now.hour <= 17 do
-      stale_hours = Timex.Date.diff(now, latest_comment, :hours)
+      stale_hours = Timex.Date.diff(latest_comment, now, :hours)
       slack_user = SlackCoder.Config.slack_user(pr.github_user)
       message = """
       :hankey: *#{pr.title}*
