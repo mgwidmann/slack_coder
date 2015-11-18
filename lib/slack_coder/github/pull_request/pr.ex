@@ -8,7 +8,7 @@ defmodule SlackCoder.Github.PullRequest.PR do
             github_user: nil,
             # Stale PR checking
             latest_comment: nil,
-            comment_backoff: 1,
+            comment_backoff: Application.get_env(:slack_coder, :pr_backoff_start, 1),
             # Used in view
             title: nil,
             number: nil,

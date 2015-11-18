@@ -51,33 +51,58 @@ defmodule SlackCoder.Github.PullRequest do
     if pr.latest_comment == nil && latest_comment == nil do
       latest_comment = Timex.DateTime.local
     end
-    next_exponent = trunc(:math.log2(pr.comment_backoff) + 1)
-    next_notification = trunc(:math.pow(2, next_exponent))
-    if latest_comment && pr.latest_comment do
-      diff = Timex.Date.diff(latest_comment, pr.latest_comment, :hours)
-    end
-    # At least pr.comment_backoff hours since the latest comment or no comments
-    if diff == nil || (diff > pr.comment_backoff && diff > next_notification) do
-      comment_backoff = next_notification
+    if should_send_notification?(pr, latest_comment) && can_send_notification?() do
+      comment_backoff = next_backoff(pr)
       stale_pr_notification(pr, latest_comment)
     end
     %PR{pr | latest_comment: latest_comment, comment_backoff: comment_backoff}
   end
 
   @weekdays [1,2,3,4,5] |> Enum.map(&Timex.Date.day_name(&1))
-  defp stale_pr_notification(pr, latest_comment) do
-    now = Timex.Date.local
+  defp can_send_notification?() do
+    now = Timex.Date.now
+    hour = now.hour + Application.get_env(:slack_coder, :timezone_offset)
     day_name = now |> Timex.Date.weekday |> Timex.Date.day_name
-    if day_name in @weekdays && now.hour >= 8 && now.hour <= 17 do
-      stale_hours = Timex.Date.diff(latest_comment, now, :hours)
-      slack_user = SlackCoder.Config.slack_user(pr.github_user)
-      message = """
-      :hankey: *#{pr.title}*
-      Stale for *#{stale_hours}* hours
-      #{pr.html_url}
-      """
-      notify(slack_user, message)
+    day_name in @weekdays && hour >= 8 && hour <= 17
+  end
+
+  defp should_send_notification?(pr, latest_comment) do
+    next_notification = next_backoff(pr)
+    if latest_comment && pr.latest_comment do
+      diff = Timex.Date.diff(latest_comment, pr.latest_comment, :hours)
     end
+    # At least pr.comment_backoff hours since the latest comment or no comments
+    not already_reported?(pr) && (diff == nil || (diff > pr.comment_backoff && diff > next_notification))
+  end
+
+  defp already_reported?(pr) do
+    stale_pr = SlackCoder.Repo.get_by(SlackCoder.Models.StalePR, pr: pr.number)
+    stale_pr[:backoff] >= pr.comment_backoff
+  end
+
+  defp next_backoff(pr) do
+    next_exponent = trunc(:math.log2(pr.comment_backoff) + 1)
+    next_notification = trunc(:math.pow(2, next_exponent))
+    next_notification
+  end
+
+  defp stale_pr_notification(pr, latest_comment) do
+    now = Timex.Date.now
+    stale_hours = Timex.Date.diff(latest_comment, now, :hours)
+    slack_user = SlackCoder.Config.slack_user(pr.github_user)
+    stale_pr = SlackCoder.Repo.get_by(SlackCoder.Models.StalePR, pr: pr.number)
+    changeset = SlackCoder.Models.StalePR.changeset(stale_pr || %SlackCoder.Models.StalePR{}, %{pr: pr.number, backoff: pr.comment_backoff})
+    if stale_pr do
+      SlackCoder.Repo.update changeset
+    else
+      SlackCoder.Repo.insert changeset
+    end
+    message = """
+    :hankey: *#{pr.title}*
+    Stale for *#{stale_hours}* hours
+    #{pr.html_url}
+    """
+    notify(slack_user, message)
   end
 
 end
