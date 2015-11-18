@@ -19,7 +19,7 @@ defmodule SlackCoder.Slack do
   end
 
   def handle_close(reason, _slack, _state) do
-    Logger.error reason
+    Logger.error inspect(reason)
     {:error, reason}
   end
 
