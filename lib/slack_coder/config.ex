@@ -16,4 +16,8 @@ defmodule SlackCoder.Config do
     end
   end
 
+  def slack_user(github_user) do
+    Application.get_env(:slack_coder, :users, [])[github_user][:slack]
+  end
+
 end

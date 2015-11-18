@@ -1,4 +1,4 @@
-%{"combine": {:hex, :combine, "0.5.2"},
+%{"combine": {:hex, :combine, "0.5.3"},
   "cowboy": {:hex, :cowboy, "1.0.3"},
   "cowlib": {:hex, :cowlib, "1.0.1"},
   "decimal": {:hex, :decimal, "1.1.0"},
@@ -22,6 +22,6 @@
   "ranch": {:hex, :ranch, "1.1.0"},
   "slack": {:git, "https://github.com/mgwidmann/Elixir-Slack", "ca3072c6df38475c93bd4a1939605577e26010d6", [branch: "im_list"]},
   "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.5"},
-  "timex": {:hex, :timex, "0.17.0"},
-  "tzdata": {:hex, :tzdata, "0.1.7"},
+  "timex": {:hex, :timex, "1.0.0-rc2"},
+  "tzdata": {:hex, :tzdata, "0.5.4"},
   "websocket_client": {:git, "https://github.com/jeremyong/websocket_client.git", "f6892c8b55004008ce2d52be7d98b156f3e34569", []}}

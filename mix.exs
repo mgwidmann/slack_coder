@@ -17,7 +17,7 @@ defmodule SlackCoder.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [applications: [:phoenix, :phoenix_html, :cowboy, :logger,
-                   :phoenix_ecto, :slack, :httpoison, :postgrex],
+                   :phoenix_ecto, :slack, :httpoison, :postgrex, :tzdata],
      mod: mod(Mix.env)]
   end
 
@@ -45,6 +45,7 @@ defmodule SlackCoder.Mixfile do
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 2.2"},
       {:cowboy, "~> 1.0"},
+      {:timex, "~> 1.0.0-rc2"},
       # {:slack, "~> 0.2.0"},
       {:slack, git: "https://github.com/mgwidmann/Elixir-Slack", branch: "im_list"},
       {:websocket_client, git: "https://github.com/jeremyong/websocket_client.git", override: true},

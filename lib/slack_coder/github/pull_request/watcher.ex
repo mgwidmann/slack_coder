@@ -60,7 +60,7 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
       end
 
 
-      slack_user = Application.get_env(:slack_coder, :users, [])[commit.pr.github_user][:slack]
+      slack_user = SlackCoder.Config.slack_user(commit.pr.github_user)
       case commit.status do
         status when status in [:failure, :error] ->
           message = ":facepalm: *BUILD FAILURE* #{commit.pr.title} :-1:\n#{commit.travis_url}\n#{commit.pr.html_url}"
@@ -74,11 +74,6 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
       end
     end
     commit
-  end
-
-  def notify(slack_user, message) do
-    Logger.info message
-    SlackCoder.Slack.send_to(slack_user, message)
   end
 
   def reported?(%Commit{id: nil}), do: true # Will cause an error if we attempt to insert

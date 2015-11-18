@@ -9,7 +9,7 @@ defmodule SlackCoder.Slack do
   """
 
   def send_to(user, message) do
-    send :slack, {user, message}
+    send :slack, {user, String.strip(message)}
   end
 
   def handle_info({user, message}, slack, _state) do

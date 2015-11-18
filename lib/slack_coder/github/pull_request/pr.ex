@@ -6,6 +6,9 @@ defmodule SlackCoder.Github.PullRequest.PR do
             repo: nil,
             branch: nil,
             github_user: nil,
+            # Stale PR checking
+            latest_comment: nil,
+            comment_backoff: 1,
             # Used in view
             title: nil,
             number: nil,

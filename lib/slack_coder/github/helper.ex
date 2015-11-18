@@ -84,6 +84,34 @@ defmodule SlackCoder.Github.Helper do
     commit
   end
 
+  def find_latest_comment(%PR{number: number, repo: repo, owner: owner}) do
+     latest_issue_comment = get("repos/#{owner}/#{repo}/issues/#{number}/comments") |> List.last
+     latest_pr_comment = get("repos/#{owner}/#{repo}/pulls/#{number}/comments") |> List.last
+     case {latest_issue_comment, latest_pr_comment} do
+       {date1, date2} when date1 != nil or date2 != nil ->
+         greatest_date_for(date1["updated_at"], date2["updated_at"])
+       {nil, nil} ->
+         nil
+     end
+  end
+
+  defp greatest_date_for(nil, date), do: date_for(date)
+  defp greatest_date_for(date, nil), do: date_for(date)
+  defp greatest_date_for(date1, date2) do
+    date1 = date_for(date1)
+    date2 = date_for(date2)
+    case Timex.DateTime.compare(date1, date2) do
+      -1 -> date2
+      0 -> date1 # Doesn't matter really
+      1 -> date1
+    end
+  end
+
+  defp date_for(string) do
+     {:ok, date} = Timex.DateFormat.parse(string, "{ISO}")
+     date
+  end
+
   def build_pr(pr), do: build_pr(pr, %PR{})
 
   def build_pr(pr, nil), do: build_pr(pr)
@@ -101,6 +129,11 @@ defmodule SlackCoder.Github.Helper do
       repo: repo,
       branch: pr["head"]["ref"]
     }
+  end
+
+  def notify(slack_user, message) do
+    Logger.info message
+    SlackCoder.Slack.send_to(slack_user, message)
   end
 
 end

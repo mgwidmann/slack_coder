@@ -8,5 +8,6 @@ defmodule SlackCoder.Github.PullRequest.Commit do
             pr: %PR{},
             sha: nil,
             github_user: nil,
-            github_user_avatar: nil
+            github_user_avatar: nil,
+            latest_comment: nil
 end
