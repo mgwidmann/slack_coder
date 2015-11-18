@@ -1,7 +1,6 @@
 defmodule SlackCoder.Github.PullRequest do
   use GenServer
   import SlackCoder.Github.Helper
-  alias SlackCoder.Github.PullRequest.PR
   require Logger
 
   @poll_interval 60_000 * 5 # 5 minutes
@@ -17,12 +16,8 @@ defmodule SlackCoder.Github.PullRequest do
   end
 
   def handle_info({:pr_response, prs}, {repo, old_prs}) do
-    prs = prs
-          |> Enum.map fn
-               %PR{} = pr ->
-                 watcher = SlackCoder.Github.Supervisor.start_watcher(pr)
-                 %PR{ pr | watcher: watcher}
-             end
+    prs
+    |> Enum.each(&SlackCoder.Github.Supervisor.start_watcher(&1))
     close_prs(prs, old_prs)
     {:noreply, {repo, prs}}
   end

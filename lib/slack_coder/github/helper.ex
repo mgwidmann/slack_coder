@@ -91,13 +91,11 @@ defmodule SlackCoder.Github.Helper do
     github_user = pr["user"]["login"] |> String.to_atom
     repo = pr["base"]["repo"]["name"] |> String.to_atom
     owner = pr["base"]["repo"]["owner"]["login"]
-    slack_user = Application.get_env(:slack_coder, :users, [])[github_user][:slack]
     %PR{ existing |
       number: pr["number"],
       title: pr["title"],
       html_url: pr["_links"]["html"]["href"],
       statuses_url: "repos/#{owner}/#{repo}/statuses/",
-      slack_user: slack_user,
       github_user: github_user,
       owner: owner,
       repo: repo,

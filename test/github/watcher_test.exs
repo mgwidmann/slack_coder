@@ -5,7 +5,7 @@ defmodule SlackCoder.Github.WatcherTest do
   alias SlackCoder.Github.PullRequest.Commit
 
   describe "handle_info" do
-    let :pr, do: %SlackCoder.Github.PullRequest.PR{title: "title", html_url: "html_url", slack_user: "slack_user"}
+    let :pr, do: %SlackCoder.Github.PullRequest.PR{title: "title", html_url: "html_url"}
     before :each do
       allow(SlackCoder.Github.Helper) |> to_receive(status: fn(_)-> nil end)
       :ok

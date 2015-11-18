@@ -1,12 +1,13 @@
 defmodule SlackCoder.Github.PullRequest.PR do
-  defstruct slack_user: nil,
-            html_url: nil,
-            repo: nil,
-            owner: nil,
-            watcher: nil,
+  defstruct owner: nil, # Saved in DB
+            # Holds statuses URL
             statuses_url: nil,
+            # Building commit URL & saved in DB
+            repo: nil,
+            branch: nil,
+            github_user: nil,
+            # Used in view
             title: nil,
             number: nil,
-            branch: nil,
-            github_user: nil
+            html_url: nil
 end

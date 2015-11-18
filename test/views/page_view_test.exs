@@ -11,7 +11,7 @@ defmodule SlackCoder.PageViewTest do
     end
 
     it "populated commit with a PR" do
-      pr = %PR{slack_user: "slack", html_url: "url", repo: "myrepo", watcher: self, statuses_url: "statuses", title: "MY PR", number: 4321}
+      pr = %PR{html_url: "url", repo: "myrepo", statuses_url: "statuses", title: "MY PR", number: 4321}
       commit = %Commit{id: 123, travis_url: "travis", code_climate_url: "codeclimate", status: :success, code_climate_status: :success, pr: pr, sha: "1234", github_user: "gituser", github_user_avatar: "avatar.jpg"}
       expect {:safe, _} = PageView.render("pull_request.html", commit: commit)
     end

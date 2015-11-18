@@ -60,13 +60,14 @@ defmodule SlackCoder.Github.PullRequest.Watcher do
       end
 
 
+      slack_user = Application.get_env(:slack_coder, :users, [])[commit.pr.github_user][:slack]
       case commit.status do
         status when status in [:failure, :error] ->
           message = ":facepalm: *BUILD FAILURE* #{commit.pr.title} :-1:\n#{commit.travis_url}\n#{commit.pr.html_url}"
-          notify(commit.pr.slack_user, message)
+          notify(slack_user, message)
         :success ->
           message = ":bananadance: #{commit.pr.title} :success:"
-          notify(commit.pr.slack_user, message)
+          notify(slack_user, message)
         # :pending or ignoring any other unknown statuses
         _ ->
           nil

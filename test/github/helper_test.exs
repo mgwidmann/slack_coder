@@ -27,11 +27,11 @@ defmodule SlackCoder.Github.HelperTest do
           {:ok, %HTTPoison.Response{status_code: 123, body: ~S({"message": "Error"}) }}
         end
 
-        it "uses the default" do
+        it "returns empty list without default" do
           expect Helper.get("non/200/success") |> to_eq []
         end
 
-        it "uses the default" do
+        it "returns default when supplied" do
           expect Helper.get("non/200/success", [default: :data]) |> to_eq [default: :data]
         end
       end
@@ -71,7 +71,6 @@ defmodule SlackCoder.Github.HelperTest do
       Helper.pulls(:cool_project)
       assert_receive {:pr_response, [
         %PR{
-          slack_user: :slack_coder,
           statuses_url: "repos/slack_coder/cool_project/statuses/",
           title: "A new idea"
         }
