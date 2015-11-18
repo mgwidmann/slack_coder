@@ -76,7 +76,7 @@ defmodule SlackCoder.Github.PullRequest do
   end
 
   defp already_reported?(pr) do
-    stale_pr = SlackCoder.Repo.get_by(SlackCoder.Models.StalePR, pr: pr.number)
+    stale_pr = SlackCoder.Repo.get_by(SlackCoder.Models.StalePR, pr: to_string(pr.number))
     stale_pr[:backoff] >= pr.comment_backoff
   end
 
@@ -90,8 +90,8 @@ defmodule SlackCoder.Github.PullRequest do
     now = Timex.Date.now
     stale_hours = Timex.Date.diff(latest_comment, now, :hours)
     slack_user = SlackCoder.Config.slack_user(pr.github_user)
-    stale_pr = SlackCoder.Repo.get_by(SlackCoder.Models.StalePR, pr: pr.number)
-    changeset = SlackCoder.Models.StalePR.changeset(stale_pr || %SlackCoder.Models.StalePR{}, %{pr: pr.number, backoff: pr.comment_backoff})
+    stale_pr = SlackCoder.Repo.get_by(SlackCoder.Models.StalePR, pr: to_string(pr.number))
+    changeset = SlackCoder.Models.StalePR.changeset(stale_pr || %SlackCoder.Models.StalePR{}, %{pr: to_string(pr.number), backoff: pr.comment_backoff})
     if stale_pr do
       SlackCoder.Repo.update changeset
     else
