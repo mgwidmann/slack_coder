@@ -38,9 +38,4 @@ defmodule SlackCoder.Slack do
     {:ok, state}
   end
 
-  def websocket_info(message, _connection, %{slack: slack, state: state}) do
-    handle_info(message, slack, state)
-    {:ok, %{slack: slack, state: state}}
-  end
-
 end
