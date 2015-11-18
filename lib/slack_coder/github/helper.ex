@@ -30,9 +30,9 @@ defmodule SlackCoder.Github.Helper do
 
   def pulls(repo, existing_prs \\ []) do
     me = self
-    # spawn_link fn->
+    spawn_link fn->
       send(me, {:pr_response, _pulls(repo, existing_prs)})
-    # end
+    end
   end
 
   defp _pulls(repo, existing_prs) do
@@ -54,9 +54,9 @@ defmodule SlackCoder.Github.Helper do
 
   def status(commit) do
     me = self
-    # spawn_link fn ->
+    spawn_link fn ->
       send(me, {:commit_results, _status(commit)})
-    # end
+    end
   end
 
   defp _status(commit) do

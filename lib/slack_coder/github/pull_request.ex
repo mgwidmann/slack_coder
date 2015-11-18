@@ -16,7 +16,7 @@ defmodule SlackCoder.Github.PullRequest do
   end
 
   def handle_info({:pr_response, prs}, {repo, old_prs}) do
-    prs
+    prs # new prs start watchers for each
     |> Enum.each(&SlackCoder.Github.Supervisor.start_watcher(&1))
     close_prs(prs, old_prs)
     {:noreply, {repo, prs}}
