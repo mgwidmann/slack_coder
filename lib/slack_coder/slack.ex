@@ -18,6 +18,11 @@ defmodule SlackCoder.Slack do
     {:ok, slack}
   end
 
+  def handle_close(reason, _slack, _state) do
+    Logger.error reason
+    {:error, reason}
+  end
+
   def handle_connect(slack, state) do
     Process.register(self, :slack)
     channel = Config.channel(slack)
