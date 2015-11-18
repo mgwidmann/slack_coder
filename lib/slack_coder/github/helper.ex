@@ -100,7 +100,7 @@ defmodule SlackCoder.Github.Helper do
   defp greatest_date_for(date1, date2) do
     date1 = date_for(date1)
     date2 = date_for(date2)
-    case Timex.DateTime.compare(date1, date2) do
+    case Timex.Date.compare(date1, date2) do
       -1 -> date2
       0 -> date1 # Doesn't matter really
       1 -> date1
