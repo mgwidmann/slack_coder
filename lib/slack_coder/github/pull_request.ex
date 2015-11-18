@@ -51,15 +51,15 @@ defmodule SlackCoder.Github.PullRequest do
     if pr.latest_comment == nil && latest_comment == nil do
       latest_comment = Timex.DateTime.local
     end
-    unless pr.latest_comment do
-      next_exponent = trunc(:math.log2(pr.comment_backoff) + 1)
-      next_notification = trunc(:math.pow(2, next_exponent))
+    next_exponent = trunc(:math.log2(pr.comment_backoff) + 1)
+    next_notification = trunc(:math.pow(2, next_exponent))
+    if latest_comment && pr.latest_comment do
       diff = Timex.Date.diff(latest_comment, pr.latest_comment, :hours)
-      # At least pr.comment_backoff hours since the latest comment
-      if diff > pr.comment_backoff && diff > next_notification do
-        comment_backoff = next_notification
-        stale_pr_notification(pr, latest_comment)
-      end
+    end
+    # At least pr.comment_backoff hours since the latest comment or no comments
+    if diff == nil || (diff > pr.comment_backoff && diff > next_notification) do
+      comment_backoff = next_notification
+      stale_pr_notification(pr, latest_comment)
     end
     %PR{pr | latest_comment: latest_comment, comment_backoff: comment_backoff}
   end
