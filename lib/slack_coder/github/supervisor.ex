@@ -34,10 +34,7 @@ defmodule SlackCoder.Github.Supervisor do
   def find_watcher(pr) do
     number = pr.number
     child = Supervisor.which_children(SlackCoder.Github.Supervisor)
-            |> Enum.find(fn
-              {"PR-" <> number, _, _, _} -> true
-              _ -> false
-            end)
+            |> Enum.find(&(match?({"PR-" <> ^number, _, _, _}, &1)))
     case child do
       nil -> nil
       {_, worker, _, _} -> worker
@@ -47,7 +44,7 @@ defmodule SlackCoder.Github.Supervisor do
   def pull_requests() do
     Supervisor.which_children(SlackCoder.Github.Supervisor)
     |> Stream.filter(fn
-      {"PR-" <> number, _, _, _} -> true
+      {"PR-" <> _number, _, _, _} -> true
       _ -> false
     end)
     |> Stream.map(fn

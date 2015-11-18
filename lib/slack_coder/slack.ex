@@ -12,7 +12,7 @@ defmodule SlackCoder.Slack do
     send :slack, {user, message}
   end
 
-  def handle_info({user, message}, slack, state) do
+  def handle_info({user, message}, slack, _state) do
     user = user(slack, user)
     send_message(message_for(user, message), Config.route_message(slack, user).id, slack)
     {:ok, slack}
