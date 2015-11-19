@@ -29,10 +29,12 @@ defmodule SlackCoder.Github.Helper do
   end
 
   def pulls(repo, existing_prs \\ []) do
-    me = self
-    # spawn_link fn->
-      send(me, {:pr_response, _pulls(repo, existing_prs)})
-    # end
+    if can_send_notifications? do
+      me = self
+      # spawn_link fn->
+        send(me, {:pr_response, _pulls(repo, existing_prs)})
+      # end
+    end
   end
 
   defp _pulls(repo, existing_prs) do
@@ -53,10 +55,12 @@ defmodule SlackCoder.Github.Helper do
   end
 
   def status(commit) do
-    me = self
-    # spawn_link fn ->
-      send(me, {:commit_results, _status(commit)})
-    # end
+    if can_send_notifications? do
+      me = self
+      # spawn_link fn ->
+        send(me, {:commit_results, _status(commit)})
+      # end
+    end
   end
 
   defp _status(commit) do
@@ -129,6 +133,19 @@ defmodule SlackCoder.Github.Helper do
       repo: repo,
       branch: pr["head"]["ref"]
     }
+  end
+
+  if Mix.env == :test do
+    def can_send_notifications?(), do: true
+  else
+    @weekdays [1,2,3,4,5] |> Enum.map(&Timex.Date.day_name(&1))
+    def can_send_notifications?() do
+      utc = Timex.Date.now
+      offset = Application.get_env(:slack_coder, :timezone_offset)
+      now = Timex.Date.add(utc, Timex.Time.to_timestamp(offset, :hours))
+      day_name = now |> Timex.Date.weekday |> Timex.Date.day_name
+      day_name in @weekdays && now.hour >= 8 && now.hour <= 17
+    end
   end
 
   def notify(slack_user, message) do

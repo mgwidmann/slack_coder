@@ -20,8 +20,10 @@ defmodule SlackCoder.Github.PullRequest do
     prs # new prs start watchers for each
     |> Enum.each(&SlackCoder.Github.Supervisor.start_watcher(&1))
     close_prs(prs, old_prs)
-    prs = prs
-          |> Enum.map(&(stale_pr(&1)))
+    if can_send_notifications? do
+      prs = prs
+            |> Enum.map(&(stale_pr(&1)))
+    end
     {:noreply, {repo, prs}}
   end
 
@@ -51,21 +53,11 @@ defmodule SlackCoder.Github.PullRequest do
     if pr.latest_comment == nil && latest_comment == nil do
       latest_comment = Timex.DateTime.local
     end
-    IO.inspect "should_send: #{inspect can_send_notification?}"
-    if should_send_notification?(pr, latest_comment) && can_send_notification?() do
+    if should_send_notification?(pr, latest_comment) do
       comment_backoff = next_backoff(pr)
       stale_pr_notification(pr, latest_comment)
     end
     %PR{pr | latest_comment: latest_comment, comment_backoff: comment_backoff}
-  end
-
-  @weekdays [1,2,3,4,5] |> Enum.map(&Timex.Date.day_name(&1))
-  defp can_send_notification?() do
-    utc = Timex.Date.now
-    offset = Application.get_env(:slack_coder, :timezone_offset)
-    now = Timex.Date.add(utc, Timex.Time.to_timestamp(offset, :hours))
-    day_name = now |> Timex.Date.weekday |> Timex.Date.day_name
-    day_name in @weekdays && now.hour >= 8 && now.hour <= 17
   end
 
   defp should_send_notification?(pr, latest_comment) do
