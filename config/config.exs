@@ -19,7 +19,7 @@ config :slack_coder,
   repos: [],
   channel: nil,
   group: nil,
-  timezone_offset: -4,
+  timezone_offset: -5,
   pr_backoff_start: 2
 
 # Configures Elixir's Logger

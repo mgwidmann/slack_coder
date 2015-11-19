@@ -51,6 +51,7 @@ defmodule SlackCoder.Github.PullRequest do
     if pr.latest_comment == nil && latest_comment == nil do
       latest_comment = Timex.DateTime.local
     end
+    IO.inspect "should_send: #{inspect can_send_notification?}"
     if should_send_notification?(pr, latest_comment) && can_send_notification?() do
       comment_backoff = next_backoff(pr)
       stale_pr_notification(pr, latest_comment)
@@ -60,10 +61,11 @@ defmodule SlackCoder.Github.PullRequest do
 
   @weekdays [1,2,3,4,5] |> Enum.map(&Timex.Date.day_name(&1))
   defp can_send_notification?() do
-    now = Timex.Date.now
-    hour = now.hour + Application.get_env(:slack_coder, :timezone_offset)
+    utc = Timex.Date.now
+    offset = Application.get_env(:slack_coder, :timezone_offset)
+    now = Timex.Date.add(utc, Timex.Time.to_timestamp(offset, :hours))
     day_name = now |> Timex.Date.weekday |> Timex.Date.day_name
-    day_name in @weekdays && hour >= 8 && hour <= 17
+    day_name in @weekdays && now.hour >= 8 && now.hour <= 17
   end
 
   defp should_send_notification?(pr, latest_comment) do
@@ -77,7 +79,7 @@ defmodule SlackCoder.Github.PullRequest do
 
   defp already_reported?(pr) do
     stale_pr = SlackCoder.Repo.get_by(SlackCoder.Models.StalePR, pr: to_string(pr.number))
-    stale_pr[:backoff] >= pr.comment_backoff
+    stale_pr != nil && stale_pr.backoff >= pr.comment_backoff
   end
 
   defp next_backoff(pr) do
