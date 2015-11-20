@@ -1,6 +1,7 @@
 defmodule SlackCoder.Github.Helper do
-  alias SlackCoder.Github.PullRequest.PR
-  alias SlackCoder.Github.PullRequest.Commit
+  alias SlackCoder.Models.PR
+  alias SlackCoder.Models.Commit
+  alias SlackCoder.Repo
   require Logger
 
   def get(url, default \\ []) do
@@ -52,19 +53,18 @@ defmodule SlackCoder.Github.Helper do
     |> Enum.to_list
   end
 
-  def status(commit) do
+  def status(pr) do
     if can_send_notifications? do
       me = self
       # spawn_link fn ->
-        send(me, {:commit_results, _status(commit)})
+        send(me, {:commit_results, _status(pr)})
       # end
     end
   end
 
-  defp _status(commit) do
-    last_commit = (get("repos/#{commit.pr.github_user}/#{commit.pr.repo}/commits?sha=#{commit.pr.branch}") |> List.first)
-    statuses = (commit.pr.statuses_url <> "#{last_commit["sha"]}")
-                 |> get
+  defp _status(pr) do
+    last_commit = (get("repos/#{pr.github_user}/#{pr.repo}/commits?sha=#{pr.branch}") |> List.first)
+    statuses = (pr.statuses_url <> "#{last_commit["sha"]}") |> get
     last_status = statuses
                   |> Stream.filter(&( &1["context"] =~ ~r/travis/ ))
                   |> Enum.take(1) # List is already sorted, first is the latest
@@ -73,17 +73,23 @@ defmodule SlackCoder.Github.Helper do
                   |> Stream.filter(&( &1["context"] =~ ~r/codeclimate/ ))
                   |> Enum.take(1) # List is already sorted, first is the latest
                   |> List.first
-    commit = %Commit{ commit |
-                status: String.to_atom(last_status["state"] || "pending"),
-                code_climate_status: String.to_atom(code_climate["state"] || "pending"),
-                travis_url: last_status["target_url"],
-                code_climate_url: code_climate["target_url"],
-                sha: last_commit["sha"],
-                github_user: String.to_atom(last_commit["author"]["login"]),
-                github_user_avatar: last_commit["author"]["avatar_url"],
-                id: last_status["id"]
-             }
-    commit
+    if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
+      commit = pr.latest_commit
+    else
+      commit = Repo.get_by(Commit, sha: last_status["sha"]) || %Commit{}
+    end
+    cs = Commit.changeset(commit, %{
+          status: last_status["state"] || "pending",
+          code_climate_status: code_climate["state"] || "pending",
+          travis_url: last_status["target_url"],
+          code_climate_url: code_climate["target_url"],
+          sha: last_commit["sha"],
+          github_user: last_commit["author"]["login"],
+          github_user_avatar: last_commit["author"]["avatar_url"],
+          latest_status_id: last_status["id"]
+         })
+    {:ok, commit} = Repo.save(cs)
+    %PR{ pr | latest_commit: commit}
   end
 
   def find_latest_comment(%PR{number: number, repo: repo, owner: owner}) do
@@ -114,23 +120,36 @@ defmodule SlackCoder.Github.Helper do
      date
   end
 
-  def build_pr(pr), do: build_pr(pr, %PR{})
+  def build_pr(pr), do: build_pr(pr, Repo.get_by(PR, number: pr["number"]) || %PR{})
 
   def build_pr(pr, nil), do: build_pr(pr)
-  def build_pr(pr, existing) do
-    github_user = pr["user"]["login"] |> String.to_atom
-    repo = pr["base"]["repo"]["name"] |> String.to_atom
+  def build_pr(pr, %PR{id: id} = existing_pr) when is_integer(id) do
+    # Title is only thing that can change
+    {:ok, existing_pr} = PR.changeset(existing_pr, %{title: pr["title"]}) |> Repo.update
+    existing_pr
+  end
+  def build_pr(pr, new_pr) do
+    github_user = pr["user"]["login"]
+    repo = pr["base"]["repo"]["name"]
     owner = pr["base"]["repo"]["owner"]["login"]
-    %PR{ existing |
-      number: pr["number"],
-      title: pr["title"],
-      html_url: pr["_links"]["html"]["href"],
-      statuses_url: "repos/#{owner}/#{repo}/statuses/",
-      github_user: github_user,
-      owner: owner,
-      repo: repo,
-      branch: pr["head"]["ref"]
-    }
+    cs = PR.changeset(new_pr,
+      %{number: pr["number"],
+        title: pr["title"],
+        html_url: pr["_links"]["html"]["href"],
+        statuses_url: "repos/#{owner}/#{repo}/statuses/",
+        github_user: github_user,
+        owner: owner,
+        repo: repo,
+        branch: pr["head"]["ref"]
+      })
+    {:ok, new_pr} = Repo.insert(cs)
+    new_pr
+  end
+
+  def now do
+    utc = Timex.Date.now
+    offset = Application.get_env(:slack_coder, :timezone_offset)
+    Timex.Date.add(utc, Timex.Time.to_timestamp(offset, :hours))
   end
 
   if Mix.env == :test do
@@ -138,9 +157,6 @@ defmodule SlackCoder.Github.Helper do
   else
     @weekdays [1,2,3,4,5] |> Enum.map(&Timex.Date.day_name(&1))
     def can_send_notifications?() do
-      utc = Timex.Date.now
-      offset = Application.get_env(:slack_coder, :timezone_offset)
-      now = Timex.Date.add(utc, Timex.Time.to_timestamp(offset, :hours))
       day_name = now |> Timex.Date.weekday |> Timex.Date.day_name
       day_name in @weekdays && now.hour >= 8 && now.hour <= 17
     end
