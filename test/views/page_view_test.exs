@@ -1,8 +1,8 @@
 defmodule SlackCoder.PageViewTest do
   use SlackCoder.ConnCase, async: true
   alias SlackCoder.PageView
-  alias SlackCoder.Github.PullRequest.Commit
-  alias SlackCoder.Github.PullRequest.PR
+  alias SlackCoder.Models.Commit
+  alias SlackCoder.Models.PR
 
   describe "pull_request.html" do
 

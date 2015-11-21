@@ -2,7 +2,8 @@ defmodule SlackCoder.Github.HelperTest do
   use Pavlov.Case, async: true
   import Pavlov.Syntax.Expect
   alias SlackCoder.Github.Helper
-  alias SlackCoder.Github.PullRequest.PR
+  alias SlackCoder.Models.PR
+  alias SlackCoder.Repo
 
   describe "get" do
     before :each do
@@ -58,23 +59,84 @@ defmodule SlackCoder.Github.HelperTest do
       allow(HTTPoison) |> to_receive(get: fn(_url, _headers)-> {:ok, %HTTPoison.Response{status_code: 200, body: JSX.encode!(response)}} end)
       :ok
     end
+    let :number, do: 0
     let :response do
       [%{
         "user" => %{"login" => "slack_coder"},
         "base" => %{"repo" => %{"name" => "cool_project", "owner" => %{"login" => "slack_coder"}}},
-        "_links" => %{"commits" => %{"href" => "github.com/commits"}},
-        "title" => "A new idea"
+        "_links" => %{"commits" => %{"href" => "github.com/commits"}, "html" => %{"href" => "github.com/pulls"}},
+        "title" => "A new idea",
+        "number" => number,
+        "head" => %{"ref" => "branch"}
       }]
     end
 
-    it "returns pull request structs" do
-      Helper.pulls(:cool_project)
-      assert_receive {:pr_response, [
-        %PR{
-          statuses_url: "repos/slack_coder/cool_project/statuses/",
-          title: "A new idea"
-        }
+    context "when PR is opened" do
+      let :number, do: 123
+      it "returns a new pull request" do
+        Helper.pulls(:cool_project)
+        assert_receive {:pr_response, [
+          %PR{
+            statuses_url: "repos/slack_coder/cool_project/statuses/",
+            title: "A new idea",
+            number: 123,
+            branch: "branch",
+            html_url: "github.com/pulls"
+          }
         ]}
+      end
+    end
+
+    context "when the PR exists" do
+      let :number, do: 456
+      let :existing_pr, do: %SlackCoder.Models.PR{number: number, owner: "foo", branch: "branch", title: "old title", repo: "repo", github_user: "user", html_url: "url"}
+      it "returns an updated pull request" do
+        {:ok, pr} = Repo.insert(existing_pr)
+        id = pr.id
+        number = pr.number
+        Helper.pulls(:cool_project)
+        assert_receive {:pr_response, [
+          %PR{
+            id: ^id,
+            title: "A new idea",
+            number: ^number
+          }
+        ]}
+      end
+    end
+  end
+
+  describe "find_latest_comment" do
+    before :each do
+      allow(HTTPoison) |> to_receive(get: fn
+        "https://slack_coder:pat-123@api.github.com/repos/o/r/issues/1/comments", _headers -> issue_response
+        "https://slack_coder:pat-123@api.github.com/repos/o/r/pulls/1/comments", _headers -> pull_response
+      end)
+      :ok
+    end
+    let :pr, do: %SlackCoder.Models.PR{owner: "o", repo: "r", number: 1}
+    let :issue_response do
+      {:ok, %HTTPoison.Response{status_code: 200, body: JSX.encode!(issue_body)}}
+    end
+    let :issue_body, do: [%{updated_at: "2015-11-20T10:01:23Z"}]
+    let :pull_response do
+      {:ok, %HTTPoison.Response{status_code: 200, body: JSX.encode!(pull_body)}}
+    end
+    let :pull_body, do: [%{updated_at: "2015-11-21T10:00:49Z"}]
+
+    it "returns the greater date" do
+       expect Helper.find_latest_comment(pr) |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 21, hour: 10, minute: 0,
+        month: 11, ms: 0, second: 49, timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min, full_name: "UTC",
+        offset_std: 0, offset_utc: 0, until: :max}, year: 2015})
+    end
+
+    context "when one is nil" do
+      let :pull_body, do: []
+      it "returns the other" do
+        expect Helper.find_latest_comment(pr) |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 20, hour: 10, minute: 1,
+          month: 11, ms: 0, second: 23, timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min, full_name: "UTC",
+          offset_std: 0, offset_utc: 0, until: :max}, year: 2015})
+      end
     end
   end
 
