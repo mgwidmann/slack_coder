@@ -167,4 +167,24 @@ defmodule SlackCoder.Github.Helper do
     SlackCoder.Slack.send_to(slack_user, message)
   end
 
+  def report_change(commit) do
+    pr = Repo.get(PR, commit.pr_id)
+    pr = %PR{ pr | latest_commit: commit }
+    {:safe, html} = SlackCoder.PageView.render("pull_request.html", pr: pr)
+    SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, html: :erlang.iolist_to_binary(html)})
+
+    slack_user = SlackCoder.Config.slack_user(pr.github_user)
+    case String.to_atom(commit.status) do
+      status when status in [:failure, :error] ->
+        message = ":facepalm: *BUILD FAILURE* #{pr.title} :-1:\n#{pr.travis_url}\n#{pr.html_url}"
+        notify(slack_user, message)
+      :success ->
+        message = ":bananadance: #{pr.title} :success:"
+        notify(slack_user, message)
+      # :pending or ignoring any other unknown statuses
+      _ ->
+        nil
+    end
+  end
+
 end

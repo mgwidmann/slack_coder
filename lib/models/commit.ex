@@ -1,5 +1,6 @@
 defmodule SlackCoder.Models.Commit do
   use Ecto.Model
+  alias SlackCoder.Github.Helper
 
   schema "commits" do
     field :sha, :string
@@ -35,7 +36,9 @@ defmodule SlackCoder.Models.Commit do
   end
 
   def notify_status(changeset) do
-
+    if changeset.changes[:status] do
+      Helper.report_change(changeset.model)
+    end
   end
 
 end
