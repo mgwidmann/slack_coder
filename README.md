@@ -49,7 +49,23 @@ config :slack_coder,
   # Finally where to report build notifications. All possible keys are channel
   # (string), group (string) and personal (boolean). The bot will only send the
   # notification to the first configured location it finds.
-  group: "builds"
+  group: "builds",
+  # For stale PR notifications
+  notifications: [
+    # The minimum hour to send a notification (Just stale, passes/fails don't apply)
+    min_hour: 8,
+    # The maximum hour to send a notification (Just stale, passes/fails don't apply)
+    max_hour: 17,
+    # If you prefer to just always send notifications (don't bother with min/max then)
+    always_allow: false,
+    # The days on which to send stale PR notifications, 1 starts Monday
+    # See Timex.Date.day_name/1 for more info
+    days: [1,2,3,4,5]
+  ],
+  # If your timezone is different than the server timezone, enter adjustment here
+  timezone_offset: -5,
+  # Indicates the number of hours which to consider a PR stale at, must be a power of 2 (1,2,4,8,16,32,ect.)
+  pr_backoff_start: 2
 ```
 
 ### Deploying
