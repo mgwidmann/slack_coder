@@ -196,7 +196,7 @@ defmodule SlackCoder.Github.Helper do
     slack_user = SlackCoder.Config.slack_user(pr.github_user)
     case String.to_atom(commit.status) do
       status when status in [:failure, :error] ->
-        message = ":facepalm: *BUILD FAILURE* #{pr.title} :-1:\n#{pr.travis_url}\n#{pr.html_url}"
+        message = ":facepalm: *BUILD FAILURE* #{pr.title} :-1:\n#{pr.latest_commit.travis_url}\n#{pr.html_url}"
         notify(slack_user, message)
       :success ->
         message = ":bananadance: #{pr.title} :success:"
