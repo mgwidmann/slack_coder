@@ -10,8 +10,6 @@ defmodule SlackCoder.Models.Commit do
     field :code_climate_status, :string
     field :travis_url, :string
     field :code_climate_url, :string
-    field :github_user, :string, virtual: true
-    field :github_user_avatar, :string, virtual: true
 
     belongs_to :pr, SlackCoder.Models.PR
 
@@ -21,8 +19,8 @@ defmodule SlackCoder.Models.Commit do
   after_insert __MODULE__, :notify_status
   after_update __MODULE__, :notify_status
 
-  @required_fields ~w(sha pr_id status latest_status_id code_climate_status travis_url code_climate_url)
-  @optional_fields ~w(github_user github_user_avatar)
+  @required_fields ~w(sha pr_id status)
+  @optional_fields ~w(latest_status_id code_climate_status travis_url code_climate_url)
 
   @doc """
   Creates a changeset based on the `model` and `params`.
@@ -39,6 +37,7 @@ defmodule SlackCoder.Models.Commit do
     if changeset.changes[:status] do
       Helper.report_change(changeset.model)
     end
+    changeset
   end
 
 end

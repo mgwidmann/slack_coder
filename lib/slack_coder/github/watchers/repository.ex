@@ -49,25 +49,29 @@ defmodule SlackCoder.Github.Watchers.Repository do
   end
 
   def stale_pr(pr) do
-    latest_comment = find_latest_comment(pr)
-    cs = PR.changeset(pr, %{})
-    if Date.compare(latest_comment, pr.latest_comment) != 0 do
-      cs = put_change(cs, :backoff, 0)
-    end
-    cs = put_change(cs, :latest_comment, latest_comment)
-    hours = Date.diff(now, latest_comment, :hours)
+    latest_comment = find_latest_comment(pr) || pr.opened_at
+    cs = PR.changeset(pr, %{latest_comment: latest_comment})
+    hours = Date.diff(latest_comment, now, :hours)
     if hours > pr.backoff && can_send_notifications? do
-      cs = put_change(cs, :backoff, next_backoff(pr))
-      stale_pr_notification(pr)
+      cs = put_change(cs, :backoff, next_backoff(pr.backoff, hours))
+      send_notification = true
+    end
+    if Date.compare(latest_comment, pr.latest_comment || latest_comment) != 0 do
+      cs = put_change(cs, :backoff, Application.get_env(:slack_coder, :pr_backoff_start, 1))
     end
     {:ok, pr} = SlackCoder.Repo.update(cs)
+    if send_notification, do: stale_pr_notification(pr)
     pr
   end
 
-  defp next_backoff(pr) do
-    next_exponent = trunc(:math.log2(pr.backoff) + 1)
+  defp next_backoff(backoff, greater_than) do
+    next_exponent = trunc(:math.log2(backoff) + 1)
     next_notification = trunc(:math.pow(2, next_exponent))
-    next_notification
+    if next_notification >= greater_than do
+      next_notification
+    else
+      next_backoff(next_notification, greater_than)
+    end
   end
 
   defp stale_pr_notification(pr) do

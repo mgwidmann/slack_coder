@@ -14,11 +14,13 @@ defmodule SlackCoder.Slack do
 
   def handle_info({user, message}, slack, state) do
     user = user(slack, user)
-    send_message(message_for(user, message), Config.route_message(slack, user).id, slack)
+    message = message_for(user, message)
+    Logger.info "Sending message (#{user.name}): #{message}"
+    send_message(message, Config.route_message(slack, user).id, slack)
     {:ok, state}
   end
   def handle_info(message, _slack, state) do
-    Logger.info "Got unhandled message: #{inspect message}"
+    Logger.warn "Got unhandled message: #{inspect message}"
     {:ok, state}
   end
 

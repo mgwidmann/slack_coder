@@ -7,9 +7,11 @@ defmodule SlackCoder.Models.PR do
     field :repo, :string
     field :branch, :string
     field :github_user, :string
+    field :github_user_avatar, :string, virtual: true
     # Stale PR checking
-    field :latest_comment, Ecto.DateTime
-    field :backoff, :integer
+    field :latest_comment, Timex.Ecto.DateTime
+    field :opened_at, Timex.Ecto.DateTime
+    field :backoff, :integer, default: Application.get_env(:slack_coder, :pr_backoff_start, 1)
     # Used in view
     field :title, :string
     field :number, :integer
@@ -22,7 +24,7 @@ defmodule SlackCoder.Models.PR do
     timestamps
   end
 
-  @required_fields ~w(owner repo branch github_user title number html_url)
+  @required_fields ~w(owner repo branch github_user title number html_url opened_at)
   @optional_fields ~w(statuses_url latest_comment backoff)
 
   @doc """

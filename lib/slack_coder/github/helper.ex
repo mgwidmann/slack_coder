@@ -76,7 +76,7 @@ defmodule SlackCoder.Github.Helper do
     if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
       commit = pr.latest_commit
     else
-      commit = Repo.get_by(Commit, sha: last_status["sha"]) || %Commit{}
+      commit = Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
     end
     cs = Commit.changeset(commit, %{
           status: last_status["state"] || "pending",
@@ -86,7 +86,8 @@ defmodule SlackCoder.Github.Helper do
           sha: last_commit["sha"],
           github_user: last_commit["author"]["login"],
           github_user_avatar: last_commit["author"]["avatar_url"],
-          latest_status_id: last_status["id"]
+          latest_status_id: last_status["id"],
+          pr_id: pr.id
          })
     {:ok, commit} = Repo.save(cs)
     %PR{ pr | latest_commit: commit}
@@ -125,11 +126,15 @@ defmodule SlackCoder.Github.Helper do
   def build_pr(pr, nil), do: build_pr(pr)
   def build_pr(pr, %PR{id: id} = existing_pr) when is_integer(id) do
     # Title is only thing that can change
-    {:ok, existing_pr} = PR.changeset(existing_pr, %{title: pr["title"]}) |> Repo.update
-    existing_pr
+    {:ok, existing_pr} = PR.changeset(existing_pr, %{
+                           title: pr["title"]
+                         })
+                         |> Repo.update
+    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"] }
   end
   def build_pr(pr, new_pr) do
     github_user = pr["user"]["login"]
+    avatar = pr["user"]["avatar_url"]
     repo = pr["base"]["repo"]["name"]
     owner = pr["base"]["repo"]["owner"]["login"]
     cs = PR.changeset(new_pr,
@@ -138,6 +143,8 @@ defmodule SlackCoder.Github.Helper do
         html_url: pr["_links"]["html"]["href"],
         statuses_url: "repos/#{owner}/#{repo}/statuses/",
         github_user: github_user,
+        github_user_avatar: avatar,
+        opened_at: date_for(pr["created_at"]),
         owner: owner,
         repo: repo,
         branch: pr["head"]["ref"]
@@ -152,10 +159,10 @@ defmodule SlackCoder.Github.Helper do
     Timex.Date.add(utc, Timex.Time.to_timestamp(offset, :hours))
   end
 
-  if Mix.env == :test do
+  if Application.get_env(:slack_coder, :notifications)[:always_allow] do
     def can_send_notifications?(), do: true
   else
-    @weekdays [1,2,3,4,5] |> Enum.map(&Timex.Date.day_name(&1))
+    @weekdays (Application.get_env(:slack_coder, :notifications)[:days] || [1,2,3,4,5]) |> Enum.map(&Timex.Date.day_name(&1))
     @min_hour Application.get_env(:slack_coder, :notifications)[:min_hour] || 8
     @max_hour Application.get_env(:slack_coder, :notifications)[:max_hour] || 17
     def can_send_notifications?() do
@@ -165,13 +172,12 @@ defmodule SlackCoder.Github.Helper do
   end
 
   def notify(slack_user, message) do
-    Logger.info message
     SlackCoder.Slack.send_to(slack_user, message)
   end
 
   def report_change(commit) do
     pr = Repo.get(PR, commit.pr_id)
-    pr = %PR{ pr | latest_commit: commit }
+    pr = %PR{ pr | latest_commit: commit } # temporary for view only
     {:safe, html} = SlackCoder.PageView.render("pull_request.html", pr: pr)
     SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, html: :erlang.iolist_to_binary(html)})
 

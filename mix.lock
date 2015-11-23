@@ -22,6 +22,7 @@
   "ranch": {:hex, :ranch, "1.1.0"},
   "slack": {:git, "https://github.com/mgwidmann/Elixir-Slack", "0a3baa16e7bf2c5a9195b6a5c3e7fa1f327aed97", [branch: "im_list"]},
   "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.5"},
-  "timex": {:hex, :timex, "1.0.0-rc2"},
+  "timex": {:hex, :timex, "0.19.5"},
+  "timex_ecto": {:hex, :timex_ecto, "0.5.0"},
   "tzdata": {:hex, :tzdata, "0.5.4"},
   "websocket_client": {:git, "https://github.com/PSPDFKit-labs/websocket_client.git", "81d25ef5320ab76e7a035ff9d5d0fe1fe0b12fea", [branch: "alco/websocket-terminate-fix"]}}

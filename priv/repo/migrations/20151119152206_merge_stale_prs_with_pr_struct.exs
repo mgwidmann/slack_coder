@@ -2,8 +2,8 @@ defmodule SlackCoder.Repo.Migrations.MergeStalePrsWithPrStruct do
   use Ecto.Migration
 
   def up do
-    drop table(:reported_commits)
-    drop table(:stale_prs)
+    drop_if_exists table(:reported_commits)
+    drop_if_exists table(:stale_prs)
     create table(:prs) do
       add :owner, :string
       add :statuses_url, :string
@@ -12,7 +12,8 @@ defmodule SlackCoder.Repo.Migrations.MergeStalePrsWithPrStruct do
       add :github_user, :string
       # Stale PR checking
       add :latest_comment, :datetime
-      add :backoff, :integer
+      add :backoff, :integer, default: Application.get_env(:slack_coder, :pr_backoff_start, 1)
+      add :opened_at, :datetime
       # Used in view
       add :title, :string
       add :number, :integer
@@ -36,6 +37,7 @@ defmodule SlackCoder.Repo.Migrations.MergeStalePrsWithPrStruct do
   end
 
   def down do
-    raise Ecto.MigrationError, message: "Cannot be reversed"
+    drop_if_exists table(:prs)
+    drop_if_exists table(:commits)
   end
 end

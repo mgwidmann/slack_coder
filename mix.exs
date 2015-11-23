@@ -45,7 +45,7 @@ defmodule SlackCoder.Mixfile do
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 2.2"},
       {:cowboy, "~> 1.0"},
-      {:timex, "~> 1.0.0-rc2"},
+      {:timex_ecto, "~> 0.5.0"},
       # {:slack, "~> 0.2.0"},
       {:slack, git: "https://github.com/mgwidmann/Elixir-Slack", branch: "im_list"},
       {:websocket_client, git: "https://github.com/PSPDFKit-labs/websocket_client.git", override: true, branch: "alco/websocket-terminate-fix"},

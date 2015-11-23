@@ -67,7 +67,8 @@ defmodule SlackCoder.Github.HelperTest do
         "_links" => %{"commits" => %{"href" => "github.com/commits"}, "html" => %{"href" => "github.com/pulls"}},
         "title" => "A new idea",
         "number" => number,
-        "head" => %{"ref" => "branch"}
+        "head" => %{"ref" => "branch"},
+        "created_at" => "2015-11-19T22:18:37Z"
       }]
     end
 
@@ -89,7 +90,7 @@ defmodule SlackCoder.Github.HelperTest do
 
     context "when the PR exists" do
       let :number, do: 456
-      let :existing_pr, do: %SlackCoder.Models.PR{number: number, owner: "foo", branch: "branch", title: "old title", repo: "repo", github_user: "user", html_url: "url"}
+      let :existing_pr, do: %SlackCoder.Models.PR{number: number, owner: "foo", branch: "branch", title: "old title", repo: "repo", github_user: "user", html_url: "url", opened_at: Timex.Date.now}
       it "returns an updated pull request" do
         {:ok, pr} = Repo.insert(existing_pr)
         id = pr.id

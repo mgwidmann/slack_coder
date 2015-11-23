@@ -1,23 +1,28 @@
-<tr id="pr-<%= @commit.pr.number %>">
+<tr id="pr-<%= @pr.number %>">
   <td>
-    <img src="<%= @commit.github_user_avatar %>" class="user-avatar" />
+    <img src="<%= @pr.github_user_avatar %>" class="user-avatar" />
   </td>
   <td>
-    <%= @commit.github_user %>
+    <%= @pr.github_user %>
   </td>
   <td>
-    <%= link @commit.pr.title, to: @commit.pr.html_url, target: "_blank" %>
+    <%= link @pr.title, to: @pr.html_url, target: "_blank" %>
   </td>
   <td>
-    <%= link_if to: @commit.travis_url, class: "label label-#{status_class(@commit.status)} text-uppercase", target: "_blank" do %>
-      <%= to_string(@commit.status) %>
+    <%= link_if to: @pr.latest_commit.travis_url, class: "label label-#{status_class(@pr.latest_commit.status)} text-uppercase", target: "_blank" do %>
+      <%= to_string(@pr.latest_commit.status) %>
     <% end %>
   </td>
   <td>
-    <%= if @commit.code_climate_url do %>
-      <%= link to: @commit.code_climate_url, target: "_blank" do %>
+    <%= if @pr.latest_commit.code_climate_url do %>
+      <%= link to: @pr.latest_commit.code_climate_url, target: "_blank" do %>
         <i class="code-climate"></i>
       <% end %>
+    <% end %>
+  </td>
+  <td>
+    <%= if @pr.backoff > Application.get_env(:slack_coder, :pr_backoff_start, 1) do %>
+      Stale for <%= staleness(@pr) %>
     <% end %>
   </td>
 </tr>

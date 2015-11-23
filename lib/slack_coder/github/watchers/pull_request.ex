@@ -1,10 +1,6 @@
 defmodule SlackCoder.Github.Watchers.PullRequest do
   use GenServer
   import SlackCoder.Github.Helper
-  alias SlackCoder.Models.PR
-  alias SlackCoder.Models.Commit
-  alias SlackCoder.Repo
-  require Logger
 
   @poll_interval 60_000
 
@@ -31,62 +27,10 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     {:reply, pr, pr}
   end
 
-  # def handle_call({:report_status_change, commit}, _from, pr) do
-  #   report_status(pr)
-  #   {:noreply, pr}
-  # end
-  #
-  # def status_change(commit) do
-  #   GenServer.call
-  # end
-
   def fetch(:undefined), do: nil
 
   def fetch(pid) do
     GenServer.call(pid, :fetch)
   end
-
-  # defp report_status(%PR{latest_commit: %Commit{latest_status_id: id}} = _pr, %Commit{latest_status_id: id} = _old_commit), do: nil
-  # defp report_status(commit, _old_commit) do
-  #   unless reported?(commit) do
-  #     %ReportedCommit{}
-  #     |> ReportedCommit.changeset(%{
-  #       repo: "#{commit.pr.owner}/#{commit.pr.repo}",
-  #       sha: commit.sha,
-  #       status_id: commit.id,
-  #       status: to_string(commit.status),
-  #       github_user: to_string(commit.github_user),
-  #       pr: to_string(commit.pr.number)
-  #     })
-  #     |> Repo.insert
-  #
-  #     {:safe, html} = SlackCoder.PageView.render("pull_request.html", commit: commit)
-  #     case SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: commit.pr.number, html: :erlang.iolist_to_binary(html)}) do
-  #       :ok -> nil
-  #       error ->
-  #         Logger.error "Error broadcasting pr:update -- #{inspect error}"
-  #     end
-  #
-  #
-  #     slack_user = SlackCoder.Config.slack_user(commit.pr.github_user)
-  #     case commit.status do
-  #       status when status in [:failure, :error] ->
-  #         message = ":facepalm: *BUILD FAILURE* #{commit.pr.title} :-1:\n#{commit.travis_url}\n#{commit.pr.html_url}"
-  #         notify(slack_user, message)
-  #       :success ->
-  #         message = ":bananadance: #{commit.pr.title} :success:"
-  #         notify(slack_user, message)
-  #       # :pending or ignoring any other unknown statuses
-  #       _ ->
-  #         nil
-  #     end
-  #   end
-  #   commit
-  # end
-  #
-  # def reported?(%Commit{id: nil}), do: true # Will cause an error if we attempt to insert
-  # def reported?(commit) do
-  #   Repo.get_by(ReportedCommit, status_id: commit.id)
-  # end
 
 end
