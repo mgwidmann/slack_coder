@@ -54,7 +54,7 @@ defmodule SlackCoder.Github.Helper do
   end
 
   def status(pr) do
-    if can_send_notifications? do
+    if can_send_notifications? || pr.latest_commit == nil do
       me = self
       # spawn_link fn ->
         send(me, {:commit_results, _status(pr)})
@@ -90,7 +90,6 @@ defmodule SlackCoder.Github.Helper do
           pr_id: pr.id
          })
     {:ok, commit} = Repo.save(cs)
-    Logger.info "Saved commit #{inspect commit}"
     %PR{ pr | latest_commit: commit}
   end
 
