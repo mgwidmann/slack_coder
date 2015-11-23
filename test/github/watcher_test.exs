@@ -1,20 +1,20 @@
 defmodule SlackCoder.Github.WatcherTest do
   use Pavlov.Case, async: true
   import Pavlov.Syntax.Expect
-  alias SlackCoder.Github.PullRequest.Watcher
-  alias SlackCoder.Github.PullRequest.Commit
+  alias SlackCoder.Github.Watchers.PullRequest
+  alias SlackCoder.Models.Commit
 
   describe "handle_info" do
-    let :pr, do: %SlackCoder.Github.PullRequest.PR{title: "title", html_url: "html_url"}
+    let :pr, do: %SlackCoder.Models.PR{title: "title", html_url: "html_url"}
     before :each do
       allow(SlackCoder.Github.Helper) |> to_receive(status: fn(_)-> nil end)
       :ok
     end
 
     describe "update_status message received" do
-      let :commit, do: %SlackCoder.Github.PullRequest.Commit{}
+      let :commit, do: %SlackCoder.Models.Commit{}
       before :each do
-        response = Watcher.handle_info(:update_status, commit)
+        response = PullRequest.handle_info(:update_status, commit)
         {:ok, response: response, commit: commit}
       end
 
@@ -30,15 +30,15 @@ defmodule SlackCoder.Github.WatcherTest do
     end
 
     describe "{:commit_results, commit} message received" do
-      let :old_commit, do: %SlackCoder.Github.PullRequest.Commit{id: 1234}
-      let :new_commit, do: %SlackCoder.Github.PullRequest.Commit{id: 4567, status: :failure, pr: pr}
+      let :old_commit, do: %SlackCoder.Models.Commit{id: 1234}
+      let :new_commit, do: %SlackCoder.Models.Commit{id: 4567, status: :failure, pr: pr}
       before :each do
         allow(SlackCoder.Slack) |> to_receive(send_to: &({&1, &2}))
         :ok
       end
 
       xit "reports the status when the id changed" do
-        Watcher.handle_info({:commit_results, new_commit}, old_commit)
+        PullRequest.handle_info({:commit_results, new_commit}, old_commit)
         expect(SlackCoder.Slack) |> to_have_received(send_to: 2)
       end
 

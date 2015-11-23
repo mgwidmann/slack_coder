@@ -1,3 +1,6 @@
 
 alias SlackCoder.Repo
-alias SlackCoder.Models.ReportedCommit
+alias SlackCoder.Models.PR
+alias SlackCoder.Models.Commit
+alias SlackCoder.Github.Helper
+alias SlackCoder.Github.Supervisor, as: Github

@@ -32,7 +32,16 @@ config :slack_coder,
     ]
   ],
   channel: "slack_coder_channel",
-  group: "slack_coder_group"
+  group: "slack_coder_group",
+  notifications: [
+    always_allow: true, # So tests dont fail
+    # Actual config values for prod could be (24 hour format)
+    min_hour: 8,
+    max_hour: 17,
+    # 1 is Monday, 7 is Sunday
+    # See Timex for Date.now |> Date.weekday for more info
+    days: [1,2,3,4,5,6,7]
+  ]
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
