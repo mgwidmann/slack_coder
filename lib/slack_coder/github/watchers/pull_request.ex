@@ -2,7 +2,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   use GenServer
   import SlackCoder.Github.Helper
 
-  @poll_interval 60_000 * 2 + 30_000 # Every 2 1/2 minutes
+  @poll_interval 60_000
 
   def start_link(pr) do
     GenServer.start_link __MODULE__, pr

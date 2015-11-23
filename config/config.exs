@@ -20,7 +20,7 @@ config :slack_coder,
   channel: nil,
   group: nil,
   timezone: "America/New_York",
-  pr_backoff_start:
+  pr_backoff_start: 2
 
 # Configures Elixir's Logger
 config :logger, :console,

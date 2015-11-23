@@ -49,9 +49,10 @@ defmodule SlackCoder.Github.Watchers.Repository do
   end
 
   def stale_pr(pr) do
-    latest_comment = find_latest_comment(pr) || pr.opened_at
+    latest_comment = to_local(find_latest_comment(pr) || pr.opened_at)
     cs = PR.changeset(pr, %{latest_comment: latest_comment})
     hours = Date.diff(latest_comment, now, :hours)
+    Logger.info "Stale PR-#{pr.number}: #{hours} > #{pr.backoff}"
     if hours > pr.backoff && can_send_notifications? do
       cs = put_change(cs, :backoff, next_backoff(pr.backoff, hours))
       send_notification = true
