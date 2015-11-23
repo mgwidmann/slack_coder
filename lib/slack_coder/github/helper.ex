@@ -30,10 +30,12 @@ defmodule SlackCoder.Github.Helper do
   end
 
   def pulls(repo, existing_prs \\ []) do
-    me = self
-    # spawn_link fn->
-      send(me, {:pr_response, _pulls(repo, existing_prs)})
-    # end
+    if can_send_notifications? || Enum.any?(existing_prs, &(&1.id == nil)) do
+      me = self
+      # spawn_link fn->
+        send(me, {:pr_response, _pulls(repo, existing_prs)})
+      # end
+    end
   end
 
   defp _pulls(repo, existing_prs) do
