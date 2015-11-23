@@ -9,9 +9,11 @@ defmodule SlackCoder.Github.Helper do
     full_url = "https://#{github_config[:user]}:#{github_config[:pat]}@api.github.com/#{url}"
     Logger.debug "HTTP Request: curl #{full_url}"
     body = case HTTPoison.get(full_url, Accept: "application/vnd.github.com.v3+json") do
-             {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+             {:ok, %HTTPoison.Response{status_code: 200, body: body, headers: headers}} ->
+               rate_limit_info(headers)
                body
-             {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+             {:ok, %HTTPoison.Response{status_code: code, body: body, headers: headers}} ->
+               rate_limit_info(headers)
                response = case JSX.decode(body) do
                             {:ok, data} -> data
                             {:error, _} -> %{"message" => body}
@@ -27,6 +29,14 @@ defmodule SlackCoder.Github.Helper do
     else
       default
     end
+  end
+
+  defp rate_limit_info(headers) do
+    {timestamp, _} = Integer.parse(headers["X-RateLimit-Reset"])
+    {:ok, date} = Timex.Date.from(timestamp, :secs)
+                  |> Timex.Timezone.convert("America/New_York")
+                  |> Timex.DateFormat.format("%D %T", Timex.Format.DateTime.Formatters.Strftime)
+    Logger.info "Rate Limit: #{headers["X-RateLimit-Remaining"]} / #{headers["X-RateLimit-Limit"]}\nResetting at: #{date}"
   end
 
   def pulls(repo, existing_prs \\ []) do
