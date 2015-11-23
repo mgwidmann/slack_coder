@@ -121,11 +121,12 @@ defmodule SlackCoder.Github.Helper do
   defp greatest_date_for(date1, date2) do
     date1 = date_for(date1)
     date2 = date_for(date2)
-    case Timex.Date.compare(date1, date2) do
+    greater = case Timex.Date.compare(date1, date2) do
       -1 -> date2
       0 -> date1 # Doesn't matter really
       1 -> date1
     end
+    greater |> to_local
   end
 
   defp date_for(string) do
@@ -166,11 +167,15 @@ defmodule SlackCoder.Github.Helper do
   end
 
   def now do
+    to_local(Timex.Date.local)
+  end
+
+  def to_local(date) do
     timezone = Application.get_env(:slack_coder, :timezone)
     if Timex.Timezone.exists?(timezone) do
-      Timex.Date.now |> Timex.Timezone.convert(timezone)
+      date |> Timex.Timezone.convert(timezone)
     else
-      Timex.Date.local
+      date
     end
   end
 
