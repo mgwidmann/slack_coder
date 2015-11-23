@@ -62,8 +62,8 @@ config :slack_coder,
     # See Timex.Date.day_name/1 for more info
     days: [1,2,3,4,5]
   ],
-  # If your timezone is different than the server timezone, enter adjustment here
-  timezone_offset: -5,
+  # If your timezone is different than the server timezone, enter string here
+  timezone: "America/New_York",
   # Indicates the number of hours which to consider a PR stale at, must be a power of 2 (1,2,4,8,16,32,ect.)
   pr_backoff_start: 2
 ```

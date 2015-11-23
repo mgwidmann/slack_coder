@@ -166,9 +166,12 @@ defmodule SlackCoder.Github.Helper do
   end
 
   def now do
-    utc = Timex.Date.now
-    offset = Application.get_env(:slack_coder, :timezone_offset)
-    Timex.Date.add(utc, Timex.Time.to_timestamp(offset, :hours))
+    timezone = Application.get_env(:slack_coder, :timezone)
+    if Timex.Timezone.exists?(timezone) do
+      Timex.Date.now |> Timex.Timezone.convert(timezone)
+    else
+      Timex.Date.local
+    end
   end
 
   if Application.get_env(:slack_coder, :notifications)[:always_allow] do
