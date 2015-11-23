@@ -90,6 +90,7 @@ defmodule SlackCoder.Github.Helper do
           pr_id: pr.id
          })
     {:ok, commit} = Repo.save(cs)
+    Logger.info "Saved commit #{inspect commit}"
     %PR{ pr | latest_commit: commit}
   end
 
