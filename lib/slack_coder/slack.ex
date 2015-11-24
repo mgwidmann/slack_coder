@@ -17,10 +17,15 @@ defmodule SlackCoder.Slack do
   end
 
   def handle_info({user, message}, slack, state) do
-    user = user(slack, user)
-    message = message_for(user, message)
-    Logger.info "Sending message (#{user.name}): #{message}"
-    send_message(message, Config.route_message(slack, user).id, slack)
+    try do
+      slack_user = user(slack, user)
+      message = message_for(user, message)
+      Logger.info "Sending message (#{user}): #{message}"
+      send_message(message, Config.route_message(slack, slack_user).id, slack)
+    catch
+      e ->
+        Logger.error "Unable to send messge to: #{user}\n#{inspect e}"
+    end
     {:ok, state}
   end
   def handle_info(message, _slack, state) do
