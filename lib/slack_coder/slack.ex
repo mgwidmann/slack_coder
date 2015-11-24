@@ -9,7 +9,7 @@ defmodule SlackCoder.Slack do
   """
 
   def send_to(user, message) when is_binary(user) do
-    String.to_atom(user) |> send_message(message)
+    String.to_atom(user) |> send_to(message)
   end
 
   def send_to(user, message) do
