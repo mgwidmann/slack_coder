@@ -25,4 +25,4 @@
   "timex": {:hex, :timex, "0.19.5"},
   "timex_ecto": {:hex, :timex_ecto, "0.5.0"},
   "tzdata": {:hex, :tzdata, "0.5.4"},
-  "websocket_client": {:git, "https://github.com/jeremyong/websocket_client.git", "f6892c8b55004008ce2d52be7d98b156f3e34569", []}}
+  "websocket_client": {:git, "https://github.com/mgwidmann/websocket_client.git", "a685410bf167c48d4a7f65636c120ed6ed081770", [branch: "fix_error_logging"]}}
