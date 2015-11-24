@@ -41,9 +41,14 @@ defmodule SlackCoder.Slack do
   end
 
   def handle_connect(slack, state) do
-    Process.register(self, :slack)
-    channel = Config.channel(slack)
-    if channel, do: send_message(@online_message, channel.id, slack)
+    try do
+      Process.register(self, :slack)
+      channel = Config.channel(slack)
+      if channel, do: send_message(@online_message, channel.id, slack)
+    catch
+      e ->
+        Logger.error "Unable to connect to slack!\n#{inspect e}"
+    end
     {:ok, state}
   end
 
