@@ -8,6 +8,10 @@ defmodule SlackCoder.Slack do
   Reporting on any PRs since last online...
   """
 
+  def send_to(user, message) when is_binary(user) do
+    String.to_atom(user) |> send_message(message)
+  end
+
   def send_to(user, message) do
     send :slack, {user, String.strip(message)}
   end
