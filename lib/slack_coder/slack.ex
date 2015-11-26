@@ -41,7 +41,10 @@ defmodule SlackCoder.Slack do
   def handle_close(reason, slack, _state) do
     Logger.error inspect(reason)
     caretaker = user(slack, Application.get_env(:slack_coder, :caretaker))
-    send_message("Crashing: #{inspect reason}", Config.route_message(slack, caretaker).id, slack)
+    caretaker_im = Config.route_message(slack, caretaker)
+    if caretaker_im do
+      send_message("Crashing: #{inspect reason}", caretaker_im.id, slack)
+    end
     {:error, reason}
   end
 
