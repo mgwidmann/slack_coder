@@ -32,11 +32,21 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp rate_limit_info(headers) do
-    {timestamp, _} = Integer.parse(headers["X-RateLimit-Reset"])
-    {:ok, date} = Timex.Date.from(timestamp, :secs)
-                  |> Timex.Timezone.convert("America/New_York")
-                  |> Timex.DateFormat.format("%D %T", Timex.Format.DateTime.Formatters.Strftime)
-    Logger.info "Rate Limit: #{headers["X-RateLimit-Remaining"]} / #{headers["X-RateLimit-Limit"]}\nResetting at: #{date}"
+    {remaining, _} = Integer.parse(headers["X-RateLimit-Remaining"])
+    {total, _} = Integer.parse(headers["X-RateLimit-Limit"])
+    rate_limit_message = fn ->
+      {timestamp, _} = Integer.parse(headers["X-RateLimit-Reset"])
+      {:ok, date} = Timex.Date.from(timestamp, :secs)
+                    |> Timex.Timezone.convert("America/New_York")
+                    |> Timex.DateFormat.format("%D %T", Timex.Format.DateTime.Formatters.Strftime)
+      "Rate Limit: #{remaining} / #{total} -- Resetting at: #{date}"
+    end
+    # Cannot invoke macros w/ apply
+    if remaining / total > 0.25 do
+      Logger.debug rate_limit_message
+    else
+      Logger.warn rate_limit_message
+    end
   end
 
   def pulls(repo, existing_prs \\ []) do
@@ -172,11 +182,15 @@ defmodule SlackCoder.Github.Helper do
 
   def to_local(date) do
     timezone = Application.get_env(:slack_coder, :timezone)
-    if Timex.Timezone.exists?(timezone) do
+    if Timex.Timezone.exists?(timezone) && date do
       date |> Timex.Timezone.convert(timezone)
     else
       date
     end
+  end
+
+  def to_utc(date) do
+    date && Timex.Timezone.convert(date, "UTC")
   end
 
   if Application.get_env(:slack_coder, :notifications)[:always_allow] do

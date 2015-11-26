@@ -21,10 +21,15 @@ defmodule SlackCoder.Slack do
       slack_user = user(slack, user)
       message = message_for(user, message)
       Logger.info "Sending message (#{user}): #{message}"
-      send_message(message, Config.route_message(slack, slack_user).id, slack)
-    catch
+      slack_user = Config.route_message(slack, slack_user)
+      if slack_user do
+        send_message(message, slack_user.id, slack)
+      else
+        Logger.error "Unable to send message to #{inspect user}"
+      end
+    rescue
       e ->
-        Logger.error "Unable to send messge to: #{user}\n#{inspect e}"
+        Logger.error "Error sending messge to: #{user}\n#{inspect e}"
     end
     {:ok, state}
   end
@@ -45,7 +50,7 @@ defmodule SlackCoder.Slack do
       Process.register(self, :slack)
       channel = Config.channel(slack)
       if channel, do: send_message(@online_message, channel.id, slack)
-    catch
+    rescue
       e ->
         Logger.error "Unable to connect to slack!\n#{inspect e}"
     end
