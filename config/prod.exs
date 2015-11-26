@@ -7,7 +7,7 @@ config :slack_coder, SlackCoder.Endpoint,
   cache_static_manifest: "priv/static/manifest.json"
 
 # Do not print debug messages in production
-config :logger, level: :debug
+config :logger, level: :info
 
 config :slack_coder, SlackCoder.Repo,
   adapter: Ecto.Adapters.Postgres,
