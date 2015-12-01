@@ -16,6 +16,17 @@ defmodule SlackCoder.Slack do
     send :slack, {user, String.strip(message)}
   end
 
+  def slack() do
+    send :slack, {:slack, self()}
+    receive do
+      data -> data
+    end
+  end
+
+  def handle_info({:slack, pid}, slack, state) when is_pid(pid) do
+    send pid, slack
+    {:ok, state}
+  end
   def handle_info({user, message}, slack, state) do
     try do
       slack_user = user(slack, user)
