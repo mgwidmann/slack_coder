@@ -31,9 +31,9 @@ defmodule SlackCoder.Slack do
     try do
       slack_user = user(slack, user)
       message = message_for(user, message)
-      Logger.info "Sending message (#{user}): #{message}"
       slack_user = Config.route_message(slack, slack_user)
       if slack_user do
+        Logger.info "Sending message (#{slack_user.name}): #{message}"
         send_message(message, slack_user.id, slack)
       else
         Logger.error "Unable to send message to #{inspect user}"
