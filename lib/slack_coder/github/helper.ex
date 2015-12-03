@@ -134,7 +134,7 @@ defmodule SlackCoder.Github.Helper do
       0 -> date1 # Doesn't matter really
       1 -> date1
     end
-    greater |> to_local
+    greater
   end
 
   defp date_for(string) do

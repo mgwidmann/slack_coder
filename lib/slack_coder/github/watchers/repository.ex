@@ -66,7 +66,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
     pr
   end
 
-  defp next_backoff(backoff, greater_than) do
+  def next_backoff(backoff, greater_than) do
     next_exponent = trunc(:math.log2(backoff) + 1)
     next_notification = trunc(:math.pow(2, next_exponent))
     if next_notification >= greater_than do
