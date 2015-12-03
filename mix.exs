@@ -48,6 +48,7 @@ defmodule SlackCoder.Mixfile do
       {:timex_ecto, "~> 0.5.0"},
       # {:slack, "~> 0.2.0"},
       {:slack, git: "https://github.com/mgwidmann/Elixir-Slack", branch: "im_list"},
+      # {:slack, path: "../Elixir-Slack"},
       {:websocket_client, git: "https://github.com/mgwidmann/websocket_client.git", override: true, branch: "fix_error_logging"},
       # {:websocket_client, git: "https://github.com/jeremyong/websocket_client.git"},
       {:httpoison, "~> 0.7.2"},

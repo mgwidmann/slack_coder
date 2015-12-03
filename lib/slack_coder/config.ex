@@ -26,4 +26,10 @@ defmodule SlackCoder.Config do
     Application.get_env(:slack_coder, :users, [])[github_user][:slack]
   end
 
+  def slack_user_with_monitors(github_user) do
+    monitors = Application.get_env(:slack_coder, :users, [])[github_user][:monitors] || []
+                |> Enum.map(&slack_user/1)
+    [slack_user(github_user) | monitors]
+  end
+
 end

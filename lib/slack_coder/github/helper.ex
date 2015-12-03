@@ -203,6 +203,11 @@ defmodule SlackCoder.Github.Helper do
     end
   end
 
+  def notify([slack_user | users], message) do
+    notify(slack_user, message)
+    notify(users, message)
+  end
+  def notify([], _message), do: nil
   def notify(slack_user, message) do
     SlackCoder.Slack.send_to(slack_user, message)
   end
@@ -213,14 +218,14 @@ defmodule SlackCoder.Github.Helper do
     {:safe, html} = SlackCoder.PageView.render("pull_request.html", pr: pr)
     SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, html: :erlang.iolist_to_binary(html)})
 
-    slack_user = SlackCoder.Config.slack_user(pr.github_user)
+    slack_users = SlackCoder.Config.slack_user_with_monitors(pr.github_user)
     case String.to_atom(commit.status) do
       status when status in [:failure, :error] ->
         message = ":facepalm: *BUILD FAILURE* #{pr.title} :-1:\n#{pr.latest_commit.travis_url}\n#{pr.html_url}"
-        notify(slack_user, message)
+        notify(slack_users, message)
       :success ->
         message = ":bananadance: #{pr.title} :success:"
-        notify(slack_user, message)
+        notify(slack_users, message)
       # :pending or ignoring any other unknown statuses
       _ ->
         nil
