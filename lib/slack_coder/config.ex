@@ -7,8 +7,8 @@ defmodule SlackCoder.Config do
   end
 
   def channel(slack) do
-    group_name = Application.get_env(:slack_coder, :group)
-    channel_name = Application.get_env(:slack_coder, :channel)
+    group_name = Application.get_env(:slack_coder, :notifications)[:group]
+    channel_name = Application.get_env(:slack_coder, :notifications)[:channel]
     cond do
       channel = channel(slack, channel_name) -> channel
       group = group(slack, group_name) -> group

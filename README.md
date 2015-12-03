@@ -19,17 +19,19 @@ You'll want to `config :slack_coder, ...` in your `prod.secret.exs` to give your
 ```elixir
 config :slack_coder,
   slack_api_token: "Find your token here: https://api.slack.com/web",
-  github: [
-    pat: "Create your token here: https://github.com/settings/tokens",
-    user: "the-github-user-name-that-goes-with-the-pat-token",
-  ],
+
+config :slack_coder, :github,
+  pat: "Create your token here: https://github.com/settings/tokens",
+  user: "the-github-user-name-that-goes-with-the-pat-token",
+
+config :slack_coder, :users,
   # A list of all users the bot should talk to and their
   # github to slack username translation
-  users: [
-    mgwidmann: [slack: :matt]
-  ],
+  mgwidmann: [slack: :matt]
+
+config :slack_coder, :repos,
   # The repositories to watch pull requests
-  repos: [
+  [
     a_new_project: [
       owner: "my_org",
       users: [
@@ -45,27 +47,24 @@ config :slack_coder,
         :mgwidmann
       ]
     ]
-  ],
+  ]
+
+config :slack_coder, :notifications,
   # Finally where to report build notifications. All possible keys are channel
   # (string), group (string) and personal (boolean). The bot will only send the
-  # notification to the first configured location it finds.
-  group: "builds",
+  # notification to the first configured location it finds (in the above order).
+  channel: nil, # Won't post in any channel because of nil
+  group: "builds", # Posts in a group
   # For stale PR notifications
-  notifications: [
-    # The minimum hour to send a notification (Just stale, passes/fails don't apply)
-    min_hour: 8,
-    # The maximum hour to send a notification (Just stale, passes/fails don't apply)
-    max_hour: 17,
-    # If you prefer to just always send notifications (don't bother with min/max then)
-    always_allow: false,
-    # The days on which to send stale PR notifications, 1 starts Monday
-    # See Timex.Date.day_name/1 for more info
-    days: [1,2,3,4,5]
-  ],
-  # If your timezone is different than the server timezone, enter string here
-  timezone: "America/New_York",
-  # Indicates the number of hours which to consider a PR stale at, must be a power of 2 (1,2,4,8,16,32,ect.)
-  pr_backoff_start: 2
+  # The minimum hour to send a notification (Just stale, passes/fails don't apply)
+  min_hour: 8,
+  # The maximum hour to send a notification (Just stale, passes/fails don't apply)
+  max_hour: 17,
+  # If you prefer to just always send notifications (don't bother with min/max then)
+  always_allow: false,
+  # The days on which to send stale PR notifications, 1 starts Monday
+  # See Timex.Date.day_name/1 for more info
+  days: [1,2,3,4,5]
 ```
 
 ### Deploying
