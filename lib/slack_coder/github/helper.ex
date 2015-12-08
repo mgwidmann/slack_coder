@@ -158,13 +158,14 @@ defmodule SlackCoder.Github.Helper do
     avatar = pr["user"]["avatar_url"]
     repo = pr["base"]["repo"]["name"]
     owner = pr["base"]["repo"]["owner"]["login"]
+    # Ecto bug https://github.com/elixir-lang/ecto/issues/1121
+    new_pr = %PR{new_pr | github_user_avatar: avatar }
     cs = PR.changeset(new_pr,
       %{number: pr["number"],
         title: pr["title"],
         html_url: pr["_links"]["html"]["href"],
         statuses_url: "repos/#{owner}/#{repo}/statuses/",
         github_user: github_user,
-        github_user_avatar: avatar,
         opened_at: date_for(pr["created_at"]),
         owner: owner,
         repo: repo,
