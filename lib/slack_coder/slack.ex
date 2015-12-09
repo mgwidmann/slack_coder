@@ -2,6 +2,8 @@ defmodule SlackCoder.Slack do
   use Slack
   import SlackCoder.Slack.Helper
   alias SlackCoder.Config
+  alias SlackCoder.Users.Supervisor, as: Users
+  alias SlackCoder.Users.User
   require Logger
   @online_message """
   :slack: *Slack* :computer: *Coder* online!
@@ -71,6 +73,13 @@ defmodule SlackCoder.Slack do
     {:ok, state}
   end
 
+  def handle_message(%{text: message, type: "message", user: user_id}, slack, state) do
+    slack_name = slack[:users][user_id]["name"]
+    if slack_name do
+      User.help(Users.user(slack_name), message)
+    end
+    {:ok, state}
+  end
   def handle_message(_message, _slack, state) do
     {:ok, state}
   end

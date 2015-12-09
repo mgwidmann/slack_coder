@@ -13,7 +13,8 @@ defmodule SlackCoder do
       supervisor(SlackCoder.Endpoint, []),
       # Start the Ecto repository
       worker(SlackCoder.Repo, []),
-      supervisor(SlackCoder.Github.Supervisor, [])
+      supervisor(SlackCoder.Github.Supervisor, []),
+      supervisor(SlackCoder.Users.Supervisor, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
