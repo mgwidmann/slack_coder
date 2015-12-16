@@ -78,13 +78,13 @@ defmodule SlackCoder.Github.Watchers.Repository do
 
   defp stale_pr_notification(pr) do
     stale_hours = Timex.Date.diff(pr.latest_comment, now, :hours)
-    slack_users = SlackCoder.Config.slack_user_with_monitors(pr.github_user)
+    [message_for | slack_users] = SlackCoder.Config.slack_user_with_monitors(pr.github_user)
     message = """
     :hankey: *#{pr.title}*
     Stale for *#{stale_hours}* hours
     #{pr.html_url}
     """
-    notify(slack_users, message)
+    notify(slack_users, :stale, message_for, message)
   end
 
 end

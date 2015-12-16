@@ -15,14 +15,18 @@ defmodule SlackCoder.Users.User do
   def init(user) do
     github = SlackCoder.Config.github_user(user)
     user = user |> User.by_slack |> Repo.one
-    unless user do
-      {:ok, user} = Repo.insert(User.changeset(%User{}, %{slack: to_string(user), github: to_string(github), config: %{}}))
+    if user do
+      {:ok, user} = User.changeset(user, %{config: Helper.default_config(user.config)})
+                    |> Repo.update
+    else
+      {:ok, user} = User.changeset(%User{}, %{slack: to_string(user), github: to_string(github), config: Help.default_config})
+                    |> Repo.insert
     end
     {:ok, user}
   end
 
   for type <- [:stale, :build] do
-    def handle_cast({unquote(type), {user_for, message}}, user) do
+    def handle_cast({unquote(type), user_for, message}, user) do
       if configured_to_send_message(unquote(type), user_for, user) do
         Slack.send_to(user.slack, message)
       end
@@ -31,7 +35,11 @@ defmodule SlackCoder.Users.User do
   end
 
   def handle_cast({:help, message}, user) do
-    user = handle_message(String.split(message, " "), user)
+    {new_config, reply} = handle_message(message |> String.downcase |> String.split(" "), user.config)
+    {:ok, user} = User.changeset(user, %{config: new_config}) |> Repo.update
+    if reply do
+      Slack.send_to(user.slack, reply)
+    end
     {:noreply, user}
   end
 
@@ -41,12 +49,8 @@ defmodule SlackCoder.Users.User do
 
   # Client API
 
-  def stale_pr_notification(user_pid, {user, message}) do
-    GenServer.cast user_pid, {:stale, {user, message}}
-  end
-
-  def build_notification(user_pid, {user, message}) do
-    GenServer.cast user_pid, {:build, {user, message}}
+  def notification(user_pid, {type, user, message}) do
+    GenServer.cast user_pid, {type, user, message}
   end
 
   def help(user_pid, message) do
