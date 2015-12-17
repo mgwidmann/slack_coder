@@ -6,7 +6,8 @@ defmodule SlackCoder.Github.Watchers.Repository do
   use Timex
   require Logger
 
-  @poll_interval 60_000 * 5 # 5 minutes
+  @poll_minutes 5
+  @poll_interval 60_000 * @poll_minutes # 5 minutes
 
   def start_link(repo) do
     GenServer.start_link __MODULE__, repo
@@ -33,6 +34,8 @@ defmodule SlackCoder.Github.Watchers.Repository do
     # State doesn't change until :pr_response message is received
     {:noreply, {repo, existing_prs}}
   end
+
+  def poll_minutes(), do: @poll_minutes
 
   defp close_prs(_new_prs, []), do: nil
   defp close_prs(new_prs, old_prs) do
