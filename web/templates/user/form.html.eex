@@ -1,0 +1,56 @@
+<%= form_for @changeset, @action, fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below:</p>
+      <ul>
+        <%= for {attr, message} <- f.errors do %>
+          <li><%= humanize(attr) %> <%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="form-group col-xs-6">
+      <h4>Slack Info</h4>
+      <%= label f, :slack, "Slack", class: "control-label" %>
+      <%= text_input f, :slack, class: "form-control", placeholder: @changeset.model.github %>
+      <p class="help-block">Enter your name on slack without the @</p>
+    </div>
+
+    <div class="form-group col-xs-6">
+      <h4>Notifications</h4>
+      <%= inputs_for f, :config, fn c -> %>
+        <%= hidden_input c, :id %>
+        <%= for [left_key, right_key] <- Enum.chunk(SlackCoder.Users.Help.default_config_keys, 2) do %>
+          <div class="row">
+            <div class="col-xs-6">
+              <%= checkbox c, String.to_atom(left_key) %>
+              <%= label c, left_key %>
+            </div>
+            <div class="col-xs-6">
+              <%= checkbox c, String.to_atom(right_key) %>
+              <%= label c, right_key %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="form-group col-xs-6">
+      <%= label f, :monitors, "Team members you wish to monitor", class: "control-label" %>
+      <a href="javascript: $('#user_monitors').val('');" class="pull-right">
+        <i class="fa fa-times-circle-o"></i>
+        Clear
+      </a>
+      <div>
+        <%= tag :input, type: "hidden", value: "", name: "user[monitors][]" %>
+        <%= multiple_select f, :monitors, users_list(@changeset.model.github), class: "form-control", value: @changeset.model.monitors %>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group pull-right">
+    <%= submit "Submit", class: "btn btn-primary" %>
+  </div>
+<% end %>

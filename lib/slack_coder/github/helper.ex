@@ -57,8 +57,8 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp _pulls(repo, existing_prs) do
-    users = Application.get_env(:slack_coder, :repos, [])[repo][:users]
-            |> Enum.map(&(to_string(&1)))
+    users = Repo.all(SlackCoder.Models.User)
+            |> Enum.map(&(&1.github))
     owner = Application.get_env(:slack_coder, :repos, [])[repo][:owner]
     Logger.debug "Pulling #{owner}/#{repo} PRs with #{length(existing_prs)} existing"
     get("repos/#{owner}/#{repo}/pulls", existing_prs)
@@ -137,6 +137,7 @@ defmodule SlackCoder.Github.Helper do
     greater
   end
 
+  defp date_for(nil), do: nil
   defp date_for(string) do
      {:ok, date} = Timex.DateFormat.parse(string, "{ISO}")
      date
@@ -167,6 +168,8 @@ defmodule SlackCoder.Github.Helper do
         statuses_url: "repos/#{owner}/#{repo}/statuses/",
         github_user: github_user,
         opened_at: date_for(pr["created_at"]),
+        closed_at: date_for(pr["closed_at"]),
+        merged_at: date_for(pr["merged_at"]),
         owner: owner,
         repo: repo,
         branch: pr["head"]["ref"]
@@ -221,18 +224,28 @@ defmodule SlackCoder.Github.Helper do
     {:safe, html} = SlackCoder.PageView.render("pull_request.html", pr: pr)
     SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, html: :erlang.iolist_to_binary(html)})
 
-    [message_for | slack_users] = SlackCoder.Config.slack_user_with_monitors(pr.github_user)
+    [message_for | slack_users] = slack_user_with_monitors(pr)
     case String.to_atom(commit.status) do
       status when status in [:failure, :error] ->
         message = ":facepalm: *BUILD FAILURE* #{pr.title} :-1:\n#{pr.latest_commit.travis_url}\n#{pr.html_url}"
-        notify(slack_users, :build, message_for, message)
+        notify(slack_users, :fail, message_for, message)
       :success ->
-        message = ":bananadance: #{pr.title} :success:"
-        notify(slack_users, :build, message_for, message)
+        message = ":bananadance: #{pr.title} :success:\n#{pr.html_url}"
+        notify(slack_users, :pass, message_for, message)
       # :pending or ignoring any other unknown statuses
       _ ->
         nil
     end
+  end
+
+  def slack_user_with_monitors(pr) do
+    user = SlackCoder.Users.Supervisor.user(pr.github_user)
+           |> SlackCoder.Users.User.get
+    message_for = user.slack
+    slack_users = SlackCoder.Models.User.by_github(user.monitors)
+                          |> Repo.all
+                          |> Enum.map(&(&1.slack))
+    [message_for | slack_users]
   end
 
 end

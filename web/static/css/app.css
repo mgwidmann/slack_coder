@@ -21,7 +21,8 @@ form.link, form.button {
   height: 120px;
   display: block;
   margin-top: -1em;
-  background-image: url("/images/camelbot.jpg");
+  background-image: url("/images/botlogo.png");
+  background-size: 120px 120px;
   float: left;
 }
 

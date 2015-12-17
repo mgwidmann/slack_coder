@@ -10,14 +10,14 @@ defmodule SlackCoder.Users.Help do
   _More to come..._
 
   *Config*
-  #{@zipped_self_monitors_configs |> Enum.map(fn([type, config])-> "config #{config} #{type} <on/off>" end) |>Enum.join("\n")}
+  #{@zipped_self_monitors_configs |> Enum.map(fn([type, config])-> "config #{type} #{config} <on/off>" end) |>Enum.join("\n")}
   """
   @unknown_message "I'm sorry. I'm too dumb to comprehend what you mean. :disappointed:"
   def handle_message(["help" | _command], config) do
     {config, @help_text}
   end
   def handle_message(["config" | settings_list], config) do
-    # settings(settings_list, config)
+    settings(settings_list, config)
   end
   def handle_message(_, config) do
     {config, @unknown_message}
@@ -26,14 +26,14 @@ defmodule SlackCoder.Users.Help do
   for [config, self_or_monitors] <- @zipped_self_monitors_configs do
     {config, self_or_monitors} = {to_string(config), to_string(self_or_monitors)}
     defp settings([unquote(config), unquote(self_or_monitors), value], config) do
-      bool_value = value_to_boolean(value)
+      bool_value = SlackCoder.Models.Types.Boolean.value_to_boolean(value)
       config = Map.put(config, [unquote(config), unquote(self_or_monitors)]
                |> List.flatten
                |> Enum.join("_"), bool_value)
       {config, settings_reply(unquote(config), unquote(self_or_monitors), bool_value)}
     end
     defp settings([unquote(self_or_monitors), unquote(config), value], config) do
-      bool_value = value_to_boolean(value)
+      bool_value = SlackCoder.Models.Types.Boolean.value_to_boolean(value)
       config = Map.put(config, [unquote(config), unquote(self_or_monitors)]
                |> List.flatten
                |> Enum.join("_"), bool_value)
@@ -44,19 +44,11 @@ defmodule SlackCoder.Users.Help do
     {config, "Don't think thats a configuration setting, try `help` to get more info"}
   end
 
-  @default_config Enum.into(Enum.map(@zipped_self_monitors_configs, &({Enum.join(&1, "_"), nil})), %{})
+  @default_config Enum.into(Enum.map(@zipped_self_monitors_configs, &({Enum.join(&1, "_"), true})), %{})
   def default_config(), do: @default_config
 
   @default_config_keys Map.keys(@default_config)
-  def default_config(config) do
-    (@default_config_keys -- Map.keys(config))
-    |> Enum.map(&({&1, nil}))
-    |> Enum.into(config)
-  end
-
-  defp value_to_boolean(on) when on in ["on", "yes", "1", "y"], do: true
-  defp value_to_boolean(off) when off in ["off", "no", "0", "n"], do: false
-  defp value_to_boolean(_), do: nil
+  def default_config_keys(), do: @default_config_keys
 
   defp config_for_reply("stale"), do: "Stale PR notifications"
   defp config_for_reply("fail"), do: "Build failure notifications"

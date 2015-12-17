@@ -2,7 +2,6 @@ defmodule SlackCoder.Users.User do
   use GenServer
   alias SlackCoder.Repo
   alias SlackCoder.Models.User
-  alias SlackCoder.Models.User.Config
   alias SlackCoder.Slack
   import SlackCoder.Users.Help
 
@@ -13,19 +12,10 @@ defmodule SlackCoder.Users.User do
   end
 
   def init(user) do
-    github = SlackCoder.Config.github_user(user)
-    user = user |> User.by_slack |> Repo.one
-    if user do
-      {:ok, user} = User.changeset(user, %{config: Helper.default_config(user.config)})
-                    |> Repo.update
-    else
-      {:ok, user} = User.changeset(%User{}, %{slack: to_string(user), github: to_string(github), config: Help.default_config})
-                    |> Repo.insert
-    end
     {:ok, user}
   end
 
-  for type <- [:stale, :build] do
+  for type <- SlackCoder.Users.Help.default_config_keys() do
     def handle_cast({unquote(type), user_for, message}, user) do
       if configured_to_send_message(unquote(type), user_for, user) do
         Slack.send_to(user.slack, message)
@@ -33,18 +23,29 @@ defmodule SlackCoder.Users.User do
       {:noreply, user}
     end
   end
+  # Don't send unknown messages
+  def handle_cast({_unknown, _user_for, _message}, user) do
+    {:noreply, user}
+  end
 
   def handle_cast({:help, message}, user) do
     {new_config, reply} = handle_message(message |> String.downcase |> String.split(" "), user.config)
-    {:ok, user} = User.changeset(user, %{config: new_config}) |> Repo.update
+    # {:ok, user} = User.changeset(user, %{config: new_config}) |> Repo.update
     if reply do
       Slack.send_to(user.slack, reply)
     end
     {:noreply, user}
   end
+  def handle_cast({:update, new_user}, _user) do
+    {:noreply, new_user}
+  end
+
+  def handle_call(:get, _from, user) do
+    {:reply, user, user}
+  end
 
   defp configured_to_send_message(type, user_for, user) do
-    user.slack == user_for && apply(Config, :"#{type}_self", [user]) || user.slack != user_for && apply(Config, :"config_#{type}_monitors", [user])
+    user.slack == user_for && user.config["#{type}_self"] || user.slack != user_for && user.config["#{type}_monitors"]
   end
 
   # Client API
@@ -55,6 +56,14 @@ defmodule SlackCoder.Users.User do
 
   def help(user_pid, message) do
     GenServer.cast user_pid, {:help, message}
+  end
+
+  def get(user_pid) do
+    GenServer.call user_pid, :get
+  end
+
+  def update(user_pid, user) do
+    GenServer.cast user_pid, {:update, user}
   end
 
 end

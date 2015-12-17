@@ -15,13 +15,17 @@ config :slack_coder,
     pat: "Create your token here: https://github.com/settings/tokens",
     user: "your-user-name",
   ],
-  users: [],
   repos: [],
   channel: nil,
   group: nil,
   timezone: "America/New_York",
   pr_backoff_start: 2
 
+config :slack_coder, :github_oauth,
+  client_id: "your-github-client-id",
+  client_secret: "your-github-client-secret",
+  redirect_uri: "http://localhost:4000/auth/github/callback"
+  
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

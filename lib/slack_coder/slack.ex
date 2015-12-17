@@ -105,12 +105,14 @@ defmodule SlackCoder.Slack do
 
   @doc false
   def handle_message(%{text: message, type: "message", user: user_id}, slack, state) do
-    slack_name = slack[:users][user_id][:name]
-    user_pid = Users.user(slack_name)
-    if user_pid do
-      User.help(user_pid, message)
-    else
-      Logger.warn "User #{slack_name || user_id} sent a message but it was ignored because the user_pid could not be found."
+    unless slack[:me][:id] == user_id do
+      slack_name = slack[:users][user_id][:name]
+      user_pid = Users.user(slack_name)
+      if user_pid do
+        User.help(user_pid, message)
+      else
+        Logger.warn "User #{inspect slack_name || user_id} sent us a message but it was ignored because the user_pid could not be found."
+      end
     end
     {:ok, state}
   end

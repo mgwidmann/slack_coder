@@ -54,6 +54,7 @@ defmodule SlackCoder.Mixfile do
       {:httpoison, "~> 0.7.2"},
       {:exjsx, "~> 3.1"},
       {:ecto, "~> 1.0.0"},
+      {:oauth2, "~> 0.5"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev},

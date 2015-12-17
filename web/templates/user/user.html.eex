@@ -1,0 +1,12 @@
+<h2 class="center">
+  <img src="<%= @user.avatar_url %>" class="img-md img-circle"/>
+  <%= @user.github %>
+</h2>
+<div class="row">
+  <div class="col-xs-8 col-xs-offset-2">
+    <div class="row">
+      <%= render "form.html", changeset: @changeset,
+                              action: new_or_update_user_path(@conn, @user) %>
+    </div>
+  </div>
+</div>
