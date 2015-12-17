@@ -45,7 +45,7 @@
       </a>
       <div>
         <%= tag :input, type: "hidden", value: "", name: "user[monitors][]" %>
-        <%= multiple_select f, :monitors, users_list(@changeset.model.github), class: "form-control", value: @changeset.model.monitors %>
+        <%= multiple_select f, :monitors, users_list(@changeset.model.github), class: "form-control", value: @changeset.model.monitors || [] %>
       </div>
     </div>
   </div>
