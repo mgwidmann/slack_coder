@@ -1,10 +1,10 @@
 defmodule SlackCoder.UserTest do
   use SlackCoder.ModelCase
 
-  alias SlackCoder.User
+  alias SlackCoder.Models.User
 
-  @valid_attrs %{config: %{}, github: "some content", slack: "some content"}
-  @invalid_attrs %{}
+  @valid_attrs %{config: %{}, github: "github", slack: "slack"}
+  @invalid_attrs %{slack: "only slack"}
 
   test "changeset with valid attributes" do
     changeset = User.changeset(%User{}, @valid_attrs)

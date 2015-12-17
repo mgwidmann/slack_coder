@@ -1,18 +1,13 @@
 defmodule SlackCoder.UserControllerTest do
   use SlackCoder.ConnCase
 
-  alias SlackCoder.User
-  @valid_attrs %{slack: "some content"}
-  @invalid_attrs %{}
+  alias SlackCoder.Models.User
+  @valid_attrs %{slack: "slack", github: "github"}
+  @invalid_attrs %{github: "only github"}
 
   setup do
     conn = conn()
     {:ok, conn: conn}
-  end
-
-  test "lists all entries on index", %{conn: conn} do
-    conn = get conn, user_path(conn, :index)
-    assert html_response(conn, 200) =~ "Listing users"
   end
 
   test "renders form for new resources", %{conn: conn} do
@@ -29,12 +24,6 @@ defmodule SlackCoder.UserControllerTest do
   test "does not create resource and renders errors when data is invalid", %{conn: conn} do
     conn = post conn, user_path(conn, :create), user: @invalid_attrs
     assert html_response(conn, 200) =~ "New user"
-  end
-
-  test "shows chosen resource", %{conn: conn} do
-    user = Repo.insert! %User{}
-    conn = get conn, user_path(conn, :show, user)
-    assert html_response(conn, 200) =~ "Show user"
   end
 
   test "renders page not found when id is nonexistent", %{conn: conn} do
@@ -62,10 +51,4 @@ defmodule SlackCoder.UserControllerTest do
     assert html_response(conn, 200) =~ "Edit user"
   end
 
-  test "deletes chosen resource", %{conn: conn} do
-    user = Repo.insert! %User{}
-    conn = delete conn, user_path(conn, :delete, user)
-    assert redirected_to(conn) == user_path(conn, :index)
-    refute Repo.get(User, user.id)
-  end
 end
