@@ -10,7 +10,7 @@ defmodule SlackCoder.Users.Help do
   _More to come..._
 
   *Config*
-  #{@zipped_self_monitors_configs |> Enum.map(fn([type, config])-> "config #{type} #{config} <on/off>" end) |>Enum.join("\n")}
+  #{@zipped_self_monitors_configs |> Enum.map(fn([config, type])-> "config #{config} #{type} <on/off>" end) |>Enum.join("\n")}
   """
   @unknown_message "I'm sorry. I'm too dumb to comprehend what you mean. :disappointed:"
   def handle_message(["help" | _command], config) do
