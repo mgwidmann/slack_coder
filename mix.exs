@@ -45,7 +45,7 @@ defmodule SlackCoder.Mixfile do
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 2.2"},
       {:cowboy, "~> 1.0"},
-      {:timex_ecto, "~> 0.5.0"},
+      {:timex_ecto, "~> 0.6"},
       # {:slack, "~> 0.2.0"},
       {:slack, git: "https://github.com/mgwidmann/Elixir-Slack", branch: "im_list"},
       # {:slack, path: "../Elixir-Slack"},
