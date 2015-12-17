@@ -222,7 +222,7 @@ defmodule SlackCoder.Github.Helper do
     pr = Repo.get(PR, commit.pr_id)
     pr = %PR{ pr | latest_commit: commit } # temporary for view only
     {:safe, html} = SlackCoder.PageView.render("pull_request.html", pr: pr)
-    SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, html: :erlang.iolist_to_binary(html)})
+    SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: :erlang.iolist_to_binary(html)})
 
     [message_for | slack_users] = slack_user_with_monitors(pr)
     case String.to_atom(commit.status) do

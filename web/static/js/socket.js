@@ -54,7 +54,7 @@ let socket = new Socket("/socket")
 socket.connect({})
 
 // Now that you are connected, you can join channels with a topic:
-let channel = socket.channel("prs:all", {})
+let channel = socket.channel("prs:all", {github: window.github})
 channel.join()
   .receive("ok", resp => { console.log("Joined successfully", resp) })
   .receive("error", resp => { console.log("Unable to join", resp) })
@@ -65,7 +65,11 @@ $(document).ready(()=> {
     if($(`#pr-${resp.pr}`).length > 0) {
       $(`#pr-${resp.pr}`).replaceWith(resp.html)
     } else {
-      $('#pull-requests').append(resp.html)
+      if window.github == resp.github {
+        $('#pull-requests').append(resp.html)
+      } else {
+        $('#team-pull-requests').append(resp.html)
+      }
     }
   })
   channel.on("pr:remove", resp => {

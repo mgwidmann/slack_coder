@@ -2,14 +2,14 @@
   <h1>My Pull Requests</h1>
   <table class="table table-striped">
     <tbody id="pull-requests">
-      <%= for user <- Map.keys(@prs), user == String.to_atom(@current_user.github) do %>
+      <%= for user <- Map.keys(@prs), user == github(@current_user) do %>
         <%= for pr <- @prs[user] do %>
           <%= render "pull_request.html", pr: pr %>
         <% end %>
       <% end %>
     </tbody>
   </table>
-  <%= unless @prs[String.to_atom(@current_user.github)] do %>
+  <%= unless @prs[github(@current_user)] do %>
     <div class="text-center">
       <h2>
         Pull Requests are refreshed every <%= SlackCoder.Github.Watchers.Repository.poll_minutes %> minutes.
@@ -23,7 +23,7 @@
   <h1>My Team's Pull Requests</h1>
   <table class="table table-striped">
     <tbody id="team-pull-requests">
-      <%= for user <- Map.keys(@prs), user != String.to_atom(@current_user.github) do %>
+      <%= for user <- Map.keys(@prs), user != github(@current_user) do %>
         <%= for pr <- @prs[user] do %>
           <%= render "pull_request.html", pr: pr %>
         <% end %>

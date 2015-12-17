@@ -13,4 +13,9 @@ defmodule SlackCoder.PageView do
     Timex.Format.Time.Formatters.Humanized.format(timestamp)
   end
 
+  def github(nil), do: nil
+  def github(current_user) do
+    String.to_atom(current_user.github)
+  end
+
 end

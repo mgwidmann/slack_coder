@@ -55,6 +55,11 @@
       <% end %>
 
     </div> <!-- /container -->
+    <%= if @current_user do %>
+      <script>
+        window.github = "<%= @current_user.github %>";
+      </script>
+    <% end %>
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
   </body>
 </html>
