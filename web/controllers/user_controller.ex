@@ -32,6 +32,7 @@ defmodule SlackCoder.UserController do
 
   def update(conn, %{"id" => id, "user" => user_params}) do
     user = Repo.get!(User, id)
+    user_params = Map.delete(user_params, "config")
     changeset = User.changeset(user, user_params)
 
     case Repo.update(changeset) do
