@@ -1,9 +1,43 @@
-<table class="table table-striped">
-  <tbody id="pull-requests">
-    <%= for user <- Map.keys(@prs) do %>
-      <%= for pr <- @prs[user] do %>
-        <%= render "pull_request.html", pr: pr %>
-      <% end %>
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <span class="h3">My pull requests</span>
+  </div>
+  <div class="panel-body">
+    <table class="table table-striped">
+      <tbody id="pull-requests">
+        <%= for user <- Map.keys(@prs), user == github(@current_user) do %>
+          <%= for pr <- @prs[user] do %>
+            <%= render "pull_request.html", pr: pr %>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+    <%= unless @prs[github(@current_user)] do %>
+      <div class="text-center">
+        <h2>
+          Pull Requests are refreshed every <%= SlackCoder.Github.Watchers.Repository.poll_minutes %> minutes.
+          <br/>
+          <small>You may have to wait until then to see your PRs show up here</small>
+        </h2>
+      </div>
     <% end %>
-  </tbody>
-</table>
+  </div>
+</section>
+<% if @current_user.monitors != [] do %>
+  <section class="panel panel-default">
+    <div class="panel-heading">
+      <span class="h3">Team members I monitor</span>
+    </div>
+    <div class="panel-body">
+      <table class="table table-striped">
+        <tbody id="team-pull-requests">
+          <%= for user <- Map.keys(@prs), user != github(@current_user) do %>
+            <%= for pr <- @prs[user] do %>
+              <%= render "pull_request.html", pr: pr %>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% end %>

@@ -19,7 +19,8 @@ defmodule SlackCoder.Web do
   def model do
     quote do
       use Ecto.Model
-      
+      alias SlackCoder.Models.Types.StringList
+      alias SlackCoder.Models.Types.Boolean
     end
   end
 
@@ -30,6 +31,8 @@ defmodule SlackCoder.Web do
       alias SlackCoder.Repo
       import Ecto.Model
       import Ecto.Query, only: [from: 1, from: 2]
+
+      alias SlackCoder.Models.User
 
       import SlackCoder.Router.Helpers
     end
@@ -44,6 +47,9 @@ defmodule SlackCoder.Web do
 
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
+
+      import SlackCoder.ApplicationHelper
+      alias SlackCoder.Models.User
 
       import SlackCoder.Router.Helpers
     end

@@ -6,7 +6,8 @@ defmodule SlackCoder.Github.Watchers.Repository do
   use Timex
   require Logger
 
-  @poll_interval 60_000 * 5 # 5 minutes
+  @poll_minutes 5
+  @poll_interval 60_000 * @poll_minutes # 5 minutes
 
   def start_link(repo) do
     GenServer.start_link __MODULE__, repo
@@ -34,6 +35,8 @@ defmodule SlackCoder.Github.Watchers.Repository do
     {:noreply, {repo, existing_prs}}
   end
 
+  def poll_minutes(), do: @poll_minutes
+
   defp close_prs(_new_prs, []), do: nil
   defp close_prs(new_prs, old_prs) do
     closed_prs =  (old_prs |> Enum.map(&(&1.number))) -- (new_prs |> Enum.map(&(&1.number)))
@@ -41,9 +44,24 @@ defmodule SlackCoder.Github.Watchers.Repository do
       Logger.debug "Closed PRs: #{inspect closed_prs}"
       Enum.each closed_prs, fn(pr_number)->
         pr = Enum.find(old_prs, &( &1.number == pr_number))
+        new_pr = Enum.find(new_prs, &( &1.number == pr_number))
         Logger.debug "Stopping watcher for: PR-#{pr.number} #{pr.title}"
         SlackCoder.Github.Supervisor.stop_watcher(pr)
         SlackCoder.Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
+        [message_for | slack_users] = slack_user_with_monitors(pr)
+        if new_pr.merged_at do
+          message = """
+          :smiling_imp: _MERGED_ *#{pr.title}* :raveparrot:
+          #{pr.html_url}
+          """
+          notify(slack_users, :merge, message_for, message)
+        else
+          message = """
+          :rage: _CLOSED_ *#{pr.title}*
+          #{pr.html_url}
+          """
+          notify(slack_users, :close, message_for, message)
+        end
       end
     end
   end
@@ -78,13 +96,13 @@ defmodule SlackCoder.Github.Watchers.Repository do
 
   defp stale_pr_notification(pr) do
     stale_hours = Timex.Date.diff(pr.latest_comment, now, :hours)
-    slack_users = SlackCoder.Config.slack_user_with_monitors(pr.github_user)
+    [message_for | slack_users] = slack_user_with_monitors(pr)
     message = """
     :hankey: *#{pr.title}*
     Stale for *#{stale_hours}* hours
     #{pr.html_url}
     """
-    notify(slack_users, message)
+    notify(slack_users, :stale, message_for, message)
   end
 
 end

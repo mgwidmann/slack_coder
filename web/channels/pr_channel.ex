@@ -1,8 +1,12 @@
 defmodule SlackCoder.PRChannel do
   use SlackCoder.Web, :channel
 
-  def join("prs:all", _payload, socket) do
-      {:ok, socket}
+  def join("prs:all", %{"github" => github}, socket) do
+    assign(socket, :current_user, SlackCoder.Users.Supervisor.user(github) |> SlackCoder.Users.User.get)
+    {:ok, socket}
+  end
+  def join("prs:all", _, socket) do
+    {:error, %{"error" => "Must be signed in"}}
   end
 
   # Channels can be used in a request/response fashion

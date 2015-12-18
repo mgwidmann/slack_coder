@@ -1,0 +1,28 @@
+.user-avatar {
+  width: 32px;
+  height: 32px;
+}
+
+.code-climate {
+  background-image: url("/images/code-climate-grey.svg");
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+
+.sign-in {
+  height: 35vh;
+}
+
+.header {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  height: 135px;
+  margin-bottom: 5px;
+  background-image: -webkit-radial-gradient(50% 50%, circle, #F67938 29%, #EF4734 120%);
+  background-image: radial-gradient( circle at 50% 50%, #F67938 29%, #EF4734 120%);
+  color: #fff !important;
+  a {
+    color: #fff !important;
+  }
+}

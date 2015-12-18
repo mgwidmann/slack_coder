@@ -10,26 +10,60 @@
     <title>Slack Coder</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
   </head>
 
   <body>
-    <div class="container" role="main">
-      <div class="header">
-        <div class="jumbotron">
-          <h2>
-            <span class="logo"></span>
-            Slack Coder
-          </h2>
-          <p class="lead">Monitoring your pull requests</p>
+    <div class="header">
+      <div class="container">
+        <div class="col-md-3 hidden-xs">
+          <a class="logo" href="/"></a>
         </div>
+        <div class="col-md-6 col-xs-12 text-center">
+          <h1>
+            Slack Coder
+          </h1>
+          <p class="lead">Monitoring your <strong>dead</strong> pull requests</p>
+        </div>
+        <%= if @current_user do %>
+          <div class="col-md-3 col-xs-12 text-right">
+            <span>
+              <img src="<%= @current_user.avatar_url %>" class="img-xs img-circle"/>
+              <%= if @current_user.id do %>
+                <%= link @current_user.github, to: user_path(@conn, :edit, @current_user.id)%>
+              <% else %>
+                <%= link @current_user.github, to: user_path(@conn, :new)%>
+              <% end %>
+            </span>
+            |
+            <%= link "Logout", to: auth_path(@conn, :delete), method: :delete %>
+          </div>
+        <% end %>
       </div>
+    </div>
 
+    <div class="container" role="main">
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
       <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
 
-      <%= @inner %>
+      <%= if @current_user do %>
+        <%= @inner %>
+      <% else %>
+        <div class="center sign-in">
+          <a class="btn btn-default btn-xxl" href="<%= auth_path @conn, :index, "github" %>">
+            <i class="fa fa-github"></i>
+            Sign in with GitHub
+            <i class="fa fa-angle-right"></i>
+          </a>
+        </div>
+      <% end %>
 
     </div> <!-- /container -->
+    <%= if @current_user do %>
+      <script>
+        window.github = "<%= @current_user.github %>";
+      </script>
+    <% end %>
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
   </body>
 </html>

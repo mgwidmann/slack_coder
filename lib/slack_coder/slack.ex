@@ -2,20 +2,49 @@ defmodule SlackCoder.Slack do
   use Slack
   import SlackCoder.Slack.Helper
   alias SlackCoder.Config
+  alias SlackCoder.Users.Supervisor, as: Users
+  alias SlackCoder.Users.User
   require Logger
   @online_message """
   :slack: *Slack* :computer: *Coder* online!
   Reporting on any PRs since last online...
   """
 
-  def send_to(user, message) when is_binary(user) do
+  @doc """
+  Sends the message to `user` to be processed and delivered.
+  Two types accepted:
+      send_to(:user, {:type, :message_for, "message"})
+      send_to(:user, "message")
+  The first delivers the message to `user` process where based upon
+  its logic and the `user`'s configuration it will either be delivered or
+  discarded. The second is meant to be used only by the User processes, so
+  that they may deliver messages to `:slack` through the RTM service.
+  """
+  def send_to(user, message)
+  def send_to(user, {type, message_for, message}) when is_binary(user) do
+    String.to_atom(user) |> send_to({type, message_for, message})
+  end
+
+  def send_to(user, {type, message_for, message}) do
+    user_pid = Users.user(user)
+    if user_pid do
+      User.notification user_pid, {type, message_for, String.strip(message)}
+    else
+      Logger.error "Attempt to deliver message to #{inspect user}, but pid cannot be found. Message: #{message}"
+    end
+  end
+
+  def send_to(user, message) when is_binary(user) and is_binary(message) do
     String.to_atom(user) |> send_to(message)
   end
 
-  def send_to(user, message) do
-    send :slack, {user, String.strip(message)}
+  def send_to(user, message) when is_binary(message) do
+    send :slack, {user, message}
   end
 
+  @doc """
+  Retrieves the current slack data. Useful for inspecting the running process.
+  """
   def slack() do
     send :slack, {:slack, self()}
     receive do
@@ -23,6 +52,7 @@ defmodule SlackCoder.Slack do
     end
   end
 
+  @doc false
   def handle_info({:slack, pid}, slack, state) when is_pid(pid) do
     send pid, slack
     {:ok, state}
@@ -49,6 +79,7 @@ defmodule SlackCoder.Slack do
     {:ok, state}
   end
 
+  @doc false
   def handle_close(reason, slack, _state) do
     Logger.error inspect(reason)
     caretaker = user(slack, Application.get_env(:slack_coder, :caretaker))
@@ -59,6 +90,7 @@ defmodule SlackCoder.Slack do
     {:error, reason}
   end
 
+  @doc false
   def handle_connect(slack, state) do
     try do
       Process.register(self, :slack)
@@ -71,6 +103,24 @@ defmodule SlackCoder.Slack do
     {:ok, state}
   end
 
+  @doc false
+  def handle_message(%{text: message, type: "message", user: user_id}, slack, state) do
+    unless slack[:me][:id] == user_id do
+      slack_name = slack[:users][user_id][:name]
+      user_pid = Users.user(slack_name)
+      if user_pid do
+        User.help(user_pid, message)
+      else
+        send_to slack_name, """
+        Sorry, but I can't chat until you've registered!
+
+        Please register at http://slack-coder.herokuapp.com
+        """
+        Logger.warn "User #{inspect slack_name || user_id} sent us a message but it was ignored because the user_pid could not be found."
+      end
+    end
+    {:ok, state}
+  end
   def handle_message(_message, _slack, state) do
     {:ok, state}
   end

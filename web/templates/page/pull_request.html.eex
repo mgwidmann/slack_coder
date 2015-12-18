@@ -1,6 +1,6 @@
 <tr id="pr-<%= @pr.number %>">
   <td>
-    <img src="<%= @pr.github_user_avatar %>" class="user-avatar" />
+    <img src="<%= @pr.github_user_avatar %>" class="img-circle user-avatar" />
   </td>
   <td>
     <%= @pr.github_user %>
@@ -9,7 +9,7 @@
     <%= link @pr.title, to: @pr.html_url, target: "_blank" %>
   </td>
   <td>
-    <%= link_if to: @pr.latest_commit.travis_url, class: "label label-#{status_class(@pr.latest_commit.status)} text-uppercase", target: "_blank" do %>
+    <%= link_if @pr.latest_commit.travis_url, to: @pr.latest_commit.travis_url, class: "label label-#{status_class(@pr.latest_commit.status)} text-uppercase", target: "_blank" do %>
       <%= to_string(@pr.latest_commit.status) %>
     <% end %>
   </td>

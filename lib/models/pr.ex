@@ -11,6 +11,8 @@ defmodule SlackCoder.Models.PR do
     # Stale PR checking
     field :latest_comment, Timex.Ecto.DateTime
     field :opened_at, Timex.Ecto.DateTime
+    field :closed_at, Timex.Ecto.DateTime
+    field :merged_at, Timex.Ecto.DateTime
     field :backoff, :integer, default: Application.get_env(:slack_coder, :pr_backoff_start, 1)
     # Used in view
     field :title, :string
@@ -25,7 +27,7 @@ defmodule SlackCoder.Models.PR do
   end
 
   @required_fields ~w(owner repo branch github_user title number html_url opened_at)
-  @optional_fields ~w(statuses_url latest_comment backoff)
+  @optional_fields ~w(statuses_url latest_comment backoff merged_at closed_at)
 
   @doc """
   Creates a changeset based on the `model` and `params`.

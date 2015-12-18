@@ -8,17 +8,14 @@ defmodule SlackCoder.PageView do
   def status_class(:error), do: :danger
   def status_class(_), do: :default
 
-  def link_if(opts, [do: block]) do
-    if opts[:to] do
-      link(opts, [do: block])
-    else
-      content_tag :span, opts, do: block
-    end
-  end
-
   def staleness(pr) do
     timestamp = Timex.Date.diff(pr.latest_comment, SlackCoder.Github.Helper.now, :timestamp)
     Timex.Format.Time.Formatters.Humanized.format(timestamp)
+  end
+
+  def github(nil), do: nil
+  def github(current_user) do
+    String.to_atom(current_user.github)
   end
 
 end

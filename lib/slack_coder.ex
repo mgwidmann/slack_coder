@@ -7,12 +7,14 @@ defmodule SlackCoder do
     import Supervisor.Spec, warn: false
 
     children = [
+      # Start the Ecto repository
+      worker(SlackCoder.Repo, []),
+      # Start Users supervisor before slack client
+      supervisor(SlackCoder.Users.Supervisor, []),
       # Define workers and child supervisors to be supervised
       worker(SlackCoder.Slack, [Application.get_env(:slack_coder, :slack_api_token), []]),
       # Start the endpoint when the application starts
       supervisor(SlackCoder.Endpoint, []),
-      # Start the Ecto repository
-      worker(SlackCoder.Repo, []),
       supervisor(SlackCoder.Github.Supervisor, [])
     ]
 

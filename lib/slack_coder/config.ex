@@ -16,26 +16,4 @@ defmodule SlackCoder.Config do
     end
   end
 
-  def slack_user(github_user) when is_binary(github_user) do
-    github_user
-    |> String.to_atom
-    |> slack_user
-  end
-
-  def slack_user(github_user) do
-    Application.get_env(:slack_coder, :users, [])[github_user][:slack]
-  end
-
-  def slack_user_with_monitors(github_user) when is_binary(github_user) do
-    github_user
-    |> String.to_atom
-    |> slack_user_with_monitors
-  end
-
-  def slack_user_with_monitors(github_user) do
-    monitors = (Application.get_env(:slack_coder, :users, [])[github_user][:monitored_by] || [])
-                |> Enum.map(&slack_user/1)
-    [slack_user(github_user) | monitors]
-  end
-
 end
