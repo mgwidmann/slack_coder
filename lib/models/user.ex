@@ -30,19 +30,14 @@ defmodule SlackCoder.Models.User do
     |> unique_constraint(:github)
   end
 
-  def by_slack(name) when is_binary(name) do
-    from u in __MODULE__, where: u.slack == ^name
+  for field <- [:slack, :github] do
+    def unquote(:"by_#{field}")(name) when is_binary(name) do
+      from u in __MODULE__, where: u.unquote(field) == ^name
+    end
+    def unquote(:"by_#{field}")(names) when is_list(names) do
+      from u in __MODULE__, where: u.unquote(field) in ^names
+    end
+    def by_slack(name), do: to_string(name) |> unquote(:"by_#{field}")()
   end
-  def by_slack(names) when is_list(names) do
-    from u in __MODULE__, where: u.slack in ^names
-  end
-  def by_slack(name), do: to_string(name) |> by_slack
 
-  def by_github(name) when is_binary(name) do
-    from u in __MODULE__, where: u.github == ^name
-  end
-  def by_github(names) when is_list(names) do
-    from u in __MODULE__, where: u.github in ^names
-  end
-  def by_github(name), do: to_string(name) |> by_slack
 end

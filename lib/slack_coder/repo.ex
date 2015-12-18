@@ -8,4 +8,10 @@ defmodule SlackCoder.Repo do
   def save(%Ecto.Changeset{model: %{id: _id}} = changeset) do
     update(changeset)
   end
+
+  # Fun addition
+  def count(queryable) do
+    import Ecto.Query
+    one(from q in queryable, select: count(q.id))
+  end
 end
