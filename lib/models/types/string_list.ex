@@ -3,8 +3,15 @@ defmodule SlackCoder.Models.Types.StringList do
 
   def type(), do: :string
 
-  def cast(string) when is_binary(string), do: Poison.decode(string)
-  def cast(list) when is_list(list), do: {:ok, list}
+  def cast(string) when is_binary(string) do
+    case Poison.decode(string) do
+      {:ok, list} -> {:ok, Enum.filter(list, &(&1))}
+      other -> other
+    end
+  end
+  def cast(list) when is_list(list) do
+    {:ok, Enum.filter(list, &(&1))}
+  end
 
   def load(string), do: Poison.decode(string)
 
