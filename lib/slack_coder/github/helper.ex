@@ -98,6 +98,8 @@ defmodule SlackCoder.Github.Helper do
     else
       commit = Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
     end
+    response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}")
+    refreshed_pr = build_pr(response, pr)
     cs = Commit.changeset(commit, %{
           status: last_status["state"] || "pending",
           code_climate_status: code_climate["state"] || "pending",
@@ -110,7 +112,18 @@ defmodule SlackCoder.Github.Helper do
           pr_id: pr.id
          })
     {:ok, commit} = Repo.save(cs)
-    %PR{ pr | latest_commit: commit}
+    conflict_notification(pr, refreshed_pr)
+    %PR{ refreshed_pr | latest_commit: commit}
+  end
+
+  def conflict_notification(pr, refreshed_pr) do
+    # Prior was mergable but now it is not (nil means analysis in process)
+    if pr.mergable && refreshed_pr.mergable == false do
+      [message_for | slack_users] = slack_user_with_monitors(pr)
+      message = ":heavy_multiplication_x: *MERGE CONFLICTS* #{pr.title} \n#{pr.html_url}"
+      Logger.debug "Merge conflict for PR-#{pr.number}, sending to: #{inspect message_for}"
+      notify(slack_users, :conflict, message_for, message)
+    end
   end
 
   def find_latest_comment(%PR{number: number, repo: repo, owner: owner}) do
@@ -152,7 +165,7 @@ defmodule SlackCoder.Github.Helper do
                            title: pr["title"]
                          })
                          |> Repo.update
-    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"] }
+    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"], mergable: pr["mergable"] }
   end
   def build_pr(pr, new_pr) do
     github_user = pr["user"]["login"]
@@ -174,7 +187,7 @@ defmodule SlackCoder.Github.Helper do
         repo: repo,
         branch: pr["head"]["ref"]
       })
-    {:ok, new_pr} = Repo.insert(cs)
+    {:ok, new_pr} = Repo.save(cs)
     new_pr
   end
 

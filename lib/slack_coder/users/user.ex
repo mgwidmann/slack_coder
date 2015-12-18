@@ -20,6 +20,8 @@ defmodule SlackCoder.Users.User do
     def handle_cast({unquote(type), user_for, message}, user) do
       if configured_to_send_message(unquote(type), user_for, user) do
         Slack.send_to(user.slack, message)
+      else
+        Logger.debug "Not configured to send #{unquote(type)} to #{user.slack}"
       end
       {:noreply, user}
     end
@@ -47,7 +49,9 @@ defmodule SlackCoder.Users.User do
   end
 
   defp configured_to_send_message(type, user_for, user) do
-    user.slack == user_for && Map.get(user.config, :"#{type}_self") || user.slack != user_for && Map.get(user.config, :"#{type}_monitors")
+    config_self = if (config_self = Map.get(user.config, :"#{type}_self")) != nil, do: config_self, else: true
+    config_monitors = if (config_monitors = Map.get(user.config, :"#{type}_monitors")) != nil, do: config_monitors, else: true
+    user.slack == user_for && config_self || user.slack != user_for && config_monitors
   end
 
   # Client API

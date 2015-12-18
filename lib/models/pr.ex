@@ -22,6 +22,7 @@ defmodule SlackCoder.Models.PR do
     has_many :commits, SlackCoder.Models.Commit
 
     field :latest_commit, :map, virtual: true
+    field :mergable, :boolean, virtual: true
 
     timestamps
   end

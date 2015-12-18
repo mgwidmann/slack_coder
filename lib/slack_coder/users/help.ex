@@ -1,6 +1,6 @@
 defmodule SlackCoder.Users.Help do
 
-  @message_types [:stale, :fail, :pass, :close, :merge]
+  @message_types [:stale, :fail, :pass, :close, :merge, :conflict]
   @zipped_message_types for config <- @message_types, type <- [:self, :monitors], do: [config, type]
   @help_text """
   _Heres a list of things that might help_
@@ -57,6 +57,7 @@ defmodule SlackCoder.Users.Help do
   defp config_for_reply("pass"), do: "Build success notifications"
   defp config_for_reply("close"), do: "PR close notifications"
   defp config_for_reply("merge"), do: "PR merge notifications"
+  defp config_for_reply("conflict"), do: "PR conflict notifications"
 
   defp turned_to(true), do: "turned on"
   defp turned_to(false), do: "turned off"
