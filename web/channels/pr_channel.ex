@@ -6,7 +6,7 @@ defmodule SlackCoder.PRChannel do
     {:ok, socket}
   end
   def join("prs:all", _, socket) do
-    {:error, %{"error" => "Must be signed in"}, socket}
+    {:error, %{"error" => "Must be signed in"}}
   end
 
   # Channels can be used in a request/response fashion

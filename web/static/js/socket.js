@@ -65,7 +65,7 @@ $(document).ready(()=> {
     if($(`#pr-${resp.pr}`).length > 0) {
       $(`#pr-${resp.pr}`).replaceWith(resp.html)
     } else {
-      if window.github == resp.github {
+      if(window.github == resp.github) {
         $('#pull-requests').append(resp.html)
       } else {
         $('#team-pull-requests').append(resp.html)
