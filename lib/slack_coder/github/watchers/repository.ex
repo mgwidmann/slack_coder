@@ -49,7 +49,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
         SlackCoder.Github.Supervisor.stop_watcher(pr)
         SlackCoder.Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
         [message_for | slack_users] = slack_user_with_monitors(pr)
-        if new_pr.merged_at do
+        if new_pr && new_pr.merged_at do
           message = """
           :smiling_imp: _MERGED_ *#{pr.title}* :raveparrot:
           #{pr.html_url}
