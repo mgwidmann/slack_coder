@@ -47,7 +47,7 @@
       <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
 
       <%= if @current_user do %>
-        <%= @inner %>
+        <%= render @view_module, @view_template, assigns %>
       <% else %>
         <div class="center sign-in">
           <a class="btn btn-default btn-xxl" href="<%= auth_path @conn, :index, "github" %>">
