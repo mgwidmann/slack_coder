@@ -44,12 +44,15 @@ defmodule SlackCoder.Github.Watchers.Repository do
       Logger.debug "Closed PRs: #{inspect closed_prs}"
       Enum.each closed_prs, fn(pr_number)->
         pr = Enum.find(old_prs, &( &1.number == pr_number))
-        new_pr = Enum.find(new_prs, &( &1.number == pr_number))
         Logger.debug "Stopping watcher for: PR-#{pr.number} #{pr.title}"
         SlackCoder.Github.Supervisor.stop_watcher(pr)
         SlackCoder.Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
         [message_for | slack_users] = slack_user_with_monitors(pr)
-        if new_pr && new_pr.merged_at do
+        response = get("repos/#{pr.github_user}/#{pr.repo}/pulls/#{pr.number}")
+        merged = response["merged"] || response["merged_at"] != nil
+        PR.changeset(pr, %{merged_at: response["merged_at"], closed_at: response["closed_at"]})
+          |> Repo.update
+        if merged do
           message = """
           :smiling_imp: _MERGED_ *#{pr.title}* :raveparrot:
           #{pr.html_url}
