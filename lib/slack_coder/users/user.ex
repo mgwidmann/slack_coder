@@ -4,6 +4,7 @@ defmodule SlackCoder.Users.User do
   alias SlackCoder.Models.User
   alias SlackCoder.Slack
   import SlackCoder.Users.Help
+  require Logger
 
   # Server API
 
@@ -15,7 +16,7 @@ defmodule SlackCoder.Users.User do
     {:ok, user}
   end
 
-  for type <- SlackCoder.Users.Help.default_config_keys() do
+  for type <- SlackCoder.Users.Help.message_types() do
     def handle_cast({unquote(type), user_for, message}, user) do
       if configured_to_send_message(unquote(type), user_for, user) do
         Slack.send_to(user.slack, message)
@@ -24,7 +25,8 @@ defmodule SlackCoder.Users.User do
     end
   end
   # Don't send unknown messages
-  def handle_cast({_unknown, _user_for, _message}, user) do
+  def handle_cast({unknown, user_for, message}, user) do
+    Logger.warn "User #{user.name}(#{user.slack}) received unhandled message: #{inspect {unknown, user_for, message}}"
     {:noreply, user}
   end
 
@@ -45,7 +47,7 @@ defmodule SlackCoder.Users.User do
   end
 
   defp configured_to_send_message(type, user_for, user) do
-    user.slack == user_for && user.config["#{type}_self"] || user.slack != user_for && user.config["#{type}_monitors"]
+    user.slack == user_for && Map.get(user.config, :"#{type}_self") || user.slack != user_for && Map.get(user.config, :"#{type}_monitors")
   end
 
   # Client API
