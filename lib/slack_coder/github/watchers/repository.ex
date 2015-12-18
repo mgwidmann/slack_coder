@@ -5,6 +5,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
   import Ecto.Changeset, only: [put_change: 3]
   use Timex
   require Logger
+  alias SlackCoder.Repo
 
   @poll_minutes 5
   @poll_interval 60_000 * @poll_minutes # 5 minutes
