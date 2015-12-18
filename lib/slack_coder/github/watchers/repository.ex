@@ -48,7 +48,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
         SlackCoder.Github.Supervisor.stop_watcher(pr)
         SlackCoder.Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
         [message_for | slack_users] = slack_user_with_monitors(pr)
-        response = get("repos/#{pr.github_user}/#{pr.repo}/pulls/#{pr.number}")
+        response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}")
         merged = response["merged"] || response["merged_at"] != nil
         PR.changeset(pr, %{merged_at: response["merged_at"], closed_at: response["closed_at"]})
           |> Repo.update
