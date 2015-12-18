@@ -26,25 +26,28 @@ form.link, form.button {
   float: left;
 }
 
-.btn-xl {
-  padding: 13px 17px;
-  font-size: 36px;
-  line-height: 1.3333333;
-  border-radius: 7px;
-}
+// Use body for extra specificity
+body {
+  .btn-xl {
+    padding: 13px 17px;
+    font-size: 36px;
+    line-height: 1.3333333;
+    border-radius: 7px;
+  }
 
-.btn-xxl {
-  padding: 18px 22px;
-  font-size: 46px;
-  line-height: 1.3333333;
-  border-radius: 9px;
-}
+  .btn-xxl {
+    padding: 18px 22px;
+    font-size: 46px;
+    line-height: 1.3333333;
+    border-radius: 9px;
+  }
 
-.img-xs {
-  height: 32px;
-}
-.img-md {
-  height: 128px;
+  .img-xs {
+    height: 32px;
+  }
+  .img-md {
+    height: 128px;
+  }
 }
 
 .center {
