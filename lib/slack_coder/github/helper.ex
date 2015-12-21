@@ -83,37 +83,44 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp _status(pr) do
-    last_commit = (get("repos/#{pr.github_user}/#{pr.repo}/commits?sha=#{pr.branch}") |> List.first)
-    statuses = (pr.statuses_url <> "#{last_commit["sha"]}") |> get
-    last_status = statuses
-                  |> Stream.filter(&( &1["context"] =~ ~r/travis/ ))
-                  |> Enum.take(1) # List is already sorted, first is the latest
-                  |> List.first
-    code_climate = statuses
-                  |> Stream.filter(&( &1["context"] =~ ~r/codeclimate/ ))
-                  |> Enum.take(1) # List is already sorted, first is the latest
-                  |> List.first
-    if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
-      commit = pr.latest_commit
-    else
-      commit = Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
-    end
+    commit = get_latest_commit(pr)
     response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}")
     refreshed_pr = build_pr(response, pr)
-    cs = Commit.changeset(commit, %{
-          status: last_status["state"] || "pending",
-          code_climate_status: code_climate["state"] || "pending",
-          travis_url: last_status["target_url"],
-          code_climate_url: code_climate["target_url"],
-          sha: last_commit["sha"],
-          github_user: last_commit["author"]["login"],
-          github_user_avatar: last_commit["author"]["avatar_url"],
-          latest_status_id: last_status["id"],
-          pr_id: pr.id
-         })
-    {:ok, commit} = Repo.save(cs)
     conflict_notification(pr, refreshed_pr)
-    %PR{ refreshed_pr | latest_commit: commit}
+    %PR{ refreshed_pr | latest_commit: commit || pr.latest_commit}
+  end
+
+  defp get_latest_commit(pr) do
+    last_commit = (get("repos/#{pr.github_user}/#{pr.repo}/commits?sha=#{pr.branch}") |> List.first)
+    if last_commit["sha"] do # 404 returned when user deletes branch
+      statuses = (pr.statuses_url <> "#{last_commit["sha"]}") |> get
+      last_status = statuses
+                    |> Stream.filter(&( &1["context"] =~ ~r/travis/ ))
+                    |> Enum.take(1) # List is already sorted, first is the latest
+                    |> List.first
+      code_climate = statuses
+                    |> Stream.filter(&( &1["context"] =~ ~r/codeclimate/ ))
+                    |> Enum.take(1) # List is already sorted, first is the latest
+                    |> List.first
+      if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
+        commit = pr.latest_commit
+      else
+        commit = Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
+      end
+      cs = Commit.changeset(commit, %{
+            status: last_status["state"] || "pending",
+            code_climate_status: code_climate["state"] || "pending",
+            travis_url: last_status["target_url"],
+            code_climate_url: code_climate["target_url"],
+            sha: last_commit["sha"],
+            github_user: last_commit["author"]["login"],
+            github_user_avatar: last_commit["author"]["avatar_url"],
+            latest_status_id: last_status["id"],
+            pr_id: pr.id
+           })
+      {:ok, commit} = Repo.save(cs)
+    end
+    commit || pr.latest_commit
   end
 
   def conflict_notification(pr, refreshed_pr) do
