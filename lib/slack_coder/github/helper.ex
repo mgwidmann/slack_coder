@@ -258,7 +258,7 @@ defmodule SlackCoder.Github.Helper do
     slack_users = SlackCoder.Users.Supervisor.users
                   |> Stream.filter(&(&1.github == pr.github_user))
                   |> Enum.map(&(&1.slack))
-    [message_for | slack_users]
+    Enum.uniq([message_for | slack_users])
   end
 
 end
