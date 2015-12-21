@@ -32,7 +32,7 @@
     <% end %>
   </div>
 </section>
-<% if @current_user && @current_user.monitors != [] do %>
+<%= if @current_user && @current_user.monitors != [] do %>
   <section class="panel panel-default">
     <div class="panel-heading">
       <span class="h3">Team members <%= if @user == @current_user.github, do: "I monitor", else: "#{@user} monitors"%></span>
