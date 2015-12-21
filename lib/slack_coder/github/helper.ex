@@ -255,9 +255,9 @@ defmodule SlackCoder.Github.Helper do
     user = SlackCoder.Users.Supervisor.user(pr.github_user)
            |> SlackCoder.Users.User.get
     message_for = user.slack
-    slack_users = SlackCoder.Models.User.by_github(user.monitors)
-                          |> Repo.all
-                          |> Enum.map(&(&1.slack))
+    slack_users = SlackCoder.Users.Supervisor.users
+                  |> Stream.filter(&(&1.github == pr.github_user))
+                  |> Enum.map(&(&1.slack))
     [message_for | slack_users]
   end
 

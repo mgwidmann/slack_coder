@@ -64,6 +64,7 @@ defmodule SlackCoder.Users.User do
     GenServer.cast user_pid, {:help, message}
   end
 
+  def get(nil), do: nil
   def get(user_pid) do
     GenServer.call user_pid, :get
   end

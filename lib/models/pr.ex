@@ -28,7 +28,7 @@ defmodule SlackCoder.Models.PR do
   end
 
   @required_fields ~w(owner repo branch github_user title number html_url opened_at)
-  @optional_fields ~w(statuses_url latest_comment backoff merged_at closed_at)
+  @optional_fields ~w(statuses_url latest_comment backoff merged_at closed_at latest_commit mergable github_user_avatar)
 
   @doc """
   Creates a changeset based on the `model` and `params`.

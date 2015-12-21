@@ -40,8 +40,6 @@ defmodule SlackCoder.Users.Supervisor do
     end
   end
 
-  def user(github)
-
   def users() do
     Supervisor.which_children(__MODULE__)
     |> Enum.map(fn
