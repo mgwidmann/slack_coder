@@ -87,6 +87,7 @@ defmodule SlackCoder.Github.Helper do
     response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}")
     refreshed_pr = build_pr(response, pr)
     conflict_notification(pr, refreshed_pr)
+
     %PR{ refreshed_pr | latest_commit: commit || pr.latest_commit}
   end
 
@@ -167,12 +168,13 @@ defmodule SlackCoder.Github.Helper do
 
   def build_pr(pr, nil), do: build_pr(pr)
   def build_pr(pr, %PR{id: id} = existing_pr) when is_integer(id) do
-    # Title is only thing that can change
     {:ok, existing_pr} = PR.changeset(existing_pr, %{
-                           title: pr["title"]
+                           title: pr["title"],
+                           closed_at: date_for(pr["closed_at"]),
+                           merged_at: date_for(pr["merged_at"])
                          })
                          |> Repo.update
-    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"], mergable: pr["mergable"] }
+    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"], mergable: pr["mergable_state"] != "unstable" }
   end
   def build_pr(pr, new_pr) do
     github_user = pr["user"]["login"]
