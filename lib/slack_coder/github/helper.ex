@@ -244,7 +244,7 @@ defmodule SlackCoder.Github.Helper do
     pr = Repo.get(PR, commit.pr_id)
     pr = %PR{ pr | latest_commit: commit, github_user_avatar: commit.github_user_avatar } # temporary for view only
     html = SlackCoder.PageView.render("pull_request.html", pr: pr)
-    SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.Html.safe_to_string(html)})
+    SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
 
     [message_for | slack_users] = slack_user_with_monitors(pr)
     case String.to_atom(commit.status) do
