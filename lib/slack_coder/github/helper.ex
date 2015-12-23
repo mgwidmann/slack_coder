@@ -32,10 +32,10 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp rate_limit_info(headers) do
-    {remaining, _} = Integer.parse(headers["X-RateLimit-Remaining"])
-    {total, _} = Integer.parse(headers["X-RateLimit-Limit"])
+    {remaining, _} = Integer.parse(headers["X-RateLimit-Remaining"] || "0")
+    {total, _} = Integer.parse(headers["X-RateLimit-Limit"] || "1")
     rate_limit_message = fn ->
-      {timestamp, _} = Integer.parse(headers["X-RateLimit-Reset"])
+      {timestamp, _} = Integer.parse(headers["X-RateLimit-Reset"] || "0")
       {:ok, date} = Timex.Date.from(timestamp, :secs)
                     |> Timex.Timezone.convert("America/New_York")
                     |> Timex.DateFormat.format("%D %T", Timex.Format.DateTime.Formatters.Strftime)
@@ -59,6 +59,7 @@ defmodule SlackCoder.Github.Helper do
   defp _pulls(repo, existing_prs) do
     users = Repo.all(SlackCoder.Models.User)
             |> Enum.map(&(&1.github))
+    IO.inspect users
     owner = Application.get_env(:slack_coder, :repos, [])[repo][:owner]
     Logger.debug "Pulling #{owner}/#{repo} PRs with #{length(existing_prs)} existing"
     get("repos/#{owner}/#{repo}/pulls", existing_prs)
