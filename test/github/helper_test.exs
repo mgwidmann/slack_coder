@@ -58,18 +58,20 @@ defmodule SlackCoder.Github.HelperTest do
   describe "pulls" do
     let :user do
       :random.seed :erlang.phash2([node]), :erlang.monotonic_time, :erlang.unique_integer
-      IO.puts "user were creating..."
-      IO.inspect "user-#{:random.uniform(1_000)}"
+      # "user-#{:random.uniform(1_000)}"
+      "slack-user"
     end
     before :each do
-      %SlackCoder.Models.User{github: user, slack: user} |> SlackCoder.Repo.insert
+      unless SlackCoder.Repo.get_by(SlackCoder.Models.User, slack: user) do
+        %SlackCoder.Models.User{github: user, slack: user} |> SlackCoder.Repo.insert
+      end
       response # Create response here so it matches user
       allow(HTTPoison) |> to_receive(get: fn(_url, _headers)-> {:ok, %HTTPoison.Response{status_code: 200, body: JSX.encode!(response)}} end)
       :ok
     end
     let :number, do: 0
     let :response do
-      IO.inspect [%{
+      [%{
         "user" => %{"login" => user},
         "base" => %{"repo" => %{"name" => "cool_project", "owner" => %{"login" => "slack_coder"}}},
         "_links" => %{"commits" => %{"href" => "github.com/commits"}, "html" => %{"href" => "github.com/pulls"}},

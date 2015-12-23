@@ -59,7 +59,6 @@ defmodule SlackCoder.Github.Helper do
   defp _pulls(repo, existing_prs) do
     users = Repo.all(SlackCoder.Models.User)
             |> Enum.map(&(&1.github))
-    IO.inspect users
     owner = Application.get_env(:slack_coder, :repos, [])[repo][:owner]
     Logger.debug "Pulling #{owner}/#{repo} PRs with #{length(existing_prs)} existing"
     get("repos/#{owner}/#{repo}/pulls", existing_prs)

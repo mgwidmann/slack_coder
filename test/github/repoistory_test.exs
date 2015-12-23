@@ -29,11 +29,23 @@ defmodule SlackCoder.Github.RepositoryTest do
         assert 16 = pr.backoff
         assert true = send_notification
       end
+      it "handles a new PR" do
+        cs = PR.changeset pr_with(%{backoff: 2, opened_at: ten_hours_ago}), %{latest_comment: ten_hours_ago}
+        {pr, send_notification} = Watcher.stale_pr cs
+        assert 16 = pr.backoff
+        assert true = send_notification
+      end
     end
 
     describe "does not send a notification" do
       it "below the backoff" do
         cs = PR.changeset pr_with(%{backoff: 4, latest_comment: two_hours_ago, opened_at: three_hours_ago}), %{latest_comment: two_hours_ago}
+        {pr, send_notification} = Watcher.stale_pr cs
+        assert 4 = pr.backoff # Keeps the same
+        assert send_notification == nil
+      end
+      it "handles a new PR" do
+        cs = PR.changeset pr_with(%{backoff: 4, opened_at: three_hours_ago}), %{latest_comment: two_hours_ago}
         {pr, send_notification} = Watcher.stale_pr cs
         assert 4 = pr.backoff # Keeps the same
         assert send_notification == nil
