@@ -37,7 +37,7 @@ defmodule SlackCoder.Models.User do
     def unquote(:"by_#{field}")(names) when is_list(names) do
       from u in __MODULE__, where: u.unquote(field) in ^names
     end
-    def by_slack(name), do: to_string(name) |> unquote(:"by_#{field}")()
+    def unquote(:"by_#{field}")(name), do: to_string(name) |> unquote(:"by_#{field}")()
   end
 
 end

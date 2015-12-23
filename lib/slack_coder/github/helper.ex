@@ -93,10 +93,10 @@ defmodule SlackCoder.Github.Helper do
                   |> Stream.filter(&( &1["context"] =~ ~r/codeclimate/ ))
                   |> Enum.take(1) # List is already sorted, first is the latest
                   |> List.first
-    if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
-      commit = pr.latest_commit
+    commit = if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
+      pr.latest_commit
     else
-      commit = Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
+      Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
     end
     cs = Commit.changeset(commit, %{
           status: last_status["state"] || "pending",

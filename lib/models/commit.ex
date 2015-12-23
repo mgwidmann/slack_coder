@@ -1,5 +1,5 @@
 defmodule SlackCoder.Models.Commit do
-  use Ecto.Model
+  use SlackCoder.Web, :model
   alias SlackCoder.Github.Helper
 
   schema "commits" do
@@ -16,9 +16,6 @@ defmodule SlackCoder.Models.Commit do
     timestamps
   end
 
-  after_insert __MODULE__, :notify_status
-  after_update __MODULE__, :notify_status
-
   @required_fields ~w(sha pr_id status)
   @optional_fields ~w(latest_status_id code_climate_status travis_url code_climate_url)
 
@@ -33,8 +30,13 @@ defmodule SlackCoder.Models.Commit do
     |> cast(params, @required_fields, @optional_fields)
   end
 
+  # Call me after a save has occured...
+  def after_save(changeset) do
+     notify_status(changeset)
+  end
+
   def notify_status(changeset) do
-    if changeset.changes[:status] do
+    if changeset.changes[:status] && changeset.valid? do
       Helper.report_change(changeset.model)
     end
     changeset

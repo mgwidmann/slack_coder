@@ -53,7 +53,8 @@ defmodule SlackCoder.Mixfile do
       # {:websocket_client, git: "https://github.com/jeremyong/websocket_client.git"},
       {:httpoison, "~> 0.7.2"},
       {:exjsx, "~> 3.1"},
-      {:ecto, "~> 1.1.0"},
+      # {:ecto, "~> 1.1.0"},
+      {:ecto, github: "elixir-lang/ecto", override: true},
       {:oauth2, "~> 0.5"},
 
       # Dev only

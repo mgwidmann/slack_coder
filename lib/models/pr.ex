@@ -1,5 +1,5 @@
 defmodule SlackCoder.Models.PR do
-  use Ecto.Model
+  use SlackCoder.Web, :model
 
   schema "prs" do
     field :owner, :string
