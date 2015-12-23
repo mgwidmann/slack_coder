@@ -175,7 +175,7 @@ defmodule SlackCoder.Github.Helper do
                            merged_at: date_for(pr["merged_at"])
                          })
                          |> Repo.update
-    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"], mergable: pr["mergable_state"] != "unstable" }
+    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"], mergable: not pr["mergable_state"] in ["unstable", "dirty"] }
   end
   def build_pr(pr, new_pr) do
     github_user = pr["user"]["login"]
