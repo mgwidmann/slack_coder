@@ -7,6 +7,7 @@ defmodule SlackCoder.Github.RepositoryTest do
   use Timex
 
   describe "stale notifications" do
+    let :now, do: Timex.Date.now
     let :two_hours_ago, do: Timex.Date.now |> Timex.Date.subtract(Timex.Time.to_timestamp(2, :hours))
     let :three_hours_ago, do: Timex.Date.now |> Timex.Date.subtract(Timex.Time.to_timestamp(3, :hours))
     let :ten_hours_ago, do: Timex.Date.now |> Timex.Date.subtract(Timex.Time.to_timestamp(10, :hours))
@@ -50,7 +51,12 @@ defmodule SlackCoder.Github.RepositoryTest do
         assert 4 = pr.backoff # Keeps the same
         assert send_notification == nil
       end
-
+      it "1 backoff" do
+        cs = PR.changeset pr_with(%{backoff: 1, latest_comment: now, opened_at: three_hours_ago}), %{latest_comment: now}
+        {pr, send_notification} = Watcher.stale_pr cs
+        assert 1 = pr.backoff # Keeps the same
+        assert send_notification == nil
+      end
     end
   end
 
