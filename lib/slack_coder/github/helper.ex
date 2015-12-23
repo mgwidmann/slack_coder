@@ -134,14 +134,14 @@ defmodule SlackCoder.Github.Helper do
     end
   end
 
-  def find_latest_comment(%PR{number: number, repo: repo, owner: owner}) do
+  def find_latest_comment(%PR{number: number, repo: repo, owner: owner} = pr) do
      latest_issue_comment = get("repos/#{owner}/#{repo}/issues/#{number}/comments") |> List.last
      latest_pr_comment = get("repos/#{owner}/#{repo}/pulls/#{number}/comments") |> List.last
      case {latest_issue_comment, latest_pr_comment} do
        {date1, date2} when date1 != nil or date2 != nil ->
-         greatest_date_for(date1["updated_at"], date2["updated_at"])
+         PR.changeset(pr, %{latest_comment: greatest_date_for(date1["updated_at"], date2["updated_at"])})
        {nil, nil} ->
-         nil
+         PR.changeset(pr, %{latest_comment: pr.opened_at})
      end
   end
 
