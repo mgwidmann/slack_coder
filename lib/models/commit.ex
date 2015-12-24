@@ -11,6 +11,8 @@ defmodule SlackCoder.Models.Commit do
     field :travis_url, :string
     field :code_climate_url, :string
 
+    field :github_user_avatar, :string, virtual: true
+
     belongs_to :pr, SlackCoder.Models.PR
 
     timestamps

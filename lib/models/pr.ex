@@ -22,12 +22,13 @@ defmodule SlackCoder.Models.PR do
     has_many :commits, SlackCoder.Models.Commit
 
     field :latest_commit, :map, virtual: true
+    field :mergable, :boolean, virtual: true
 
     timestamps
   end
 
   @required_fields ~w(owner repo branch github_user title number html_url opened_at)
-  @optional_fields ~w(statuses_url latest_comment backoff merged_at closed_at)
+  @optional_fields ~w(statuses_url latest_comment backoff merged_at closed_at latest_commit mergable github_user_avatar)
 
   @doc """
   Creates a changeset based on the `model` and `params`.

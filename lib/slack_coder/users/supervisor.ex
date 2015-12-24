@@ -40,13 +40,15 @@ defmodule SlackCoder.Users.Supervisor do
     end
   end
 
-  def user(github)
-
   def users() do
-    Supervisor.which_children(__MODULE__)
-    |> Enum.map(fn
-      {_, user_pid, _, _} -> SlackCoder.Users.User.get(user_pid)
-    end)
+    case Process.whereis(__MODULE__) do
+      nil -> []
+      _pid ->
+        Supervisor.which_children(__MODULE__)
+        |> Enum.map(fn
+          {_, user_pid, _, _} -> SlackCoder.Users.User.get(user_pid)
+        end)
+    end
   end
 
 end

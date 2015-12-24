@@ -1,7 +1,7 @@
 defmodule SlackCoder.Users.Help do
 
-  @self_monitors_configs [:stale, :fail, :pass, :close, :merge]
-  @zipped_self_monitors_configs for config <- @self_monitors_configs, type <- [:self, :monitors], do: [config, type]
+  @message_types [:stale, :fail, :pass, :close, :merge, :conflict]
+  @zipped_message_types for config <- @message_types, type <- [:self, :monitors], do: [config, type]
   @help_text """
   _Heres a list of things that might help_
 
@@ -10,7 +10,7 @@ defmodule SlackCoder.Users.Help do
   _More to come..._
 
   *Config*
-  #{@zipped_self_monitors_configs |> Enum.map(fn([config, type])-> "config #{config} #{type} <on/off>" end) |>Enum.join("\n")}
+  #{@zipped_message_types |> Enum.map(fn([config, type])-> "config #{config} #{type} <on/off>" end) |>Enum.join("\n")}
   """
   @unknown_message "I'm sorry. I'm too dumb to comprehend what you mean. :disappointed:"
   def handle_message(["help" | _command], config) do
@@ -23,7 +23,7 @@ defmodule SlackCoder.Users.Help do
     {config, @unknown_message}
   end
 
-  for [config, self_or_monitors] <- @zipped_self_monitors_configs do
+  for [config, self_or_monitors] <- @zipped_message_types do
     {config, self_or_monitors} = {to_string(config), to_string(self_or_monitors)}
     defp settings([unquote(config), unquote(self_or_monitors), value], config) do
       bool_value = SlackCoder.Models.Types.Boolean.value_to_boolean(value)
@@ -44,17 +44,20 @@ defmodule SlackCoder.Users.Help do
     {config, "Don't think thats a configuration setting, try `help` to get more info"}
   end
 
-  @default_config Enum.into(Enum.map(@zipped_self_monitors_configs, &({Enum.join(&1, "_"), true})), %{})
+  @default_config Enum.into(Enum.map(@zipped_message_types, &({Enum.join(&1, "_"), true})), %{})
   def default_config(), do: @default_config
 
   @default_config_keys Map.keys(@default_config)
   def default_config_keys(), do: @default_config_keys
+
+  def message_types(), do: @message_types
 
   defp config_for_reply("stale"), do: "Stale PR notifications"
   defp config_for_reply("fail"), do: "Build failure notifications"
   defp config_for_reply("pass"), do: "Build success notifications"
   defp config_for_reply("close"), do: "PR close notifications"
   defp config_for_reply("merge"), do: "PR merge notifications"
+  defp config_for_reply("conflict"), do: "PR conflict notifications"
 
   defp turned_to(true), do: "turned on"
   defp turned_to(false), do: "turned off"

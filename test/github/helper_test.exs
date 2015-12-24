@@ -3,6 +3,7 @@ defmodule SlackCoder.Github.HelperTest do
   import Pavlov.Syntax.Expect
   alias SlackCoder.Github.Helper
   alias SlackCoder.Models.PR
+  alias SlackCoder.Models.User
   alias SlackCoder.Repo
 
   describe "get" do
@@ -55,14 +56,23 @@ defmodule SlackCoder.Github.HelperTest do
   end
 
   describe "pulls" do
+    let :user do
+      :random.seed :erlang.phash2([node]), :erlang.monotonic_time, :erlang.unique_integer
+      # "user-#{:random.uniform(1_000)}"
+      "slack-user"
+    end
     before :each do
+      unless SlackCoder.Repo.get_by(SlackCoder.Models.User, slack: user) do
+        %SlackCoder.Models.User{github: user, slack: user} |> SlackCoder.Repo.insert
+      end
+      response # Create response here so it matches user
       allow(HTTPoison) |> to_receive(get: fn(_url, _headers)-> {:ok, %HTTPoison.Response{status_code: 200, body: JSX.encode!(response)}} end)
       :ok
     end
     let :number, do: 0
     let :response do
       [%{
-        "user" => %{"login" => "slack_coder"},
+        "user" => %{"login" => user},
         "base" => %{"repo" => %{"name" => "cool_project", "owner" => %{"login" => "slack_coder"}}},
         "_links" => %{"commits" => %{"href" => "github.com/commits"}, "html" => %{"href" => "github.com/pulls"}},
         "title" => "A new idea",
@@ -126,7 +136,8 @@ defmodule SlackCoder.Github.HelperTest do
     let :pull_body, do: [%{updated_at: "2015-11-21T10:00:49Z"}]
 
     it "returns the greater date" do
-       expect Helper.find_latest_comment(pr) |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 21, hour: 10, minute: 0,
+      cs = Helper.find_latest_comment(pr)
+      expect cs.changes[:latest_comment] |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 21, hour: 10, minute: 0,
         month: 11, ms: 0, second: 49, timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min, full_name: "UTC",
         offset_std: 0, offset_utc: 0, until: :max}, year: 2015})
     end
@@ -134,7 +145,8 @@ defmodule SlackCoder.Github.HelperTest do
     context "when one is nil" do
       let :pull_body, do: []
       it "returns the other" do
-        expect Helper.find_latest_comment(pr) |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 20, hour: 10, minute: 1,
+        cs = Helper.find_latest_comment(pr)
+        expect cs.changes[:latest_comment] |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 20, hour: 10, minute: 1,
           month: 11, ms: 0, second: 23, timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min, full_name: "UTC",
           offset_std: 0, offset_utc: 0, until: :max}, year: 2015})
       end

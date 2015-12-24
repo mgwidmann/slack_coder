@@ -32,10 +32,10 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp rate_limit_info(headers) do
-    {remaining, _} = Integer.parse(headers["X-RateLimit-Remaining"])
-    {total, _} = Integer.parse(headers["X-RateLimit-Limit"])
+    {remaining, _} = Integer.parse(headers["X-RateLimit-Remaining"] || "0")
+    {total, _} = Integer.parse(headers["X-RateLimit-Limit"] || "1")
     rate_limit_message = fn ->
-      {timestamp, _} = Integer.parse(headers["X-RateLimit-Reset"])
+      {timestamp, _} = Integer.parse(headers["X-RateLimit-Reset"] || "0")
       {:ok, date} = Timex.Date.from(timestamp, :secs)
                     |> Timex.Timezone.convert("America/New_York")
                     |> Timex.DateFormat.format("%D %T", Timex.Format.DateTime.Formatters.Strftime)
@@ -83,44 +83,65 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp _status(pr) do
-    last_commit = (get("repos/#{pr.github_user}/#{pr.repo}/commits?sha=#{pr.branch}") |> List.first)
-    statuses = (pr.statuses_url <> "#{last_commit["sha"]}") |> get
-    last_status = statuses
-                  |> Stream.filter(&( &1["context"] =~ ~r/travis/ ))
-                  |> Enum.take(1) # List is already sorted, first is the latest
-                  |> List.first
-    code_climate = statuses
-                  |> Stream.filter(&( &1["context"] =~ ~r/codeclimate/ ))
-                  |> Enum.take(1) # List is already sorted, first is the latest
-                  |> List.first
-    commit = if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
-      pr.latest_commit
-    else
-      Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
-    end
-    cs = Commit.changeset(commit, %{
-          status: last_status["state"] || "pending",
-          code_climate_status: code_climate["state"] || "pending",
-          travis_url: last_status["target_url"],
-          code_climate_url: code_climate["target_url"],
-          sha: last_commit["sha"],
-          github_user: last_commit["author"]["login"],
-          github_user_avatar: last_commit["author"]["avatar_url"],
-          latest_status_id: last_status["id"],
-          pr_id: pr.id
-         })
-    {:ok, commit} = Repo.save(cs)
-    %PR{ pr | latest_commit: commit}
+    commit = get_latest_commit(pr)
+    response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}")
+    refreshed_pr = build_pr(response, pr)
+    conflict_notification(pr, refreshed_pr)
+
+    %PR{ refreshed_pr | latest_commit: commit || pr.latest_commit}
   end
 
-  def find_latest_comment(%PR{number: number, repo: repo, owner: owner}) do
+  defp get_latest_commit(pr) do
+    last_commit = (get("repos/#{pr.github_user}/#{pr.repo}/commits?sha=#{pr.branch}") |> List.first)
+    if last_commit["sha"] do # 404 returned when user deletes branch
+      statuses = (pr.statuses_url <> "#{last_commit["sha"]}") |> get
+      last_status = statuses
+                    |> Stream.filter(&( &1["context"] =~ ~r/travis/ ))
+                    |> Enum.take(1) # List is already sorted, first is the latest
+                    |> List.first
+      code_climate = statuses
+                    |> Stream.filter(&( &1["context"] =~ ~r/codeclimate/ ))
+                    |> Enum.take(1) # List is already sorted, first is the latest
+                    |> List.first
+      commit = if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
+        pr.latest_commit
+      else
+        Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
+      end
+      cs = Commit.changeset(commit, %{
+            status: last_status["state"] || "pending",
+            code_climate_status: code_climate["state"] || "pending",
+            travis_url: last_status["target_url"],
+            code_climate_url: code_climate["target_url"],
+            sha: last_commit["sha"],
+            github_user: last_commit["author"]["login"],
+            github_user_avatar: last_commit["author"]["avatar_url"],
+            latest_status_id: last_status["id"],
+            pr_id: pr.id
+           })
+      {:ok, commit} = Repo.save(cs)
+    end
+    commit || pr.latest_commit
+  end
+
+  def conflict_notification(pr, refreshed_pr) do
+    # Prior was mergable but now it is not (nil means analysis in process)
+    if pr.mergable && refreshed_pr.mergable == false do
+      [message_for | slack_users] = slack_user_with_monitors(pr)
+      message = ":heavy_multiplication_x: *MERGE CONFLICTS* #{pr.title} \n#{pr.html_url}"
+      Logger.debug "Merge conflict for PR-#{pr.number}, sending to: #{inspect message_for}"
+      notify(slack_users, :conflict, message_for, message)
+    end
+  end
+
+  def find_latest_comment(%PR{number: number, repo: repo, owner: owner} = pr) do
      latest_issue_comment = get("repos/#{owner}/#{repo}/issues/#{number}/comments") |> List.last
      latest_pr_comment = get("repos/#{owner}/#{repo}/pulls/#{number}/comments") |> List.last
      case {latest_issue_comment, latest_pr_comment} do
        {date1, date2} when date1 != nil or date2 != nil ->
-         greatest_date_for(date1["updated_at"], date2["updated_at"])
+         PR.changeset(pr, %{latest_comment: greatest_date_for(date1["updated_at"], date2["updated_at"])})
        {nil, nil} ->
-         nil
+         PR.changeset(pr, %{latest_comment: pr.opened_at})
      end
   end
 
@@ -147,12 +168,13 @@ defmodule SlackCoder.Github.Helper do
 
   def build_pr(pr, nil), do: build_pr(pr)
   def build_pr(pr, %PR{id: id} = existing_pr) when is_integer(id) do
-    # Title is only thing that can change
     {:ok, existing_pr} = PR.changeset(existing_pr, %{
-                           title: pr["title"]
+                           title: pr["title"],
+                           closed_at: date_for(pr["closed_at"]),
+                           merged_at: date_for(pr["merged_at"])
                          })
                          |> Repo.update
-    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"] }
+    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"], mergable: not pr["mergable_state"] in ["unstable", "dirty"] }
   end
   def build_pr(pr, new_pr) do
     github_user = pr["user"]["login"]
@@ -174,7 +196,7 @@ defmodule SlackCoder.Github.Helper do
         repo: repo,
         branch: pr["head"]["ref"]
       })
-    {:ok, new_pr} = Repo.insert(cs)
+    {:ok, new_pr} = Repo.save(cs)
     new_pr
   end
 
@@ -220,9 +242,9 @@ defmodule SlackCoder.Github.Helper do
 
   def report_change(commit) do
     pr = Repo.get(PR, commit.pr_id)
-    pr = %PR{ pr | latest_commit: commit } # temporary for view only
-    {:safe, html} = SlackCoder.PageView.render("pull_request.html", pr: pr)
-    SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: :erlang.iolist_to_binary(html)})
+    pr = %PR{ pr | latest_commit: commit, github_user_avatar: commit.github_user_avatar } # temporary for view only
+    html = SlackCoder.PageView.render("pull_request.html", pr: pr)
+    SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
 
     [message_for | slack_users] = slack_user_with_monitors(pr)
     case String.to_atom(commit.status) do
@@ -242,10 +264,10 @@ defmodule SlackCoder.Github.Helper do
     user = SlackCoder.Users.Supervisor.user(pr.github_user)
            |> SlackCoder.Users.User.get
     message_for = user.slack
-    slack_users = SlackCoder.Models.User.by_github(user.monitors)
-                          |> Repo.all
-                          |> Enum.map(&(&1.slack))
-    [message_for | slack_users]
+    slack_users = SlackCoder.Users.Supervisor.users
+                  |> Stream.filter(&(&1.github == pr.github_user))
+                  |> Enum.map(&(&1.slack))
+    Enum.uniq([message_for | slack_users])
   end
 
 end

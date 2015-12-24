@@ -5,6 +5,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
   import Ecto.Changeset, only: [put_change: 3]
   use Timex
   require Logger
+  alias SlackCoder.Repo
 
   @poll_minutes 5
   @poll_interval 60_000 * @poll_minutes # 5 minutes
@@ -23,9 +24,11 @@ defmodule SlackCoder.Github.Watchers.Repository do
     prs # new prs start watchers for each
     |> Enum.each(&SlackCoder.Github.Supervisor.start_watcher(&1))
     close_prs(prs, old_prs)
-    if can_send_notifications? do
-      prs = prs |> Enum.map(&(stale_pr(&1)))
-    end
+    prs = prs |> Enum.map(fn(pr)->
+      {pr, send_notification} = find_latest_comment(pr) |> stale_pr
+      if send_notification, do: stale_pr_notification(pr)
+      pr
+    end)
     {:noreply, {repo, prs}}
   end
 
@@ -69,22 +72,20 @@ defmodule SlackCoder.Github.Watchers.Repository do
     end
   end
 
-  def stale_pr(pr) do
-    latest_comment = find_latest_comment(pr) || pr.opened_at
-    pr_latest_comment = pr.latest_comment || pr.opened_at
-    cs = PR.changeset(pr, %{latest_comment: latest_comment})
+  def stale_pr(cs) do
+    latest_comment = cs.model.latest_comment || cs.changes[:latest_comment] # Original or new
+    pr_latest_comment = cs.changes[:latest_comment] || latest_comment # Updated or original
     hours = Date.diff(latest_comment, now, :hours)
-    send_notification = if hours > pr.backoff && can_send_notifications? do
-      backoff = next_backoff(pr.backoff, hours)
+    send_notification = if hours >= cs.model.backoff && can_send_notifications? do
+      backoff = next_backoff(cs.model.backoff, hours)
       cs = put_change(cs, :backoff, backoff)
       true
     end
     if Date.compare(latest_comment, pr_latest_comment) != 0 do
       cs = put_change(cs, :backoff, Application.get_env(:slack_coder, :pr_backoff_start, 1))
     end
-    {:ok, pr} = SlackCoder.Repo.update(cs)
-    if send_notification, do: stale_pr_notification(pr)
-    pr
+    {:ok, pr} = SlackCoder.Repo.save(cs)
+    {pr, send_notification}
   end
 
   def next_backoff(backoff, greater_than) do
