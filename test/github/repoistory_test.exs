@@ -3,6 +3,7 @@ defmodule SlackCoder.Github.RepositoryTest do
   import Pavlov.Syntax.Expect
   alias SlackCoder.Models.PR
   import SlackCoder.Support.Github
+  alias SlackCoder.Github.Helper
   alias SlackCoder.Github.Watchers.Repository, as: Watcher
   use Timex
 
@@ -34,6 +35,7 @@ defmodule SlackCoder.Github.RepositoryTest do
         cs = PR.changeset pr_with(%{backoff: 2, opened_at: ten_hours_ago}), %{latest_comment: ten_hours_ago}
         {pr, send_notification} = Watcher.stale_pr cs
         assert 16 = pr.backoff
+        assert 10 = Timex.Date.diff(pr.latest_comment, Helper.now, :hours)
         assert true = send_notification
       end
     end
@@ -43,18 +45,21 @@ defmodule SlackCoder.Github.RepositoryTest do
         cs = PR.changeset pr_with(%{backoff: 4, latest_comment: two_hours_ago, opened_at: three_hours_ago}), %{latest_comment: two_hours_ago}
         {pr, send_notification} = Watcher.stale_pr cs
         assert 4 = pr.backoff # Keeps the same
+        assert 2 = Timex.Date.diff(pr.latest_comment, Helper.now, :hours)
         assert send_notification == nil
       end
       it "handles a new PR" do
         cs = PR.changeset pr_with(%{backoff: 4, opened_at: three_hours_ago}), %{latest_comment: two_hours_ago}
         {pr, send_notification} = Watcher.stale_pr cs
         assert 4 = pr.backoff # Keeps the same
+        assert 2 = Timex.Date.diff(pr.latest_comment, Helper.now, :hours)
         assert send_notification == nil
       end
       it "1 backoff" do
         cs = PR.changeset pr_with(%{backoff: 1, latest_comment: now, opened_at: three_hours_ago}), %{latest_comment: now}
         {pr, send_notification} = Watcher.stale_pr cs
         assert 1 = pr.backoff # Keeps the same
+        assert 0 = Timex.Date.diff(pr.latest_comment, Helper.now, :hours)
         assert send_notification == nil
       end
     end
