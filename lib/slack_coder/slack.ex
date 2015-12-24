@@ -39,7 +39,7 @@ defmodule SlackCoder.Slack do
   end
 
   def send_to(user, message) when is_binary(message) do
-    send :slack, {user, message}
+    send :slack, {user, message <> unquote(if Mix.env == :dev, do: "\n*DEV MESSAGE*", else: "")}
   end
 
   @doc """
@@ -104,13 +104,18 @@ defmodule SlackCoder.Slack do
   end
 
   @doc false
-  def handle_message(%{text: message, type: "message", user: user_id}, slack, state) do
-    unless slack[:me][:id] == user_id do
+  def handle_message(%{text: message, type: "message", user: user_id, channel: channel} = payload, slack, state) do
+    if should_respond_to_message?(user_id, channel, slack) && payload[:subtype] == nil do
       slack_name = slack[:users][user_id][:name]
       user_pid = Users.user(slack_name)
       if user_pid do
         User.help(user_pid, message)
       else
+        send_to slack_name, """
+        Sorry, but I can't chat until you've registered!
+        
+        Please register at http://slack-coder.herokuapp.com
+        """
         Logger.warn "User #{inspect slack_name || user_id} sent us a message but it was ignored because the user_pid could not be found."
       end
     end
@@ -118,6 +123,11 @@ defmodule SlackCoder.Slack do
   end
   def handle_message(_message, _slack, state) do
     {:ok, state}
+  end
+
+  defp should_respond_to_message?(user_id, channel, slack) do
+    # As long as its not a message from me and it was sent via a DM
+    slack[:me][:id] != user_id && slack[:ims][channel]
   end
 
 end
