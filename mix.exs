@@ -42,7 +42,7 @@ defmodule SlackCoder.Mixfile do
       # Prod dependencies
       {:phoenix, "~> 1.1.0"},
       {:phoenix_ecto, "~> 2.0"},
-      {:postgrex, ">= 0.0.0"},
+      {:postgrex, "~> 0.10"},
       {:phoenix_html, "~> 2.3"},
       {:cowboy, "~> 1.0"},
       {:timex_ecto, "~> 0.6"},
@@ -61,7 +61,7 @@ defmodule SlackCoder.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
 
       # Test only
-      {:pavlov, "~> 0.2.3", only: :test}
+      {:pavlov, only: :test, github: "mgwidmann/pavlov", branch: "elixir_1.2_support"}
     ]
   end
 end

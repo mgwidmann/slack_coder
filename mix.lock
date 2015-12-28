@@ -13,7 +13,7 @@
   "meck": {:hex, :meck, "0.8.3"},
   "mimetype_parser": {:hex, :mimetype_parser, "0.1.0"},
   "oauth2": {:hex, :oauth2, "0.5.0"},
-  "pavlov": {:hex, :pavlov, "0.2.3"},
+  "pavlov": {:git, "https://github.com/mgwidmann/pavlov.git", "67f352b1a3e4a5e90ae682831f97a8f5081ca9c2", [branch: "elixir_1.2_support"]},
   "phoenix": {:hex, :phoenix, "1.1.0"},
   "phoenix_ecto": {:hex, :phoenix_ecto, "2.0.0"},
   "phoenix_html": {:hex, :phoenix_html, "2.3.0"},

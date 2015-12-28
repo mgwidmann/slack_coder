@@ -93,7 +93,7 @@ defmodule SlackCoder.Github.Helper do
 
   defp get_latest_commit(pr) do
     last_commit = (get("repos/#{pr.github_user}/#{pr.repo}/commits?sha=#{pr.branch}") |> List.first)
-    if last_commit["sha"] do # 404 returned when user deletes branch
+    commit = if last_commit["sha"] do # 404 returned when user deletes branch
       statuses = (pr.statuses_url <> "#{last_commit["sha"]}") |> get
       last_status = statuses
                     |> Stream.filter(&( &1["context"] =~ ~r/travis/ ))
@@ -120,6 +120,7 @@ defmodule SlackCoder.Github.Helper do
             pr_id: pr.id
            })
       {:ok, commit} = Repo.save(cs)
+      commit
     end
     commit || pr.latest_commit
   end

@@ -25,8 +25,8 @@ defmodule SlackCoderTest do
 
     xit "starts up one pull request per repository" do
       :application.start(SlackCoder, :temporary)
-      expect SlackCoder.Github.PullRequest |> to_have_received :start_link |> with "my_repo"
-      expect SlackCoder.Github.PullRequest |> to_have_received :start_link |> with "another"
+      expect SlackCoder.Github.PullRequest |> to_have_received :start_link |> with_args "my_repo"
+      expect SlackCoder.Github.PullRequest |> to_have_received :start_link |> with_args "another"
     end
 
   end

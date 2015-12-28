@@ -20,6 +20,7 @@ defmodule SlackCoder.Web do
     quote do
       use Ecto.Schema
       import Ecto.Changeset
+      import Ecto.Query
       alias SlackCoder.Models.Types.StringList
       alias SlackCoder.Models.Types.Boolean
     end
