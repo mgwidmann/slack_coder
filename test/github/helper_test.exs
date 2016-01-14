@@ -153,4 +153,22 @@ defmodule SlackCoder.Github.HelperTest do
     end
   end
 
+  describe "#slack_user_with_monitors" do
+    before :each do
+      allow(SlackCoder.Users.Supervisor) |> to_receive(users: fn()-> other_users end)
+      :ok
+    end
+
+    let :other_users, do: [%{github: "github", slack: "slack"}, %{github: "github-with-monitors", slack: "slack-with-monitors"}]
+
+    it "user with no monitors" do
+      assert ["slack"] = Helper.slack_user_with_monitors(%{slack: "slack", monitors: []})
+    end
+
+    it "returns those slack users" do
+      assert ["slack-with-monitors", "slack"] = Helper.slack_user_with_monitors(%{slack: "slack-with-monitors", monitors: ["github"]})
+    end
+
+  end
+
 end
