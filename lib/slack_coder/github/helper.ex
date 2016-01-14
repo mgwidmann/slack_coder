@@ -127,7 +127,8 @@ defmodule SlackCoder.Github.Helper do
   def conflict_notification(pr, refreshed_pr) do
     # Prior was mergable but now it is not (nil means analysis in process)
     if pr.mergable && refreshed_pr.mergable == false do
-      [message_for | slack_users] = slack_user_with_monitors(pr)
+      [message_for | slack_users] = user_for_pr(pr)
+                                    |> slack_user_with_monitors
       message = ":heavy_multiplication_x: *MERGE CONFLICTS* #{pr.title} \n#{pr.html_url}"
       Logger.debug "Merge conflict for PR-#{pr.number}, sending to: #{inspect message_for}"
       notify(slack_users, :conflict, message_for, message)
@@ -246,7 +247,8 @@ defmodule SlackCoder.Github.Helper do
     html = SlackCoder.PageView.render("pull_request.html", pr: pr)
     SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
 
-    [message_for | slack_users] = slack_user_with_monitors(pr)
+    [message_for | slack_users] = user_for_pr(pr)
+                                  |> slack_user_with_monitors
     case String.to_atom(commit.status) do
       status when status in [:failure, :error] ->
         message = ":facepalm: *BUILD FAILURE* #{pr.title} :-1:\n#{pr.latest_commit.travis_url}\n#{pr.html_url}"
@@ -260,12 +262,15 @@ defmodule SlackCoder.Github.Helper do
     end
   end
 
-  def slack_user_with_monitors(pr) do
-    user = SlackCoder.Users.Supervisor.user(pr.github_user)
-           |> SlackCoder.Users.User.get
+  def user_for_pr(pr) do
+    SlackCoder.Users.Supervisor.user(pr.github_user)
+    |> SlackCoder.Users.User.get
+  end
+
+  def slack_user_with_monitors(user) do
     message_for = user.slack
     slack_users = SlackCoder.Users.Supervisor.users
-                  |> Stream.filter(&(&1.github == pr.github_user))
+                  |> Stream.filter(&(&1.github in user.monitors))
                   |> Enum.map(&(&1.slack))
     Enum.uniq([message_for | slack_users])
   end

@@ -50,7 +50,8 @@ defmodule SlackCoder.Github.Watchers.Repository do
         Logger.debug "Stopping watcher for: PR-#{pr.number} #{pr.title}"
         SlackCoder.Github.Supervisor.stop_watcher(pr)
         SlackCoder.Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
-        [message_for | slack_users] = slack_user_with_monitors(pr)
+        [message_for | slack_users] = user_for_pr(pr)
+                                      |> slack_user_with_monitors
         response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}")
         merged = response["merged"] || response["merged_at"] != nil
         PR.changeset(pr, %{merged_at: response["merged_at"], closed_at: response["closed_at"]})
@@ -100,7 +101,8 @@ defmodule SlackCoder.Github.Watchers.Repository do
 
   defp stale_pr_notification(pr) do
     stale_hours = Timex.Date.diff(pr.latest_comment, now, :hours)
-    [message_for | slack_users] = slack_user_with_monitors(pr)
+    [message_for | slack_users] = user_for_pr(pr)
+                                  |> slack_user_with_monitors
     message = """
     :hankey: *#{pr.title}*
     Stale for *#{stale_hours}* hours
