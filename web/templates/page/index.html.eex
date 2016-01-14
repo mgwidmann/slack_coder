@@ -40,7 +40,7 @@
     <div class="panel-body">
       <table class="table table-striped">
         <tbody id="team-pull-requests">
-          <%= for user <- Map.keys(@prs), user != github(@current_user, @user) do %>
+          <%= for user <- Map.keys(@prs), user != github(@current_user, @user), to_string(user) in @current_user.monitors do %>
             <%= for pr <- @prs[user] do %>
               <%= render "pull_request.html", pr: pr %>
             <% end %>
