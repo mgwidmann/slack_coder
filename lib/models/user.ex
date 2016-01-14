@@ -14,7 +14,7 @@ defmodule SlackCoder.Models.User do
     timestamps
   end
 
-  @required_fields ~w(slack github config)
+  @required_fields ~w(slack github)
   @optional_fields ~w(avatar_url html_url name monitors)
 
   @doc """
