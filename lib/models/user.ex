@@ -14,8 +14,8 @@ defmodule SlackCoder.Models.User do
     timestamps
   end
 
-  @required_fields ~w(slack github config)
-  @optional_fields ~w(avatar_url html_url name config monitors)
+  @required_fields ~w(slack github)
+  @optional_fields ~w(avatar_url html_url name monitors)
 
   @doc """
   Creates a changeset based on the `model` and `params`.
@@ -26,6 +26,7 @@ defmodule SlackCoder.Models.User do
   def changeset(model, params \\ :empty) do
     model
     |> cast(params, @required_fields, @optional_fields)
+    |> cast_embed(:config)
     |> unique_constraint(:slack)
     |> unique_constraint(:github)
   end

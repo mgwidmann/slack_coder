@@ -19,5 +19,12 @@ defmodule SlackCoder.Models.User.Config do
   def changeset(model, params \\ :empty) do
     model
     |> cast(params, @required_fields, @optional_fields)
+    |> strings_to_bools
+  end
+
+  defp strings_to_bools(changeset) do
+    Enum.reduce @optional_fields, changeset, fn(field, cs)->
+      put_change(cs, field, true)
+    end
   end
 end

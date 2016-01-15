@@ -32,6 +32,7 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp rate_limit_info(headers) do
+    headers = Enum.into(headers, %{})
     {remaining, _} = Integer.parse(headers["X-RateLimit-Remaining"] || "0")
     {total, _} = Integer.parse(headers["X-RateLimit-Limit"] || "1")
     rate_limit_message = fn ->

@@ -41,8 +41,8 @@ defmodule SlackCoder.Mixfile do
     [
       # Prod dependencies
       {:phoenix, "~> 1.0.0"},
-      {:phoenix_ecto, "~> 1.1"},
-      {:postgrex, ">= 0.0.0"},
+      {:phoenix_ecto, "~> 2.0"},
+      {:postgrex, "~> 0.10"},
       {:phoenix_html, "~> 2.2"},
       {:cowboy, "~> 1.0"},
       {:timex_ecto, "~> 0.6"},
@@ -53,7 +53,7 @@ defmodule SlackCoder.Mixfile do
       # {:websocket_client, git: "https://github.com/jeremyong/websocket_client.git"},
       {:httpoison, "~> 0.7.2"},
       {:exjsx, "~> 3.1"},
-      {:ecto, "~> 1.0.0"},
+      {:ecto, "~> 1.1.0"},
       {:oauth2, "~> 0.5"},
 
       # Dev only
