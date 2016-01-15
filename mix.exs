@@ -16,7 +16,7 @@ defmodule SlackCoder.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:phoenix, :phoenix_html, :cowboy, :logger,
+    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :beaker,
                    :phoenix_ecto, :slack, :httpoison, :postgrex, :tzdata],
      mod: mod(Mix.env)]
   end
@@ -40,10 +40,10 @@ defmodule SlackCoder.Mixfile do
   defp deps do
     [
       # Prod dependencies
-      {:phoenix, "~> 1.0.0"},
+      {:phoenix, "~> 1.1.0"},
       {:phoenix_ecto, "~> 2.0"},
       {:postgrex, "~> 0.10"},
-      {:phoenix_html, "~> 2.2"},
+      {:phoenix_html, "~> 2.3"},
       {:cowboy, "~> 1.0"},
       {:timex_ecto, "~> 0.6"},
       # {:slack, "~> 0.2.0"},
@@ -55,6 +55,7 @@ defmodule SlackCoder.Mixfile do
       {:exjsx, "~> 3.1"},
       {:ecto, "~> 1.1.0"},
       {:oauth2, "~> 0.5"},
+      {:beaker, ">= 1.1.3"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev},

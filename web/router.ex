@@ -22,6 +22,8 @@ defmodule SlackCoder.Router do
     resources "/users", UserController, only: [:new, :create, :edit, :update]
   end
 
+  forward "/metrics", Beaker.Web
+
   scope "/auth", SlackCoder do
     pipe_through :browser
 

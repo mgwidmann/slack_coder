@@ -1,5 +1,6 @@
 defmodule SlackCoder.Repo do
   use Ecto.Repo, otp_app: :slack_coder
+  use Beaker.Integrations.Ecto
 
   def save(%Ecto.Changeset{model: %{id: nil}} = changeset) do
     insert(changeset)
