@@ -4,7 +4,7 @@ defmodule SlackCoder.Mixfile do
   def project do
     [app: :slack_coder,
      version: "0.0.1",
-     elixir: "~> 1.0",
+     elixir: "~> 1.2",
      elixirc_paths: elixirc_paths(Mix.env),
      compilers: [:phoenix] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
