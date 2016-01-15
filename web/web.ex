@@ -18,7 +18,9 @@ defmodule SlackCoder.Web do
 
   def model do
     quote do
-      use Ecto.Model
+      use Ecto.Schema
+      import Ecto.Changeset
+      import Ecto.Query, only: [from: 1, from: 2]
       alias SlackCoder.Models.Types.StringList
       alias SlackCoder.Models.Types.Boolean
     end
@@ -27,7 +29,7 @@ defmodule SlackCoder.Web do
   def controller do
     quote do
       use Phoenix.Controller
-
+      import Ecto
       alias SlackCoder.Repo
       import Ecto.Model
       import Ecto.Query, only: [from: 1, from: 2]
@@ -64,7 +66,7 @@ defmodule SlackCoder.Web do
   def channel do
     quote do
       use Phoenix.Channel
-
+      import Ecto
       alias SlackCoder.Repo
       import Ecto.Model
       import Ecto.Query, only: [from: 1, from: 2]
