@@ -3,7 +3,7 @@ defmodule SlackCoder.Models.User.Config do
 
   embedded_schema do
     for {config, value} <- SlackCoder.Users.Help.default_config do
-      field String.to_atom(config), Boolean, default: value
+      field String.to_atom(config), :boolean, default: value
     end
   end
 

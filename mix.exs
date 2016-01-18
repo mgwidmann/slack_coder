@@ -41,7 +41,7 @@ defmodule SlackCoder.Mixfile do
     [
       # Prod dependencies
       {:phoenix, "~> 1.1.0"},
-      {:phoenix_ecto, "~> 2.0"},
+      {:phoenix_ecto, github: "phoenixframework/phoenix_ecto", override: true},
       {:postgrex, "~> 0.10"},
       {:phoenix_html, "~> 2.3"},
       {:cowboy, "~> 1.0"},
