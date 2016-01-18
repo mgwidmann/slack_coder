@@ -4,7 +4,7 @@ defmodule SlackCoder.Mixfile do
   def project do
     [app: :slack_coder,
      version: "0.0.1",
-     elixir: "~> 1.0",
+     elixir: "~> 1.2",
      elixirc_paths: elixirc_paths(Mix.env),
      compilers: [:phoenix] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
@@ -16,7 +16,7 @@ defmodule SlackCoder.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:phoenix, :phoenix_html, :cowboy, :logger,
+    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :beaker,
                    :phoenix_ecto, :slack, :httpoison, :postgrex, :tzdata],
      mod: mod(Mix.env)]
   end
@@ -56,6 +56,7 @@ defmodule SlackCoder.Mixfile do
       # {:ecto, "~> 1.1.0"},
       {:ecto, github: "elixir-lang/ecto", override: true},
       {:oauth2, "~> 0.5"},
+      {:beaker, ">= 1.1.3"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev},
