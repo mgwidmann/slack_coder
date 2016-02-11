@@ -34,7 +34,7 @@ defmodule SlackCoder.Users.User do
 
   def handle_cast({:help, message}, user) do
     {new_config, reply} = handle_message(message |> String.downcase |> String.split(" "), user.config)
-    # {:ok, user} = User.changeset(user, %{config: new_config}) |> Repo.update
+    {:ok, user} = User.changeset(user, %{config: new_config}) |> Repo.update
     if reply do
       Slack.send_to(user.slack, reply)
     end
@@ -65,11 +65,11 @@ defmodule SlackCoder.Users.User do
   end
 
   def get(nil), do: nil
-  def get(user_pid) do
+  def get(user_pid) when is_pid(user_pid) do
     GenServer.call user_pid, :get
   end
 
-  def update(user_pid, user) do
+  def update(user_pid, user) when is_pid(user_pid) do
     GenServer.cast user_pid, {:update, user}
   end
 

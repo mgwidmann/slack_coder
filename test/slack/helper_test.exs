@@ -15,11 +15,11 @@ defmodule SlackCoder.Slack.HelperTest do
     end
 
     it "can find a user by string name" do
-      expect Helper.user(slack, "user-3") |> to_eq %{name: "user-3"}
+      expect(Helper.user(slack, "user-3")) |> to_eq(%{name: "user-3"})
     end
 
     it "can find a user by atom name" do
-      expect Helper.user(slack, :"user-3") |> to_eq %{name: "user-3"}
+      expect(Helper.user(slack, :"user-3")) |> to_eq(%{name: "user-3"})
     end
 
   end
@@ -36,11 +36,11 @@ defmodule SlackCoder.Slack.HelperTest do
     end
 
     it "can find a channel by string name" do
-      expect Helper.channel(slack, "channel-3") |> to_eq %{name: "channel-3"}
+      expect(Helper.channel(slack, "channel-3")) |> to_eq(%{name: "channel-3"})
     end
 
     it "can find a channel by atom name" do
-      expect Helper.channel(slack, :"channel-3") |> to_eq %{name: "channel-3"}
+      expect(Helper.channel(slack, :"channel-3")) |> to_eq(%{name: "channel-3"})
     end
   end
 
@@ -56,11 +56,11 @@ defmodule SlackCoder.Slack.HelperTest do
     end
 
     it "can find a group by string name" do
-      expect Helper.group(slack, "group-3") |> to_eq %{name: "group-3"}
+      expect(Helper.group(slack, "group-3")) |> to_eq(%{name: "group-3"})
     end
 
     it "can find a group by atom name" do
-      expect Helper.group(slack, :"group-3") |> to_eq %{name: "group-3"}
+      expect(Helper.group(slack, :"group-3")) |> to_eq(%{name: "group-3"})
     end
   end
 

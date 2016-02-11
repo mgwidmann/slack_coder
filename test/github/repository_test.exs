@@ -1,6 +1,5 @@
 defmodule SlackCoder.Github.RepositoryTest do
   use Pavlov.Case, async: true
-  import Pavlov.Syntax.Expect
   alias SlackCoder.Models.PR
   import SlackCoder.Support.Github
   alias SlackCoder.Github.Helper

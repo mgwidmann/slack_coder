@@ -32,7 +32,7 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp rate_limit_info(headers) do
-    headers = Enum.into(headers, %{})
+    headers = Enum.into(headers, %{}) # Convert to map for access syntax
     {remaining, _} = Integer.parse(headers["X-RateLimit-Remaining"] || "0")
     {total, _} = Integer.parse(headers["X-RateLimit-Limit"] || "1")
     rate_limit_message = fn ->
@@ -94,7 +94,7 @@ defmodule SlackCoder.Github.Helper do
 
   defp get_latest_commit(pr) do
     last_commit = (get("repos/#{pr.github_user}/#{pr.repo}/commits?sha=#{pr.branch}") |> List.first)
-    if last_commit["sha"] do # 404 returned when user deletes branch
+    commit = if last_commit["sha"] do # 404 returned when user deletes branch
       statuses = (pr.statuses_url <> "#{last_commit["sha"]}") |> get
       last_status = statuses
                     |> Stream.filter(&( &1["context"] =~ ~r/travis/ ))
@@ -104,10 +104,10 @@ defmodule SlackCoder.Github.Helper do
                     |> Stream.filter(&( &1["context"] =~ ~r/codeclimate/ ))
                     |> Enum.take(1) # List is already sorted, first is the latest
                     |> List.first
-      if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
-        commit = pr.latest_commit
+      commit = if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
+        pr.latest_commit
       else
-        commit = Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
+        Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
       end
       cs = Commit.changeset(commit, %{
             status: last_status["state"] || "pending",
@@ -121,6 +121,7 @@ defmodule SlackCoder.Github.Helper do
             pr_id: pr.id
            })
       {:ok, commit} = Repo.save(cs)
+      commit
     end
     commit || pr.latest_commit
   end

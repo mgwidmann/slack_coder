@@ -41,7 +41,7 @@ defmodule SlackCoder.Mixfile do
     [
       # Prod dependencies
       {:phoenix, "~> 1.1.0"},
-      {:phoenix_ecto, "~> 2.0"},
+      {:phoenix_ecto, github: "phoenixframework/phoenix_ecto", override: true},
       {:postgrex, "~> 0.10"},
       {:phoenix_html, "~> 2.3"},
       {:cowboy, "~> 1.0"},
@@ -53,7 +53,8 @@ defmodule SlackCoder.Mixfile do
       # {:websocket_client, git: "https://github.com/jeremyong/websocket_client.git"},
       {:httpoison, "~> 0.7.2"},
       {:exjsx, "~> 3.1"},
-      {:ecto, "~> 1.1.0"},
+      # {:ecto, "~> 1.1.0"},
+      {:ecto, github: "elixir-lang/ecto", override: true},
       {:oauth2, "~> 0.5"},
       {:beaker, ">= 1.1.3"},
 
@@ -61,7 +62,7 @@ defmodule SlackCoder.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
 
       # Test only
-      {:pavlov, "~> 0.2.3", only: :test}
+      {:pavlov, github: "sproutapp/pavlov", only: :test}
     ]
   end
 end

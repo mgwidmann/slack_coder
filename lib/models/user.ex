@@ -26,7 +26,7 @@ defmodule SlackCoder.Models.User do
   def changeset(model, params \\ :empty) do
     model
     |> cast(params, @required_fields, @optional_fields)
-    |> cast_embed(:config)
+    |> cast_embed(:config, required: true)
     |> unique_constraint(:slack)
     |> unique_constraint(:github)
   end
@@ -38,7 +38,7 @@ defmodule SlackCoder.Models.User do
     def unquote(:"by_#{field}")(names) when is_list(names) do
       from u in __MODULE__, where: u.unquote(field) in ^names
     end
-    def by_slack(name), do: to_string(name) |> unquote(:"by_#{field}")()
+    def unquote(:"by_#{field}")(name), do: to_string(name) |> unquote(:"by_#{field}")()
   end
 
 end

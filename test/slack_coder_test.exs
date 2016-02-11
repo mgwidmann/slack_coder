@@ -10,10 +10,9 @@ defmodule SlackCoderTest do
       ]
     end
     before :each do
-      me = self
-      allow(SlackCoder.Slack) |> to_receive(start_link: fn(_, _)-> {:ok, me} end)
-      allow(SlackCoder.Github.PullRequest) |> to_receive(start_link: fn(_)-> {:ok, me} end)
-      allow(SlackCoder.Github.PullRequest.Watcher) |> to_receive(start_link: fn(_)-> {:ok, me} end)
+      allow(SlackCoder.Slack) |> to_receive(start_link: fn(_, _)-> {:ok, self()} end)
+      allow(SlackCoder.Github.PullRequest) |> to_receive(start_link: fn(_)-> {:ok, self()} end)
+      allow(SlackCoder.Github.PullRequest.Watcher) |> to_receive(start_link: fn(_)-> {:ok, self()} end)
       allow(Application, [:no_link, :passthrough]) |> to_receive(get_env: fn
         :slack_coder, :repos, [] ->
           repos
@@ -25,8 +24,8 @@ defmodule SlackCoderTest do
 
     xit "starts up one pull request per repository" do
       :application.start(SlackCoder, :temporary)
-      expect SlackCoder.Github.PullRequest |> to_have_received :start_link |> with "my_repo"
-      expect SlackCoder.Github.PullRequest |> to_have_received :start_link |> with "another"
+      expect(SlackCoder.Github.PullRequest) |> to_have_received(:start_link) |> with_args("my_repo")
+      expect(SlackCoder.Github.PullRequest) |> to_have_received(:start_link) |> with_args("another")
     end
 
   end

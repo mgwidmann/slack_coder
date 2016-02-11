@@ -77,10 +77,10 @@ defmodule SlackCoder.Github.Watchers.Repository do
     latest_comment = cs.model.latest_comment || cs.changes[:latest_comment] # Original or new
     pr_latest_comment = cs.changes[:latest_comment] || latest_comment # Updated or original
     hours = Date.diff(latest_comment, now, :hours)
-    if hours >= cs.model.backoff && can_send_notifications? do
+    send_notification = if hours >= cs.model.backoff && can_send_notifications? do
       backoff = next_backoff(cs.model.backoff, hours)
       cs = put_change(cs, :backoff, backoff)
-      send_notification = true
+      true
     end
     if Date.compare(latest_comment, pr_latest_comment) != 0 do
       cs = put_change(cs, :backoff, Application.get_env(:slack_coder, :pr_backoff_start, 1))

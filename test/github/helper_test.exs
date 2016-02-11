@@ -3,7 +3,6 @@ defmodule SlackCoder.Github.HelperTest do
   import Pavlov.Syntax.Expect
   alias SlackCoder.Github.Helper
   alias SlackCoder.Models.PR
-  alias SlackCoder.Models.User
   alias SlackCoder.Repo
 
   describe "get" do
@@ -18,10 +17,10 @@ defmodule SlackCoder.Github.HelperTest do
 
     context "successful" do
       it "handles successful responses" do
-        expect Helper.get("successful/return/map") |> to_eq %{}
+        expect(Helper.get("successful/return/map")) |> to_eq(%{})
       end
       it "ignores default" do
-        expect Helper.get("with/default/ignore", [default: :data]) |> to_eq %{}
+        expect(Helper.get("with/default/ignore", [default: :data])) |> to_eq(%{})
       end
 
       context "non-200 status" do
@@ -30,11 +29,11 @@ defmodule SlackCoder.Github.HelperTest do
         end
 
         it "returns empty list without default" do
-          expect Helper.get("non/200/success") |> to_eq []
+          expect(Helper.get("non/200/success")) |> to_eq([])
         end
 
         it "returns default when supplied" do
-          expect Helper.get("non/200/success", [default: :data]) |> to_eq [default: :data]
+          expect(Helper.get("non/200/success", [default: :data])) |> to_eq([default: :data])
         end
       end
     end
@@ -45,11 +44,11 @@ defmodule SlackCoder.Github.HelperTest do
       end
 
       it "handles error responses, returning default" do
-        expect Helper.get("error/without/default") |> to_eq []
+        expect(Helper.get("error/without/default")) |> to_eq([])
       end
 
       it "handles error responses with optinal default" do
-        expect Helper.get("error/with/default", [default: :data]) |> to_eq [default: :data]
+        expect(Helper.get("error/with/default", [default: :data])) |> to_eq([default: :data])
       end
     end
 
@@ -137,7 +136,7 @@ defmodule SlackCoder.Github.HelperTest do
 
     it "returns the greater date" do
       cs = Helper.find_latest_comment(pr)
-      expect cs.changes[:latest_comment] |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 21, hour: 10, minute: 0,
+      expect(cs.changes[:latest_comment]) |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 21, hour: 10, minute: 0,
         month: 11, ms: 0, second: 49, timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min, full_name: "UTC",
         offset_std: 0, offset_utc: 0, until: :max}, year: 2015})
     end
@@ -146,7 +145,7 @@ defmodule SlackCoder.Github.HelperTest do
       let :pull_body, do: []
       it "returns the other" do
         cs = Helper.find_latest_comment(pr)
-        expect cs.changes[:latest_comment] |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 20, hour: 10, minute: 1,
+        expect(cs.changes[:latest_comment]) |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 20, hour: 10, minute: 1,
           month: 11, ms: 0, second: 23, timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min, full_name: "UTC",
           offset_std: 0, offset_utc: 0, until: :max}, year: 2015})
       end
