@@ -62,7 +62,7 @@ defmodule SlackCoder.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
 
       # Test only
-      {:pavlov, only: :test, github: "mgwidmann/pavlov", branch: "elixir_1.2_support"}
+      {:pavlov, github: "sproutapp/pavlov", only: :test}
     ]
   end
 end
