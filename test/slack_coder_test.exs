@@ -10,10 +10,9 @@ defmodule SlackCoderTest do
       ]
     end
     before :each do
-      me = self
-      allow(SlackCoder.Slack) |> to_receive(start_link: fn(_, _)-> {:ok, me} end)
-      allow(SlackCoder.Github.PullRequest) |> to_receive(start_link: fn(_)-> {:ok, me} end)
-      allow(SlackCoder.Github.PullRequest.Watcher) |> to_receive(start_link: fn(_)-> {:ok, me} end)
+      allow(SlackCoder.Slack) |> to_receive(start_link: fn(_, _)-> {:ok, self()} end)
+      allow(SlackCoder.Github.PullRequest) |> to_receive(start_link: fn(_)-> {:ok, self()} end)
+      allow(SlackCoder.Github.PullRequest.Watcher) |> to_receive(start_link: fn(_)-> {:ok, self()} end)
       allow(Application, [:no_link, :passthrough]) |> to_receive(get_env: fn
         :slack_coder, :repos, [] ->
           repos
