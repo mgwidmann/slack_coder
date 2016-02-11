@@ -56,7 +56,7 @@ defmodule SlackCoder.Mixfile do
       # {:ecto, "~> 1.1.0"},
       {:ecto, github: "elixir-lang/ecto", override: true},
       {:oauth2, "~> 0.5"},
-      {:beaker, ">= 1.1.3"},
+      {:beaker, ">= 1.2.0"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev},

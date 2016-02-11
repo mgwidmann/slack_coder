@@ -40,7 +40,7 @@
           </div>
         <% end %>
         <div class="pull-right">
-          <a href="/metrics">
+          <a href="/beaker/">
             <i class="glyphicon glyphicon-time"></i> Application Metrics
           </a>
         </div>
