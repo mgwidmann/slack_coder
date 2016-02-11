@@ -20,7 +20,6 @@
 
     <div class="form-group col-xs-6">
       <h4>Notifications</h4>
-      <small>Currently non-functional! Pending help from José Valim himself!</small>
       <%= inputs_for f, :config, fn c -> %>
         <%= hidden_input c, :id %>
         <%= for [left_key, right_key] <- Enum.chunk(SlackCoder.Users.Help.default_config_keys, 2) do %>
