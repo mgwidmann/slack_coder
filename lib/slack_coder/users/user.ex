@@ -65,11 +65,11 @@ defmodule SlackCoder.Users.User do
   end
 
   def get(nil), do: nil
-  def get(user_pid) do
+  def get(user_pid) when is_pid(user_pid) do
     GenServer.call user_pid, :get
   end
 
-  def update(user_pid, user) do
+  def update(user_pid, user) when is_pid(user_pid) do
     GenServer.cast user_pid, {:update, user}
   end
 
