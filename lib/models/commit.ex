@@ -18,8 +18,8 @@ defmodule SlackCoder.Models.Commit do
     timestamps
   end
 
-  @required_fields ~w(sha pr_id status)
-  @optional_fields ~w(latest_status_id code_climate_status travis_url code_climate_url)
+  @required_fields ~w(sha status)
+  @optional_fields ~w(pr_id latest_status_id code_climate_status travis_url code_climate_url)
 
   @doc """
   Creates a changeset based on the `model` and `params`.

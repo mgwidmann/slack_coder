@@ -113,7 +113,7 @@ defmodule SlackCoder.Slack do
       else
         send_to slack_name, """
         Sorry, but I can't chat until you've registered!
-        
+
         Please register at http://slack-coder.herokuapp.com
         """
         Logger.warn "User #{inspect slack_name || user_id} sent us a message but it was ignored because the user_pid could not be found."
