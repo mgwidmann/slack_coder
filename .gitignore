@@ -5,6 +5,8 @@
 erl_crash.dump
 *.ez
 *.secret.exs
+.tags*
+ttb_last_config
 
 # Generate on crash by the VM
 erl_crash.dump
