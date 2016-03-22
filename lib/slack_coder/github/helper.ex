@@ -4,12 +4,14 @@ defmodule SlackCoder.Github.Helper do
   alias SlackCoder.Repo
   alias SlackCoder.Services.CommitService
   require Logger
+  require Beaker.TimeSeries
 
   def get(url, default \\ []) do
     github_config = Application.get_env(:slack_coder, :github)
     full_url = "https://#{github_config[:user]}:#{github_config[:pat]}@api.github.com/#{url}"
     Logger.debug "HTTP Request: curl #{full_url}"
-    body = case HTTPoison.get(full_url, Accept: "application/vnd.github.com.v3+json") do
+    response = Beaker.TimeSeries.time("Github:RequestTime", fn -> HTTPoison.get(full_url, Accept: "application/vnd.github.com.v3+json") end)
+    body = case response do
              {:ok, %HTTPoison.Response{status_code: 200, body: body, headers: headers}} ->
                rate_limit_info(headers)
                body
@@ -44,7 +46,7 @@ defmodule SlackCoder.Github.Helper do
       "Rate Limit: #{remaining} / #{total} -- Resetting at: #{date}"
     end
     percent_used = remaining / total
-    Beaker.TimeSeries.sample("Github Rate Limit", percent_used)
+    Beaker.TimeSeries.sample("Github:RateLimit", percent_used)
     # Cannot invoke macros w/ apply
     if percent_used > 0.25 do
       Logger.debug rate_limit_message
