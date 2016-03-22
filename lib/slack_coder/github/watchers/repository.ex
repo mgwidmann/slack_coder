@@ -74,11 +74,11 @@ defmodule SlackCoder.Github.Watchers.Repository do
   end
 
   def stale_pr(cs) do
-    latest_comment = cs.model.latest_comment || cs.changes[:latest_comment] # Original or new
+    latest_comment = cs.data.latest_comment || cs.changes[:latest_comment] # Original or new
     pr_latest_comment = cs.changes[:latest_comment] || latest_comment # Updated or original
     hours = Date.diff(latest_comment, now, :hours)
-    send_notification = if hours >= cs.model.backoff && can_send_notifications? do
-      backoff = next_backoff(cs.model.backoff, hours)
+    send_notification = if hours >= cs.data.backoff && can_send_notifications? do
+      backoff = next_backoff(cs.data.backoff, hours)
       cs = put_change(cs, :backoff, backoff)
       true
     end

@@ -6,6 +6,7 @@ defmodule SlackCoder.Github.Supervisor do
     repos = Application.get_env(:slack_coder, :repos, []) |> Keyword.keys
     children = repos |> Enum.map(fn(repo)->
       worker(SlackCoder.Github.Watchers.Repository, [repo], id: "Repo-#{repo}")
+      worker(SlackCoder.Github.Watchers.Callout, [repo], id: "Callout-#{repo}")
     end)
 
     opts = [strategy: :one_for_one, name: SlackCoder.Github.Supervisor]

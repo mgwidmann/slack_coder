@@ -41,8 +41,8 @@ defmodule SlackCoder.Mixfile do
     [
       # Prod dependencies
       {:phoenix, "~> 1.1.0"},
-      {:phoenix_ecto, github: "phoenixframework/phoenix_ecto", override: true},
-      {:postgrex, "~> 0.10"},
+      {:phoenix_ecto, "3.0.0-beta.2", override: true},
+      {:postgrex, "~> 0.11"},
       {:phoenix_html, "~> 2.3"},
       {:cowboy, "~> 1.0"},
       {:timex_ecto, "~> 0.6"},
@@ -54,9 +54,9 @@ defmodule SlackCoder.Mixfile do
       {:httpoison, "~> 0.7.2"},
       {:exjsx, "~> 3.1"},
       # {:ecto, "~> 1.1.0"},
-      {:ecto, github: "elixir-lang/ecto", override: true},
+      {:ecto, "2.0.0-beta.1", override: true},
       {:oauth2, "~> 0.5"},
-      {:beaker, ">= 1.2.0"},
+      {:beaker, path: "../beaker/"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev},

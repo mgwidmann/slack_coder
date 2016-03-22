@@ -1,7 +1,7 @@
 defmodule SlackCoder.Users.Help do
 
   @message_types [:stale, :fail, :pass, :close, :merge, :conflict]
-  @zipped_message_types for config <- @message_types, type <- [:self, :monitors], do: [config, type]
+  @zipped_message_types for config <- @message_types, type <- [:self, :monitors, :callouts], do: [config, type]
   @help_text """
   _Heres a list of things that might help_
 
@@ -44,7 +44,8 @@ defmodule SlackCoder.Users.Help do
     {config, "Don't think thats a configuration setting, try `help` to get more info"}
   end
 
-  @default_config Enum.into(Enum.map(@zipped_message_types, &({Enum.join(&1, "_"), true})), %{})
+  @static_config %{}
+  @default_config Enum.into(Enum.map(@zipped_message_types, &({Enum.join(&1, "_"), true})), @static_config)
   def default_config(), do: @default_config
 
   @default_config_keys Map.keys(@default_config)
