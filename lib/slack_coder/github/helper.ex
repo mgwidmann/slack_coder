@@ -43,8 +43,10 @@ defmodule SlackCoder.Github.Helper do
                     |> Timex.DateFormat.format("%D %T", Timex.Format.DateTime.Formatters.Strftime)
       "Rate Limit: #{remaining} / #{total} -- Resetting at: #{date}"
     end
+    percent_used = remaining / total
+    Beaker.TimeSeries.sample("Rate Limit", percent_used)
     # Cannot invoke macros w/ apply
-    if remaining / total > 0.25 do
+    if percent_used > 0.25 do
       Logger.debug rate_limit_message
     else
       Logger.warn rate_limit_message
@@ -143,9 +145,9 @@ defmodule SlackCoder.Github.Helper do
      latest_pr_comment = get("repos/#{owner}/#{repo}/pulls/#{number}/comments") |> List.last
      case {latest_issue_comment, latest_pr_comment} do
        {date1, date2} when date1 != nil or date2 != nil ->
-         PR.changeset(pr, %{latest_comment: greatest_date_for(date1["updated_at"], date2["updated_at"])})
+         PR.reg_changeset(pr, %{latest_comment: greatest_date_for(date1["updated_at"], date2["updated_at"])})
        {nil, nil} ->
-         PR.changeset(pr, %{latest_comment: pr.opened_at})
+         PR.reg_changeset(pr, %{latest_comment: pr.opened_at})
      end
   end
 

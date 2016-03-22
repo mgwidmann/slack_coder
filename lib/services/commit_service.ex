@@ -3,7 +3,7 @@ defmodule SlackCoder.Services.CommitService do
 
   def save(changeset) do
     response = Repo.save(changeset)
-    SlackCoder.Models.notify_status(changeset)
+    SlackCoder.Models.Commit.notify_status(changeset)
     response
   end
 
