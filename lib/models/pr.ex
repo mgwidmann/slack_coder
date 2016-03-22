@@ -42,4 +42,9 @@ defmodule SlackCoder.Models.PR do
     |> cast_assoc(:commits)
   end
 
+  def reg_changeset(model, params \\ :empty) do
+    model
+    |> cast(params, @required_fields, @optional_fields)
+  end
+
 end

@@ -32,11 +32,6 @@ defmodule SlackCoder.Models.Commit do
     |> cast(params, @required_fields, @optional_fields)
   end
 
-  # Call me after a save has occured...
-  def after_save(changeset) do
-     notify_status(changeset)
-  end
-
   def notify_status(changeset) do
     if changeset.changes[:status] && changeset.valid? do
       Helper.report_change(changeset.model)

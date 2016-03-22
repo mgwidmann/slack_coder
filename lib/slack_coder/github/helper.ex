@@ -2,6 +2,7 @@ defmodule SlackCoder.Github.Helper do
   alias SlackCoder.Models.PR
   alias SlackCoder.Models.Commit
   alias SlackCoder.Repo
+  alias SlackCoder.Services.CommitService
   require Logger
 
   def get(url, default \\ []) do
@@ -120,7 +121,7 @@ defmodule SlackCoder.Github.Helper do
             latest_status_id: last_status["id"],
             pr_id: pr.id
            })
-      {:ok, commit} = Repo.save(cs)
+      {:ok, commit} = CommitService.save(cs)
       commit
     end
     commit || pr.latest_commit
@@ -171,7 +172,7 @@ defmodule SlackCoder.Github.Helper do
 
   def build_pr(pr, nil), do: build_pr(pr)
   def build_pr(pr, %PR{id: id} = existing_pr) when is_integer(id) do
-    {:ok, existing_pr} = PR.changeset(existing_pr, %{
+    {:ok, existing_pr} = PR.reg_changeset(existing_pr, %{
                            title: pr["title"],
                            closed_at: date_for(pr["closed_at"]),
                            merged_at: date_for(pr["merged_at"])
