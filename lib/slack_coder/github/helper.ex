@@ -44,7 +44,7 @@ defmodule SlackCoder.Github.Helper do
       "Rate Limit: #{remaining} / #{total} -- Resetting at: #{date}"
     end
     percent_used = remaining / total
-    Beaker.TimeSeries.sample("Rate Limit", percent_used)
+    Beaker.TimeSeries.sample("Github Rate Limit", percent_used)
     # Cannot invoke macros w/ apply
     if percent_used > 0.25 do
       Logger.debug rate_limit_message
