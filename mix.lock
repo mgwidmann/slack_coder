@@ -1,4 +1,4 @@
-%{"beaker": {:hex, :beaker, "1.2.0"},
+%{"beaker": {:git, "https://github.com/mgwidmann/beaker.git", "a9d94f7618ee7426536b819771e8e2c74808db5a", [branch: "ecto_2"]},
   "bureaucrat": {:hex, :bureaucrat, "0.1.2"},
   "combine": {:hex, :combine, "0.7.0"},
   "connection": {:hex, :connection, "1.0.2"},

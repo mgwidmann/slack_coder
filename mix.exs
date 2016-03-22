@@ -56,7 +56,7 @@ defmodule SlackCoder.Mixfile do
       # {:ecto, "~> 1.1.0"},
       {:ecto, "2.0.0-beta.1", override: true},
       {:oauth2, "~> 0.5"},
-      {:beaker, path: "../beaker/"},
+      {:beaker, github: "mgwidmann/beaker", branch: "ecto_2"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev},
