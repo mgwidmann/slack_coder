@@ -14,7 +14,7 @@ defmodule SlackCoder.Github.WatcherTest do
     describe "update_status message received" do
       let :commit, do: %SlackCoder.Models.Commit{}
       before :each do
-        response = PullRequest.handle_info(:update_status, commit)
+        response = PullRequest.handle_info(:update_status, {commit, []})
         {:ok, response: response, commit: commit}
       end
 
@@ -24,7 +24,7 @@ defmodule SlackCoder.Github.WatcherTest do
       end
 
       it "returns {:noreply, commit} unchanged", %{response: response, commit: commit} do
-        expect {:noreply, ^commit} = response
+        expect {:noreply, {^commit, []}} = response
       end
 
     end

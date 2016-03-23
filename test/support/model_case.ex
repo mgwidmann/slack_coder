@@ -22,15 +22,11 @@ defmodule SlackCoder.ModelCase do
       import Ecto.Model
       import Ecto.Query, only: [from: 2]
       import SlackCoder.ModelCase
-    end
-  end
 
-  setup tags do
-    unless tags[:async] do
-      Ecto.Adapters.SQL.restart_test_transaction(SlackCoder.Repo, [])
+      before :each do
+        Ecto.Adapters.SQL.Sandbox.checkout(SlackCoder.Repo)
+      end
     end
-
-    :ok
   end
 
   @doc """

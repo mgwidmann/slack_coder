@@ -22,7 +22,7 @@ defmodule SlackCoder.ConnCase do
 
       # The default endpoint for testing
       @endpoint SlackCoder.Endpoint
-      
+
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
 
@@ -31,14 +31,10 @@ defmodule SlackCoder.ConnCase do
       import Ecto.Query, only: [from: 2]
 
       import SlackCoder.Router.Helpers
-    end
-  end
 
-  setup tags do
-    unless tags[:async] do
-      Ecto.Adapters.SQL.restart_test_transaction(SlackCoder.Repo, [])
+      setup do
+        :ok = Ecto.Adapters.SQL.Sandbox.checkout(SlackCoder.Repo)
+      end
     end
-
-    :ok
   end
 end

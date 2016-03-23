@@ -138,7 +138,7 @@ defmodule SlackCoder.Github.Helper do
                                     |> slack_user_with_monitors
       message = ":heavy_multiplication_x: *MERGE CONFLICTS* #{pr.title} \n#{pr.html_url}"
       Logger.debug "Merge conflict for PR-#{pr.number}, sending to: #{inspect message_for}"
-      notify(slack_users, :conflict, message_for, message)
+      notify(slack_users, :conflict, message_for, message, refreshed_pr)
     end
   end
 
@@ -237,15 +237,21 @@ defmodule SlackCoder.Github.Helper do
     end
   end
 
-  def notify([slack_user | users], type, message_for, message) do
-    notify(slack_user, type, message_for, message)
-    notify(users, type, message_for, message)
+  def notify([slack_user | users], type, message_for, message, pr) do
+    notify(slack_user, type, message_for, message, pr)
+    notify(users, type, message_for, message, pr)
   end
-  def notify([], type, message_for, message) do
-    SlackCoder.Slack.send_to(message_for, {type, message_for, message})
+  def notify([], type, message_for, message, pr) do
+    spawn_link __MODULE__, :notify, [{message_for, type, message_for, message, pr}]
   end
-  def notify(slack_user, type, message_for, message) do
-    SlackCoder.Slack.send_to(slack_user, {type, message_for, message})
+  def notify(slack_user, type, message_for, message, pr) do
+    spawn_link __MODULE__, :notify, [{slack_user, type, message_for, message, pr}]
+  end
+
+  def notify({slack_user, type, message_for, message, pr}) do
+    called_out = SlackCoder.Users.Supervisor.user(slack_user)
+                 |> SlackCoder.Github.Supervisor.called_out?(pr)
+    SlackCoder.Slack.send_to(slack_user, {type, called_out, message_for, message})
   end
 
   def report_change(commit) do
@@ -259,10 +265,10 @@ defmodule SlackCoder.Github.Helper do
     case String.to_atom(commit.status) do
       status when status in [:failure, :error] ->
         message = ":facepalm: *BUILD FAILURE* #{pr.title} :-1:\n#{pr.latest_commit.travis_url}\n#{pr.html_url}"
-        notify(slack_users, :fail, message_for, message)
+        notify(slack_users, :fail, message_for, message, pr)
       :success ->
         message = ":bananadance: #{pr.title} :success:\n#{pr.html_url}"
-        notify(slack_users, :pass, message_for, message)
+        notify(slack_users, :pass, message_for, message, pr)
       # :pending or ignoring any other unknown statuses
       _ ->
         nil

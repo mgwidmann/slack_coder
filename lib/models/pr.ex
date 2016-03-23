@@ -36,13 +36,13 @@ defmodule SlackCoder.Models.PR do
   If `params` are nil, an invalid changeset is returned
   with no validation performed.
   """
-  def changeset(model, params \\ :empty) do
+  def changeset(model, params \\ %{}) do
     model
     |> cast(params, @required_fields, @optional_fields)
     |> cast_assoc(:commits)
   end
 
-  def reg_changeset(model, params \\ :empty) do
+  def reg_changeset(model, params \\ %{}) do
     model
     |> cast(params, @required_fields, @optional_fields)
   end

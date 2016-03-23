@@ -2,6 +2,10 @@ defmodule SlackCoderTest do
   use Pavlov.Case, async: true
   import Pavlov.Syntax.Expect
 
+  before :each do
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(SlackCoder.Repo)
+  end
+
   describe "start" do
     let :repos do
       [

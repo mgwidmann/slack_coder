@@ -17,8 +17,8 @@ defmodule SlackCoder.Users.User do
   end
 
   for type <- SlackCoder.Users.Help.message_types() do
-    def handle_cast({unquote(type), user_for, message}, user) do
-      if configured_to_send_message(unquote(type), user_for, user) do
+    def handle_cast({unquote(type), called_out, user_for, message}, user) do
+      if configured_to_send_message(unquote(type), called_out, user_for, user) do
         Slack.send_to(user.slack, message)
       else
         Logger.debug "Not configured to send #{unquote(type)} to #{user.slack}"
@@ -27,7 +27,7 @@ defmodule SlackCoder.Users.User do
     end
   end
   # Don't send unknown messages
-  def handle_cast({unknown, user_for, message}, user) do
+  def handle_cast({unknown, called_out, user_for, message}, user) do
     Logger.warn "User #{user.name}(#{user.slack}) received unhandled message: #{inspect {unknown, user_for, message}}"
     {:noreply, user}
   end
@@ -48,16 +48,20 @@ defmodule SlackCoder.Users.User do
     {:reply, user, user}
   end
 
-  defp configured_to_send_message(type, user_for, user) do
+  def configured_to_send_message(type, called_out, user_for, user) do
     config_self = if (config_self = Map.get(user.config, :"#{type}_self")) != nil, do: config_self, else: true
     config_monitors = if (config_monitors = Map.get(user.config, :"#{type}_monitors")) != nil, do: config_monitors, else: true
-    user.slack == user_for && config_self || user.slack != user_for && config_monitors
+    config_callouts = if (config_callouts = Map.get(user.config, :"#{type}_callouts")) != nil, do: config_callouts, else: true
+
+    (user.slack == user_for && config_callouts) ||
+      (user.slack == user_for && config_self) ||
+      (user.slack != user_for && config_monitors)
   end
 
   # Client API
 
-  def notification(user_pid, {type, user, message}) do
-    GenServer.cast user_pid, {type, user, message}
+  def notification(user_pid, {type, called_out, user, message}) do
+    GenServer.cast user_pid, {type, called_out, user, message}
   end
 
   def help(user_pid, message) do

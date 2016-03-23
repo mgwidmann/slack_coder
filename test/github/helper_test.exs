@@ -5,6 +5,10 @@ defmodule SlackCoder.Github.HelperTest do
   alias SlackCoder.Models.PR
   alias SlackCoder.Repo
 
+  before :each do
+    Ecto.Adapters.SQL.Sandbox.checkout(SlackCoder.Repo)
+  end
+
   describe "get" do
     before :each do
       allow(HTTPoison) |> to_receive(get: fn(_url, _headers)-> response end)
@@ -61,6 +65,7 @@ defmodule SlackCoder.Github.HelperTest do
       "slack-user"
     end
     before :each do
+      :ok = Ecto.Adapters.SQL.Sandbox.checkout(SlackCoder.Repo)
       unless SlackCoder.Repo.get_by(SlackCoder.Models.User, slack: user) do
         %SlackCoder.Models.User{github: user, slack: user} |> SlackCoder.Repo.insert
       end

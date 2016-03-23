@@ -35,22 +35,23 @@ defmodule SlackCoder.Github.Watchers.Callout do
     {:noreply, Map.put(state, :last_checked, Date.local)}
   end
 
-  defp issue_number(url), do: String.split("/") |> List.last
+  defp issue_number(url), do: String.split(url, "/") |> List.last
 
   defp start_watchers([], _, _), do: nil
   defp start_watchers([{pr_number, comment} | comments], github_users, {repo, owner}) do
     github_users
     |> Enum.each(fn(user)->
-      if comment =~ ~r/@#{user}/, do: watch_pr(pr_number, {repo, owner})
+      if comment =~ ~r/@#{user}/, do: watch_pr(user, pr_number, {repo, owner})
     end)
 
     start_watchers(comments, github_users, {repo, owner})
   end
 
-  defp watch_pr(pr_number, {repo, owner}) do
-    pr = get("repos/#{owner}/#{repo}/issues/#{pr_number}") |> build_pr
+  defp watch_pr(github_user, pr_number, {repo, owner}) do
+    pr = get("repos/#{owner}/#{repo}/issues/#{pr_number}", %{}) |> build_pr
 
     SlackCoder.Github.Supervisor.start_watcher(pr)
+    |> SlackCoder.Github.PullRequest.add_callout(github_user)
   end
 
 end

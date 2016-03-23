@@ -21,14 +21,14 @@ defmodule SlackCoder.Slack do
   that they may deliver messages to `:slack` through the RTM service.
   """
   def send_to(user, message)
-  def send_to(user, {type, message_for, message}) when is_binary(user) do
-    String.to_atom(user) |> send_to({type, message_for, message})
+  def send_to(user, {type, called_out, message_for, message}) when is_binary(user) do
+    String.to_atom(user) |> send_to({type, called_out, message_for, message})
   end
 
-  def send_to(user, {type, message_for, message}) do
+  def send_to(user, {type, called_out, message_for, message}) do
     user_pid = Users.user(user)
     if user_pid do
-      User.notification user_pid, {type, message_for, String.strip(message)}
+      User.notification user_pid, {type, called_out, message_for, String.strip(message)}
     else
       Logger.error "Attempt to deliver message to #{inspect user}, but pid cannot be found. Message: #{message}"
     end

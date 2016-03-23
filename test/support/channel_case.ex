@@ -22,7 +22,7 @@ defmodule SlackCoder.ChannelCase do
 
       # The default endpoint for testing
       @endpoint SlackCoder.Endpoint
-      
+
       # Import conveniences for testing with channels
       use Phoenix.ChannelTest
 
@@ -32,11 +32,4 @@ defmodule SlackCoder.ChannelCase do
     end
   end
 
-  setup tags do
-    unless tags[:async] do
-      Ecto.Adapters.SQL.restart_test_transaction(SlackCoder.Repo, [])
-    end
-
-    :ok
-  end
 end

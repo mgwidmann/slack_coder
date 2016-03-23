@@ -61,13 +61,13 @@ defmodule SlackCoder.Github.Watchers.Repository do
           :smiling_imp: _MERGED_ *#{pr.title}* :raveparrot:
           #{pr.html_url}
           """
-          notify(slack_users, :merge, message_for, message)
+          notify(slack_users, :merge, message_for, message, pr)
         else
           message = """
           :rage: _CLOSED_ *#{pr.title}*
           #{pr.html_url}
           """
-          notify(slack_users, :close, message_for, message)
+          notify(slack_users, :close, message_for, message, pr)
         end
       end
     end
@@ -108,7 +108,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
     Stale for *#{stale_hours}* hours
     #{pr.html_url}
     """
-    notify(slack_users, :stale, message_for, message)
+    notify(slack_users, :stale, message_for, message, pr)
   end
 
 end
