@@ -34,7 +34,7 @@ defmodule SlackCoder.Models.Commit do
 
   def notify_status(changeset) do
     if changeset.changes[:status] && changeset.valid? do
-      Helper.report_change(changeset.model)
+      Helper.report_change(changeset.data)
     end
     changeset
   end
