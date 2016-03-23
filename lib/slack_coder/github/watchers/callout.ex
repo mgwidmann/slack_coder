@@ -48,7 +48,7 @@ defmodule SlackCoder.Github.Watchers.Callout do
   end
 
   defp watch_pr(github_user, pr_number, {repo, owner}) do
-    pr = get("repos/#{owner}/#{repo}/issues/#{pr_number}", %{}) |> build_pr
+    pr = get("repos/#{owner}/#{repo}/pulls/#{pr_number}", %{}) |> build_pr
 
     SlackCoder.Github.Supervisor.start_watcher(pr)
     |> SlackCoder.Github.PullRequest.add_callout(github_user)
