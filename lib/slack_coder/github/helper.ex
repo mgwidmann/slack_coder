@@ -191,7 +191,7 @@ defmodule SlackCoder.Github.Helper do
     owner = pr["base"]["repo"]["owner"]["login"]
     # Ecto bug https://github.com/elixir-lang/ecto/issues/1121
     new_pr = %PR{new_pr | github_user_avatar: avatar }
-    cs = PR.changeset(new_pr,
+    cs = PR.reg_changeset(new_pr,
       %{number: pr["number"],
         title: pr["title"],
         html_url: pr["_links"]["html"]["href"],

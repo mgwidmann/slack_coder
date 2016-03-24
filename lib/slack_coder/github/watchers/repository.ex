@@ -54,7 +54,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
                                       |> slack_user_with_monitors
         response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}")
         merged = response["merged"] || response["merged_at"] != nil
-        PR.changeset(pr, %{merged_at: response["merged_at"], closed_at: response["closed_at"]})
+        PR.reg_changeset(pr, %{merged_at: response["merged_at"], closed_at: response["closed_at"]})
           |> Repo.update
         if merged do
           message = """
