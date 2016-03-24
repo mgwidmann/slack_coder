@@ -36,11 +36,11 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
 
   def add_callout(pr_pid, github_user) do
-    GenServer.handle_cast(pr_pid, {:add_callout, github_user})
+    GenServer.cast(pr_pid, {:add_callout, github_user})
   end
 
   def is_called_out?(pr_pid, github_user) do
-    GenServer.handle_call(pr_pid, {:called_out?, github_user})
+    GenServer.call(pr_pid, {:called_out?, github_user})
   end
 
   def fetch(:undefined), do: nil

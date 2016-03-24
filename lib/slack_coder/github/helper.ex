@@ -250,6 +250,7 @@ defmodule SlackCoder.Github.Helper do
 
   def notify({slack_user, type, message_for, message, pr}) do
     called_out = SlackCoder.Users.Supervisor.user(slack_user)
+                 |> SlackCoder.Users.User.get
                  |> SlackCoder.Github.Supervisor.called_out?(pr)
     SlackCoder.Slack.send_to(slack_user, {type, called_out, message_for, message})
   end

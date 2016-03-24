@@ -4,9 +4,10 @@ defmodule SlackCoder.Github.Supervisor do
 
   def start_link() do
     repos = Application.get_env(:slack_coder, :repos, []) |> Keyword.keys
-    children = repos |> Enum.map(fn(repo)->
-      worker(SlackCoder.Github.Watchers.Repository, [repo], id: "Repo-#{repo}")
-      worker(SlackCoder.Github.Watchers.Callout, [repo], id: "Callout-#{repo}")
+    Logger.info "Starting Repository watchers for: #{inspect repos}"
+    children = repos |> Enum.flat_map(fn(repo)->
+      [worker(SlackCoder.Github.Watchers.Repository, [repo], id: "Repo-#{repo}"),
+      worker(SlackCoder.Github.Watchers.Callout, [repo], id: "Callout-#{repo}")]
     end)
 
     opts = [strategy: :one_for_one, name: SlackCoder.Github.Supervisor]
@@ -61,7 +62,7 @@ defmodule SlackCoder.Github.Supervisor do
 
   def called_out?(%SlackCoder.Models.User{github: github}, pr) do
     find_watcher(pr)
-    |> SlackCoder.Github.PullRequest.is_called_out?(github)
+    |> SlackCoder.Github.Watchers.PullRequest.is_called_out?(github)
   end
 
 end
