@@ -32,7 +32,7 @@ defmodule SlackCoder.Github.Supervisor do
   end
 
   def find_watcher(pr) do
-    number = pr.number
+    number = pr.number |> to_string
     child = Supervisor.which_children(SlackCoder.Github.Supervisor)
             |> Enum.find(&(match?({"PR-" <> ^number, _, _, _}, &1)))
     case child do
