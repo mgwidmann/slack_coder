@@ -7,7 +7,7 @@ defmodule SlackCoder.Models.User do
     field :avatar_url, :string
     field :html_url, :string
     field :name, :string
-    field :monitors, StringList
+    field :monitors, StringList, default: []
 
     embeds_one :config, SlackCoder.Models.User.Config
 

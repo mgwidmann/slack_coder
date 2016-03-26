@@ -163,14 +163,20 @@ defmodule SlackCoder.Github.HelperTest do
       :ok
     end
 
-    let :other_users, do: [%{github: "github", slack: "slack"}, %{github: "github-with-monitors", slack: "slack-with-monitors"}]
+    let :other_users do
+      [
+        %SlackCoder.Models.User{github: "github", slack: "slack", monitors: ["monitored-github"]},
+        %SlackCoder.Models.User{github: "lone-dev-github", slack: "lone-dev"},
+        %SlackCoder.Models.User{github: "monitored-github", slack: "monitored-slack"}
+      ]
+    end
 
     it "user with no monitors" do
-      assert ["slack"] = Helper.slack_user_with_monitors(%{slack: "slack", monitors: []})
+      assert ["lone-dev"] = Helper.slack_user_with_monitors(other_users |> Enum.at(1))
     end
 
     it "returns those slack users" do
-      assert ["slack-with-monitors", "slack"] = Helper.slack_user_with_monitors(%{slack: "slack-with-monitors", monitors: ["github"]})
+      assert ["monitored-slack", "slack"] = Helper.slack_user_with_monitors(other_users |> List.last)
     end
 
   end
