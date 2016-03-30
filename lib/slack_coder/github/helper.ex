@@ -138,10 +138,10 @@ defmodule SlackCoder.Github.Helper do
   end
 
   def conflict_notification(pr, refreshed_pr) do
+    user = user_for_pr(pr)
     # Prior was mergeable but now it is not (nil means analysis in process)
-    if pr.mergeable && refreshed_pr.mergeable == false do
-      [message_for | slack_users] = user_for_pr(pr)
-                                    |> slack_user_with_monitors
+    if user && pr.mergeable && refreshed_pr.mergeable == false do
+      [message_for | slack_users] = slack_user_with_monitors(user)
       message = ":heavy_multiplication_x: *MERGE CONFLICTS* #{pr.title} \n#{pr.html_url}"
       Logger.debug "Merge conflict for PR-#{pr.number}, sending to: #{inspect message_for}"
       notify(slack_users, :conflict, message_for, message, refreshed_pr)
@@ -269,18 +269,20 @@ defmodule SlackCoder.Github.Helper do
     html = SlackCoder.PageView.render("pull_request.html", pr: pr)
     SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
 
-    [message_for | slack_users] = user_for_pr(pr)
-                                  |> slack_user_with_monitors
-    case String.to_atom(commit.status) do
-      status when status in [:failure, :error] ->
-        message = ":facepalm: *BUILD FAILURE* #{pr.title} :-1:\n#{pr.latest_commit.travis_url}\n#{pr.html_url}"
-        notify(slack_users, :fail, message_for, message, pr)
-      :success ->
-        message = ":bananadance: #{pr.title} :success:\n#{pr.html_url}"
-        notify(slack_users, :pass, message_for, message, pr)
-      # :pending or ignoring any other unknown statuses
-      _ ->
-        nil
+    user = user_for_pr(pr)
+    if user do
+      [message_for | slack_users] = slack_user_with_monitors(user)
+      case String.to_atom(commit.status) do
+        status when status in [:failure, :error] ->
+          message = ":facepalm: *BUILD FAILURE* #{pr.title} :-1:\n#{pr.latest_commit.travis_url}\n#{pr.html_url}"
+          notify(slack_users, :fail, message_for, message, pr)
+        :success ->
+          message = ":bananadance: #{pr.title} :success:\n#{pr.html_url}"
+          notify(slack_users, :pass, message_for, message, pr)
+        # :pending or ignoring any other unknown statuses
+        _ ->
+          nil
+      end
     end
   end
 
@@ -304,7 +306,7 @@ defmodule SlackCoder.Github.Helper do
   defp user_with_monitors(user, map_to) do
     SlackCoder.Users.Supervisor.users
     |> Stream.filter(&(user.github in &1.monitors))
-    |> Enum.map(&(apply(&1, map_to)))
+    |> Enum.map(&(Map.get(&1, map_to)))
   end
 
 end
