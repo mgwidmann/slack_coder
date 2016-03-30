@@ -6,6 +6,9 @@
     <%= @pr.github_user %>
   </td>
   <td>
+    <%= @pr.branch %>
+  </td>
+  <td>
     <%= link @pr.title, to: @pr.html_url, target: "_blank" %>
   </td>
   <td>

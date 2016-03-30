@@ -283,10 +283,20 @@ defmodule SlackCoder.Github.Helper do
 
   def slack_user_with_monitors(user) do
     message_for = user.slack
-    slack_users = SlackCoder.Users.Supervisor.users
-                  |> Stream.filter(&(user.github in &1.monitors))
-                  |> Enum.map(&(&1.slack))
-    Enum.uniq([message_for | slack_users])
+    users = user_with_monitors(user, :github)
+    Enum.uniq([message_for | users])
+  end
+
+  def github_user_with_monitors(user) do
+    message_for = user.github
+    users = user_with_monitors(user, :github)
+    Enum.uniq([message_for | users])
+  end
+
+  defp user_with_monitors(user, map_to) do
+    SlackCoder.Users.Supervisor.users
+    |> Stream.filter(&(user.github in &1.monitors))
+    |> Enum.map(&(apply(&1, map_to)))
   end
 
 end
