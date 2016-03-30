@@ -89,12 +89,18 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp _status(pr) do
-    commit = get_latest_commit(pr)
+    commit = pr
+             |> refresh_pr_from_db
+             |> get_latest_commit
     response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}")
     refreshed_pr = build_pr(response, pr)
     conflict_notification(pr, refreshed_pr)
 
     %PR{ refreshed_pr | latest_commit: commit || pr.latest_commit}
+  end
+
+  defp refresh_pr_from_db(pr) do
+    Repo.get!(PR, pr.id)
   end
 
   defp get_latest_commit(pr) do
@@ -115,7 +121,7 @@ defmodule SlackCoder.Github.Helper do
         Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
       end
       cs = Commit.changeset(commit, %{
-            status: last_status["state"] || "pending",
+            status: if(pr.mergeable, do: last_status["state"] || "pending", else: "conflict"),
             code_climate_status: code_climate["state"] || "pending",
             travis_url: last_status["target_url"],
             code_climate_url: code_climate["target_url"],
@@ -132,8 +138,8 @@ defmodule SlackCoder.Github.Helper do
   end
 
   def conflict_notification(pr, refreshed_pr) do
-    # Prior was mergable but now it is not (nil means analysis in process)
-    if pr.mergable && refreshed_pr.mergable == false do
+    # Prior was mergeable but now it is not (nil means analysis in process)
+    if pr.mergeable && refreshed_pr.mergeable == false do
       [message_for | slack_users] = user_for_pr(pr)
                                     |> slack_user_with_monitors
       message = ":heavy_multiplication_x: *MERGE CONFLICTS* #{pr.title} \n#{pr.html_url}"
@@ -176,13 +182,15 @@ defmodule SlackCoder.Github.Helper do
 
   def build_pr(pr, nil), do: build_pr(pr)
   def build_pr(pr, %PR{id: id} = existing_pr) when is_integer(id) do
+    mergeable = not pr["mergeable_state"] in ["dirty"]
     {:ok, existing_pr} = PR.reg_changeset(existing_pr, %{
                            title: pr["title"],
                            closed_at: date_for(pr["closed_at"]),
-                           merged_at: date_for(pr["merged_at"])
+                           merged_at: date_for(pr["merged_at"]),
+                           mergeable: mergeable
                          })
                          |> Repo.update
-    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"], mergable: not pr["mergeable_state"] in ["dirty"] }
+    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"] }
   end
   def build_pr(pr, new_pr) do
     github_user = pr["user"]["login"]

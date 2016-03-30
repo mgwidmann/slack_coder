@@ -6,6 +6,7 @@ defmodule SlackCoder.PageView do
   def status_class(:failed), do: :danger
   def status_class(:pending), do: :warning
   def status_class(:error), do: :danger
+  def status_class(:conflict), do: :highlight
   def status_class(_), do: :default
 
   def staleness(pr) do
