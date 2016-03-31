@@ -59,7 +59,7 @@ defmodule SlackCoder.Slack do
   end
   def handle_info({user, message}, slack, state) do
     try do
-      s_user = user(slack, unquote(if Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker), else: binding[:user]))
+      s_user = user(slack, if(Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker), else: user))
       message = message_for(s_user, message)
       slack_user = Config.route_message(slack, s_user)
       if slack_user do
