@@ -16,41 +16,55 @@
       <%= label f, :slack, "Slack", class: "control-label" %>
       <%= text_input f, :slack, class: "form-control", placeholder: @changeset.data.github %>
       <p class="help-block">Enter your name on slack without the @</p>
+      
+      <div class="form-group">
+        <%= label f, :monitors, "Team members you wish to monitor", class: "control-label" %>
+        <a href="javascript: $('#user_monitors').val('');" class="pull-right">
+          <i class="fa fa-times-circle-o"></i>
+          Clear
+        </a>
+        <div>
+          <%= tag :input, type: "hidden", value: "", name: "user[monitors][]" %>
+          <%= multiple_select f, :monitors, users_list(@changeset.data.github), class: "form-control", value: @changeset.data.monitors || [] %>
+        </div>
+      </div>
     </div>
 
     <div class="form-group col-xs-6">
       <h4>Notifications</h4>
+      <div class="panel panel-default">
+        <div class="panel-heading">General</div>
+        <div class="panel-body">
+          <%= checkbox f, :muted %>
+          <%= label f, :muted, "Mute all notifications" %>
+        </div>
+      </div>
       <%= inputs_for f, :config, fn c -> %>
         <%= hidden_input c, :id %>
-        <%= for [left_key, right_key] <- Enum.chunk(SlackCoder.Users.Help.default_config_keys, 2) do %>
-          <div class="row">
-            <div class="col-xs-6">
-              <%= if left_key do %>
-                <%= checkbox c, String.to_atom(left_key) %>
-                <%= label c, left_key %>
-              <% end %>
-            </div>
-            <div class="col-xs-6">
-              <%= if right_key do %>
-                <%= checkbox c, String.to_atom(right_key) %>
-                <%= label c, right_key %>
+        <%= for class <- SlackCoder.Users.Help.message_classes do %>
+          <div class="panel panel-default">
+            <div class="panel-heading"><%= String.capitalize(class |> to_string) %></div>
+            <div class="panel-body">
+              <%= for [left_key, right_key] <- keys_for_class(class) do %>
+                <div class="row">
+                  <div class="col-xs-6">
+                    <%= if left_key do %>
+                      <%= checkbox c, String.to_atom(left_key) %>
+                      <%= label c, left_key, label_for(left_key) %>
+                    <% end %>
+                  </div>
+                  <div class="col-xs-6">
+                    <%= if right_key do %>
+                      <%= checkbox c, String.to_atom(right_key) %>
+                      <%= label c, right_key, label_for(right_key) %>
+                    <% end %>
+                  </div>
+                </div>
               <% end %>
             </div>
           </div>
         <% end %>
       <% end %>
-    </div>
-
-    <div class="form-group col-xs-6">
-      <%= label f, :monitors, "Team members you wish to monitor", class: "control-label" %>
-      <a href="javascript: $('#user_monitors').val('');" class="pull-right">
-        <i class="fa fa-times-circle-o"></i>
-        Clear
-      </a>
-      <div>
-        <%= tag :input, type: "hidden", value: "", name: "user[monitors][]" %>
-        <%= multiple_select f, :monitors, users_list(@changeset.data.github), class: "form-control", value: @changeset.data.monitors || [] %>
-      </div>
     </div>
   </div>
 

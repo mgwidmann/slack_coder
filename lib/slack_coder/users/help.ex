@@ -1,7 +1,8 @@
 defmodule SlackCoder.Users.Help do
 
   @message_types [:stale, :fail, :pass, :close, :merge, :conflict]
-  @zipped_message_types for config <- @message_types, type <- [:self, :monitors, :callouts], do: [config, type]
+  @message_classes [:self, :monitors, :callouts]
+  @zipped_message_types for config <- @message_types, type <- @message_classes, do: [config, type]
   @help_text """
   _Heres a list of things that might help_
 
@@ -51,6 +52,7 @@ defmodule SlackCoder.Users.Help do
   @default_config_keys Map.keys(@default_config)
   def default_config_keys(), do: @default_config_keys
 
+  def message_classes(), do: @message_classes
   def message_types(), do: @message_types
 
   defp config_for_reply("stale"), do: "Stale PR notifications"

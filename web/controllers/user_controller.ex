@@ -9,19 +9,24 @@ defmodule SlackCoder.UserController do
     render(conn, "user.html", user: user, changeset: changeset)
   end
 
+  def external(conn, %{"github" => github}) do
+    user = user_for_github(github)
+    changeset = User.admin_changeset(user, %{muted: true})
+    render(conn, "user.html", user: user, changeset: changeset)
+  end
+
+  def create_external(conn, %{"user" => user_params, "github" => github}) do
+    user = user_for_github(github)
+    changeset = User.admin_changeset(user, Map.put(user_params, "muted", true))
+    conn
+    |> create_user(user, changeset, false)
+  end
+
   def create(conn, %{"user" => user_params}) do
     user = conn.assigns.current_user
-    changeset = User.changeset(user, Map.put(user_params, "config", SlackCoder.Users.Help.default_config))
-
-    case Repo.insert(changeset) do
-      {:ok, user} ->
-        SlackCoder.Users.Supervisor.start_user(user)
-        conn
-        |> put_session(:current_user, user)
-        |> redirect(to: "/")
-      {:error, changeset} ->
-        render(conn, "user.html", user: user, changeset: changeset)
-    end
+    changeset = User.changeset(user, user_params)
+    conn
+    |> create_user(user, changeset, true)
   end
 
   def edit(conn, %{"id" => id}) do
@@ -43,6 +48,25 @@ defmodule SlackCoder.UserController do
       {:error, changeset} ->
         render(conn, "user.html", user: user, changeset: changeset)
     end
+  end
+
+  defp create_user(conn, user, changeset, setup_session) do
+    changeset = Ecto.Changeset.put_embed changeset, :config, SlackCoder.Users.Help.default_config
+
+    case Repo.insert(changeset) do
+      {:ok, user} ->
+        SlackCoder.Users.Supervisor.start_user(user)
+
+        if(setup_session, do: put_session(conn, :current_user, user), else: conn)
+        |> redirect(to: "/")
+      {:error, changeset} ->
+        render(conn, "user.html", user: user, changeset: changeset)
+    end
+  end
+
+  defp user_for_github(github) do
+    github_user = SlackCoder.Github.Helper.get("users/#{github}", %{})
+    %User{github: github, name: github_user["name"], html_url: github_user["html_url"], avatar_url: github_user["avatar_url"]}
   end
 
 end

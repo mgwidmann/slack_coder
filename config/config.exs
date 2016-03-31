@@ -37,6 +37,10 @@ config :logger,
 config :logger, Rollbax.Notifier,
   level: :warn
 
+config :rollbax,
+  access_token: "bfb7314f563b47e0bdbb2b0d5cf983e0",
+  environment: "dev"
+
 import_config "#{Mix.env}.exs"
 
 # Configure phoenix generators

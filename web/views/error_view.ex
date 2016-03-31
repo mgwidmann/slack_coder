@@ -1,12 +1,14 @@
 defmodule SlackCoder.ErrorView do
   use SlackCoder.Web, :view
 
+  @not_found File.read!("priv/static/404.html")
   def render("404.html", _assigns) do
-    "Page not found"
+    @not_found
   end
 
+  @error File.read!("priv/static/500.html")
   def render("500.html", _assigns) do
-    "Server internal error"
+    @error
   end
 
   # In case no render clause matches or no

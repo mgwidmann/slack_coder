@@ -10,6 +10,14 @@ defmodule SlackCoder.Router do
     plug :assign_current_user
   end
 
+  pipeline :restricted do
+    plug SlackCoder.VerifyUser
+  end
+
+  pipeline :admin do
+    plug SlackCoder.VerifyUser, admin: true
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -19,7 +27,17 @@ defmodule SlackCoder.Router do
 
     get "/", PageController, :index
 
-    resources "/users", UserController, only: [:new, :create, :edit, :update]
+    scope "/" do
+      pipe_through :restricted
+      resources "/users", UserController, only: [:new, :create, :edit, :update]
+
+      scope "/admin" do
+        pipe_through :admin
+
+        get "/users/external/:github", UserController, :external
+        post "/users/external/:github", UserController, :create_external
+      end
+    end
   end
 
   forward "/beaker", Beaker.Web

@@ -8,6 +8,9 @@ defmodule SlackCoder.Models.User do
     field :html_url, :string
     field :name, :string
     field :monitors, StringList, default: []
+    field :muted, :boolean, default: false
+
+    field :admin, :boolean, default: false
 
     embeds_one :config, SlackCoder.Models.User.Config
 
@@ -15,7 +18,7 @@ defmodule SlackCoder.Models.User do
   end
 
   @required_fields ~w(slack github)
-  @optional_fields ~w(avatar_url html_url name monitors)
+  @optional_fields ~w(avatar_url html_url name monitors muted)
 
   @doc """
   Creates a changeset based on the `model` and `params`.
@@ -29,6 +32,13 @@ defmodule SlackCoder.Models.User do
     |> cast_embed(:config, required: true)
     |> unique_constraint(:slack)
     |> unique_constraint(:github)
+  end
+
+  @admin_fields Enum.uniq(~w(admin) ++ @required_fields)
+  @admin_required ~w(github)
+  def admin_changeset(model, params \\ %{}) do
+    model
+    |> cast(params, @admin_required, @optional_fields ++ @admin_fields)
   end
 
   for field <- [:slack, :github] do

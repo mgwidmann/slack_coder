@@ -21,7 +21,7 @@ defmodule SlackCoder.Users.User do
       if configured_to_send_message(unquote(type), called_out, user_for, user) do
         Slack.send_to(user.slack, message)
       else
-        Logger.debug "Not configured to send #{unquote(type)} to #{user.slack}"
+        Logger.debug "Not configured to send #{unquote(type)} to #{user.slack}#{if(user.muted, do: " **MUTED**", else: "")}"
       end
       {:noreply, user}
     end
@@ -48,6 +48,7 @@ defmodule SlackCoder.Users.User do
     {:reply, user, user}
   end
 
+  def configured_to_send_message(_type, _called_out, _user_for, %User{muted: true}), do: false
   def configured_to_send_message(type, called_out, user_for, user) do
     config_self = if (config_self = Map.get(user.config, :"#{type}_self")) != nil, do: config_self, else: true
     config_monitors = if (config_monitors = Map.get(user.config, :"#{type}_monitors")) != nil, do: config_monitors, else: true
