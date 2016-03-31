@@ -26,6 +26,7 @@
   "poolboy": {:hex, :poolboy, "1.5.1"},
   "postgrex": {:hex, :postgrex, "0.11.1"},
   "ranch": {:hex, :ranch, "1.2.1"},
+  "rollbax": {:hex, :rollbax, "0.5.4"},
   "slack": {:git, "https://github.com/mgwidmann/Elixir-Slack", "2439ef12c9e6ea930e3711236bed5a041f4f12ba", [branch: "im_list"]},
   "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.6"},
   "timex": {:hex, :timex, "1.0.1"},
