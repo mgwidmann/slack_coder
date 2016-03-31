@@ -23,6 +23,7 @@ defmodule SlackCoder.Web do
       import Ecto.Query, only: [from: 1, from: 2]
       alias SlackCoder.Models.Types.StringList
       alias SlackCoder.Models.Types.Boolean
+      require Logger
     end
   end
 
@@ -37,6 +38,7 @@ defmodule SlackCoder.Web do
       alias SlackCoder.Models.User
 
       import SlackCoder.Router.Helpers
+      require Logger
     end
   end
 
@@ -60,6 +62,7 @@ defmodule SlackCoder.Web do
   def router do
     quote do
       use Phoenix.Router
+      require Logger
     end
   end
 
@@ -70,7 +73,7 @@ defmodule SlackCoder.Web do
       alias SlackCoder.Repo
       import Ecto.Model
       import Ecto.Query, only: [from: 1, from: 2]
-
+      require Logger
     end
   end
 
