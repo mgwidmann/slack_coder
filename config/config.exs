@@ -25,11 +25,17 @@ config :slack_coder, :github_oauth,
   client_id: "your-github-client-id",
   client_secret: "your-github-client-secret",
   redirect_uri: "http://localhost:4000/auth/github/callback"
-  
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
+
+config :logger,
+  backends: [:console, Rollbax.Notifier]
+
+config :logger, Rollbax.Notifier,
+  level: :warn
 
 import_config "#{Mix.env}.exs"
 
