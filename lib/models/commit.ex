@@ -19,7 +19,7 @@ defmodule SlackCoder.Models.Commit do
   end
 
   @required_fields ~w(sha status)
-  @optional_fields ~w(pr_id latest_status_id code_climate_status travis_url code_climate_url)
+  @optional_fields ~w(pr_id latest_status_id github_user_avatar code_climate_status travis_url code_climate_url)
 
   @doc """
   Creates a changeset based on the `model` and `params`.
