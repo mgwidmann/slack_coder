@@ -92,7 +92,7 @@ defmodule SlackCoder.Github.Helper do
     commit = pr
              |> refresh_pr_from_db
              |> get_latest_commit
-    response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}")
+    response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}", %{})
     refreshed_pr = build_pr(response, pr)
     conflict_notification(pr, refreshed_pr)
 
