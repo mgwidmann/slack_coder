@@ -6,6 +6,9 @@
     <%= @pr.github_user %>
   </td>
   <td>
+    <%= @pr.repo %>
+  </td>
+  <td>
     <%= @pr.branch %>
   </td>
   <td>
