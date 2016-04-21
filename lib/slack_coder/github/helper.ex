@@ -21,7 +21,8 @@ defmodule SlackCoder.Github.Helper do
                             {:ok, data} -> data
                             {:error, _} -> %{"message" => body}
                           end
-               Logger.warn "#{full_url}\nStatus #{code}: #{response["message"]}"
+               stack = try(do: throw(:exception), catch: (_ -> System.stacktrace))
+               Logger.warn "#{full_url}\nStatus #{code}: #{response["message"]}\n#{Exception.format_stacktrace stack}"
                nil
              {:error, %HTTPoison.Error{reason: reason}} ->
                Logger.error "Failed to fetch: (#{reason}) #{url}"
@@ -104,7 +105,8 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp get_latest_commit(pr) do
-    last_commit = (get("repos/#{pr.github_user}/#{pr.repo}/commits?sha=#{pr.branch}") |> List.first)
+    owner = if(pr.fork, do: pr.github_user, else: pr.owner)
+    last_commit = (get("repos/#{owner}/#{pr.repo}/commits?sha=#{pr.branch}") |> List.first)
     commit = if last_commit["sha"] do # 404 returned when user deletes branch
       statuses = (pr.statuses_url <> "#{last_commit["sha"]}") |> get
       last_status = statuses
@@ -210,7 +212,8 @@ defmodule SlackCoder.Github.Helper do
         merged_at: date_for(pr["merged_at"]),
         owner: owner,
         repo: repo,
-        branch: pr["head"]["ref"]
+        branch: pr["head"]["ref"],
+        fork: pr["head"]["repo"]["owner"]["login"] != pr["base"]["repo"]["owner"]["login"]
       })
     {:ok, new_pr} = Repo.save(cs)
     new_pr
