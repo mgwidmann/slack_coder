@@ -26,7 +26,7 @@ defmodule SlackCoder.Github.Watchers.Callout do
   def handle_info(:callouts, state) do
     owner = Application.get_env(:slack_coder, :repos, [])[state.repo][:owner]
 
-    {:ok, since} = DateFormat.format(state.last_checked, "{ISOz}")
+    {:ok, since} = Timex.format(state.last_checked, "{ISOz}")
 
     get("repos/#{owner}/#{state.repo}/issues/comments?since=#{since}")
     |> Enum.map(&( {issue_number(&1["issue_url"]), &1["body"]} ))
