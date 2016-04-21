@@ -253,17 +253,20 @@ defmodule SlackCoder.Github.Helper do
     notify(users, type, message_for, message, pr)
   end
   def notify([], type, message_for, message, pr) do
-    spawn_link __MODULE__, :notify, [{message_for, type, message_for, message, pr}]
+    spawn_link __MODULE__, :notify, [{message_for, type, slack_user_called_out?(message_for, pr), message_for, message, pr}]
   end
   def notify(slack_user, type, message_for, message, pr) do
-    spawn_link __MODULE__, :notify, [{slack_user, type, message_for, message, pr}]
+    spawn_link __MODULE__, :notify, [{slack_user, type, slack_user_called_out?(slack_user, pr), message_for, message, pr}]
   end
 
-  def notify({slack_user, type, message_for, message, pr}) do
-    called_out = SlackCoder.Users.Supervisor.user(slack_user)
-                 |> SlackCoder.Users.User.get
-                 |> SlackCoder.Github.Supervisor.called_out?(pr)
+  def notify({slack_user, type, called_out, message_for, message, pr}) do
     SlackCoder.Slack.send_to(slack_user, {type, called_out, message_for, message})
+  end
+
+  defp slack_user_called_out?(slack_user, pr) do
+    SlackCoder.Users.Supervisor.user(slack_user)
+    |> SlackCoder.Users.User.get
+    |> SlackCoder.Github.Supervisor.called_out?(pr)
   end
 
   def report_change(commit) do

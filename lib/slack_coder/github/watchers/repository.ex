@@ -7,7 +7,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
   require Logger
   alias SlackCoder.Repo
 
-  @poll_minutes 5
+  @poll_minutes 1
   @poll_interval 60_000 * @poll_minutes # 5 minutes
 
   def start_link(repo) do
@@ -48,8 +48,6 @@ defmodule SlackCoder.Github.Watchers.Repository do
       Enum.each closed_prs, fn(pr_number)->
         pr = Enum.find(old_prs, &( &1.number == pr_number))
         Logger.debug "Stopping watcher for: PR-#{pr.number} #{pr.title}"
-        SlackCoder.Github.Supervisor.stop_watcher(pr)
-        SlackCoder.Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
         [message_for | slack_users] = user_for_pr(pr)
                                       |> slack_user_with_monitors
         response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}")
@@ -69,6 +67,8 @@ defmodule SlackCoder.Github.Watchers.Repository do
           """
           notify(slack_users, :close, message_for, message, pr)
         end
+        SlackCoder.Github.Supervisor.stop_watcher(pr)
+        SlackCoder.Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
       end
     end
   end
