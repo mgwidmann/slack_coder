@@ -41,9 +41,9 @@ defmodule SlackCoder.Github.Helper do
     {total, _} = Integer.parse(headers["X-RateLimit-Limit"] || "1")
     rate_limit_message = fn ->
       {timestamp, _} = Integer.parse(headers["X-RateLimit-Reset"] || "0")
-      {:ok, date} = Timex.Date.from(timestamp, :secs)
+      {:ok, date} = Timex.DateTime.from_seconds(timestamp)
                     |> Timex.Timezone.convert("America/New_York")
-                    |> Timex.DateFormat.format("%D %T", Timex.Format.DateTime.Formatters.Strftime)
+                    |> Timex.format("%D %T", Timex.Format.DateTime.Formatters.Strftime)
       "Rate Limit: #{remaining} / #{total} -- Resetting at: #{date}"
     end
     percent_used = remaining / total
@@ -221,7 +221,7 @@ defmodule SlackCoder.Github.Helper do
   end
 
   def now do
-    to_local(Timex.Date.local)
+    to_local(Timex.DateTime.local)
   end
 
   def to_local(date) do

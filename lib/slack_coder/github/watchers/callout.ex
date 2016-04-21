@@ -15,7 +15,7 @@ defmodule SlackCoder.Github.Watchers.Callout do
   def init(repo) do
     :timer.send_interval @poll_interval, :callouts
     send(self, :load_users)
-    {:ok, %{repo: repo, github_users: [], last_checked: Date.local}}
+    {:ok, %{repo: repo, github_users: [], last_checked: DateTime.local}}
   end
 
   def handle_info(:load_users, state) do
