@@ -16,7 +16,7 @@
       <%= label f, :slack, "Slack", class: "control-label" %>
       <%= text_input f, :slack, class: "form-control", placeholder: @changeset.data.github %>
       <p class="help-block">Enter your name on slack without the @</p>
-      
+
       <div class="form-group">
         <%= label f, :monitors, "Team members you wish to monitor", class: "control-label" %>
         <a href="javascript: $('#user_monitors').val('');" class="pull-right">

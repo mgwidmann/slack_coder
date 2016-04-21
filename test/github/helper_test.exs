@@ -140,7 +140,7 @@ defmodule SlackCoder.Github.HelperTest do
     let :pull_body, do: [%{updated_at: "2015-11-21T10:00:49Z"}]
 
     it "returns the greater date" do
-      cs = Helper.find_latest_comment(pr)
+      {_, cs} = Helper.find_latest_comment(pr)
       expect(cs.changes[:latest_comment]) |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 21, hour: 10, minute: 0,
         month: 11, ms: 0, second: 49, timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min, full_name: "UTC",
         offset_std: 0, offset_utc: 0, until: :max}, year: 2015})
@@ -149,7 +149,7 @@ defmodule SlackCoder.Github.HelperTest do
     context "when one is nil" do
       let :pull_body, do: []
       it "returns the other" do
-        cs = Helper.find_latest_comment(pr)
+        {_, cs} = Helper.find_latest_comment(pr)
         expect(cs.changes[:latest_comment]) |> to_eq(%Timex.DateTime{calendar: :gregorian, day: 20, hour: 10, minute: 1,
           month: 11, ms: 0, second: 23, timezone: %Timex.TimezoneInfo{abbreviation: "UTC", from: :min, full_name: "UTC",
           offset_std: 0, offset_utc: 0, until: :max}, year: 2015})

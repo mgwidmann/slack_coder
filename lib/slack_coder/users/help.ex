@@ -1,6 +1,6 @@
 defmodule SlackCoder.Users.Help do
 
-  @message_types [:stale, :fail, :pass, :close, :merge, :conflict]
+  @message_types [:stale, :unstale, :fail, :pass, :close, :merge, :conflict]
   @message_classes [:self, :monitors, :callouts]
   @zipped_message_types for config <- @message_types, type <- @message_classes, do: [config, type]
   @help_text """
@@ -55,6 +55,7 @@ defmodule SlackCoder.Users.Help do
   def message_classes(), do: @message_classes
   def message_types(), do: @message_types
 
+  defp config_for_reply("unstale"), do: "Unstale PR notifications"
   defp config_for_reply("stale"), do: "Stale PR notifications"
   defp config_for_reply("fail"), do: "Build failure notifications"
   defp config_for_reply("pass"), do: "Build success notifications"
@@ -67,6 +68,7 @@ defmodule SlackCoder.Users.Help do
 
   defp for_who("self"), do: "for your PRs"
   defp for_who("monitors"), do: "for your team members you monitor"
+  defp for_who("callouts"), do: "for PRs you're called out on"
 
   defp settings_reply(config, who, value), do: "#{config_for_reply(config)} #{for_who(who)} has been #{turned_to(value)}"
 

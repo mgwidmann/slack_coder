@@ -155,23 +155,24 @@ defmodule SlackCoder.Github.Helper do
      latest_pr_comment = get("repos/#{owner}/#{repo}/pulls/#{number}/comments") |> List.last
      case {latest_issue_comment, latest_pr_comment} do
        {date1, date2} when date1 != nil or date2 != nil ->
-         PR.reg_changeset(pr, %{latest_comment: greatest_date_for(date1["updated_at"], date2["updated_at"])})
+         {which, date} = greatest_date_for(date1["updated_at"], date2["updated_at"])
+         {if(which == :first, do: latest_issue_comment, else: latest_pr_comment),
+          PR.reg_changeset(pr, %{latest_comment: date})}
        {nil, nil} ->
-         PR.reg_changeset(pr, %{latest_comment: pr.opened_at})
+         {nil, PR.reg_changeset(pr, %{latest_comment: pr.opened_at})}
      end
   end
 
-  defp greatest_date_for(nil, date), do: date_for(date)
-  defp greatest_date_for(date, nil), do: date_for(date)
+  defp greatest_date_for(nil, date), do: {:second, date_for(date)}
+  defp greatest_date_for(date, nil), do: {:first, date_for(date)}
   defp greatest_date_for(date1, date2) do
     date1 = date_for(date1)
     date2 = date_for(date2)
-    greater = case Timex.Date.compare(date1, date2) do
-      -1 -> date2
-      0 -> date1 # Doesn't matter really
-      1 -> date1
+    case Timex.Date.compare(date1, date2) do
+      -1 -> {:second, date2}
+      0 -> {:first, date1} # Doesn't matter really
+      1 -> {:first, date1}
     end
-    greater
   end
 
   defp date_for(nil), do: nil
