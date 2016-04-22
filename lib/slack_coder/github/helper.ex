@@ -177,7 +177,7 @@ defmodule SlackCoder.Github.Helper do
 
   defp date_for(nil), do: nil
   defp date_for(string) do
-     {:ok, date} = Timex.DateFormat.parse(string, "{ISO}")
+     {:ok, date} = Timex.parse(string, "{ISO}")
      date
   end
 
