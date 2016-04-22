@@ -32,7 +32,7 @@ defmodule SlackCoder.Github.Watchers.Callout do
     |> Enum.map(&( {issue_number(&1["issue_url"]), &1["body"]} ))
     |> start_watchers(state.github_users, {state.repo, owner})
 
-    {:noreply, Map.put(state, :last_checked, Date.local)}
+    {:noreply, Map.put(state, :last_checked, DateTime.local)}
   end
 
   defp issue_number(url), do: String.split(url, "/") |> List.last
