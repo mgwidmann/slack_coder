@@ -240,7 +240,7 @@ defmodule SlackCoder.Github.Helper do
   if Application.get_env(:slack_coder, :notifications)[:always_allow] do
     def can_send_notifications?(), do: true
   else
-    @weekdays (Application.get_env(:slack_coder, :notifications)[:days] || [1,2,3,4,5]) |> Enum.map(&Timex.Date.day_name(&1))
+    @weekdays (Application.get_env(:slack_coder, :notifications)[:days] || [1,2,3,4,5]) |> Enum.map(&Timex.day_name(&1))
     @min_hour Application.get_env(:slack_coder, :notifications)[:min_hour] || 8
     @max_hour Application.get_env(:slack_coder, :notifications)[:max_hour] || 17
     def can_send_notifications?() do
