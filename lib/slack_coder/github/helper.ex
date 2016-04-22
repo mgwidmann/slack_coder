@@ -244,7 +244,7 @@ defmodule SlackCoder.Github.Helper do
     @min_hour Application.get_env(:slack_coder, :notifications)[:min_hour] || 8
     @max_hour Application.get_env(:slack_coder, :notifications)[:max_hour] || 17
     def can_send_notifications?() do
-      day_name = now |> Timex.Date.weekday |> Timex.Date.day_name
+      day_name = now |> Timex.weekday |> Timex.day_name
       day_name in @weekdays && now.hour >= @min_hour && now.hour <= @max_hour
     end
   end
