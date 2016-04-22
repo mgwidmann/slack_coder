@@ -15,6 +15,9 @@ config :slack_coder, SlackCoder.Repo,
   url: System.get_env("DATABASE_URL"),
   size: 20
 
+  config :slack_coder, :github
+    callback_host: "slack-coder.herokuapp.com"
+
 if File.exists? "config/prod.secret.exs" do
   import_config "prod.secret.exs"
 end

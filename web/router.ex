@@ -40,6 +40,12 @@ defmodule SlackCoder.Router do
     end
   end
 
+  scope "/api", SlackCoder do
+    pipe_through :api
+
+    post "/github/event", GithubController, :event
+  end
+
   forward "/beaker", Beaker.Web
 
   scope "/auth", SlackCoder do

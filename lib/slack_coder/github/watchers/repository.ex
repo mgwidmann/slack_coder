@@ -15,6 +15,11 @@ defmodule SlackCoder.Github.Watchers.Repository do
   end
 
   def init(repo) do
+    repo_config = Application.get_env(:slack_coder, :repos, [])[repo]
+    if repo_config[:webhook] do
+      Logger.info "Setting webhook for #{repo_config[:owner]}/#{repo}"
+      SlackCoder.Github.set_hook(repo_config[:owner], repo)
+    end
     pulls(repo) # Async fetch
     :timer.send_interval @poll_interval, :update_prs
     {:ok, {repo, []}}
