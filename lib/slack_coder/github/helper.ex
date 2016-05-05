@@ -5,56 +5,12 @@ defmodule SlackCoder.Github.Helper do
   alias SlackCoder.Services.CommitService
   require Logger
   require Beaker.TimeSeries
-
-  def get(url, default \\ []) do
-    github_config = Application.get_env(:slack_coder, :github)
-    full_url = "https://#{github_config[:user]}:#{github_config[:pat]}@api.github.com/#{url}"
-    Logger.debug "HTTP Request: curl #{full_url}"
-    response = Beaker.TimeSeries.time("Github:RequestTime", fn -> HTTPoison.get(full_url, Accept: "application/vnd.github.com.v3+json") end)
-    body = case response do
-             {:ok, %HTTPoison.Response{status_code: 200, body: body, headers: headers}} ->
-               rate_limit_info(headers)
-               body
-             {:ok, %HTTPoison.Response{status_code: code, body: body, headers: headers}} ->
-               rate_limit_info(headers)
-               response = case JSX.decode(body) do
-                            {:ok, data} -> data
-                            {:error, _} -> %{"message" => body}
-                          end
-               stack = try(do: throw(:exception), catch: (_ -> System.stacktrace))
-               Logger.warn "#{full_url}\nStatus #{code}: #{response["message"]}\n#{Exception.format_stacktrace stack}"
-               nil
-             {:error, %HTTPoison.Error{reason: reason}} ->
-               Logger.error "Failed to fetch: (#{reason}) #{url}"
-               nil
-           end
-    if body do
-      JSX.decode!(body)
-    else
-      default
-    end
-  end
-
-  defp rate_limit_info(headers) do
-    headers = Enum.into(headers, %{}) # Convert to map for access syntax
-    {remaining, _} = Integer.parse(headers["X-RateLimit-Remaining"] || "0")
-    {total, _} = Integer.parse(headers["X-RateLimit-Limit"] || "1")
-    rate_limit_message = fn ->
-      {timestamp, _} = Integer.parse(headers["X-RateLimit-Reset"] || "0")
-      {:ok, date} = Timex.DateTime.from_seconds(timestamp)
-                    |> Timex.Timezone.convert("America/New_York")
-                    |> Timex.format("%D %T", Timex.Format.DateTime.Formatters.Strftime)
-      "Rate Limit: #{remaining} / #{total} -- Resetting at: #{date}"
-    end
-    percent_used = remaining / total
-    Beaker.TimeSeries.sample("Github:RateLimit", percent_used)
-    # Cannot invoke macros w/ apply
-    if percent_used > 0.25 do
-      Logger.debug rate_limit_message
-    else
-      Logger.warn rate_limit_message
-    end
-  end
+  alias Tentacat.Pulls
+  alias Tentacat.Commits
+  alias Tentacat.Repositories.Statuses
+  alias Tentacat.Issues.Comments, as: IssueComments
+  alias Tentacat.Pulls.Comments, as: PullComments
+  alias SlackCoder.Github
 
   def pulls(repo, existing_prs \\ []) do
     me = self
@@ -67,11 +23,9 @@ defmodule SlackCoder.Github.Helper do
     users = Repo.all(SlackCoder.Models.User)
             |> Enum.map(&(&1.github))
     owner = Application.get_env(:slack_coder, :repos, [])[repo][:owner]
-    Logger.debug "Pulling #{owner}/#{repo} PRs with #{length(existing_prs)} existing"
-    get("repos/#{owner}/#{repo}/pulls", existing_prs)
-    |> Stream.filter(fn
-        %PR{} = pr -> pr
-        pr ->
+
+    Pulls.list(owner, repo, Github.client)
+    |> Stream.filter(fn pr ->
           pr["user"]["login"] in users
       end)
     |> Stream.map(fn(pr)->
@@ -93,9 +47,10 @@ defmodule SlackCoder.Github.Helper do
     commit = pr
              |> refresh_pr_from_db
              |> get_latest_commit
-    response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}", %{})
-    refreshed_pr = build_pr(response, pr)
-    conflict_notification(pr, refreshed_pr)
+
+    refreshed_pr = Pulls.find(pr.owner, pr.repo, pr.number, Github.client)
+                  |> build_pr(pr)
+                  |> conflict_notification(pr)
 
     %PR{ refreshed_pr | latest_commit: commit || pr.latest_commit}
   end
@@ -106,9 +61,11 @@ defmodule SlackCoder.Github.Helper do
 
   defp get_latest_commit(pr) do
     owner = if(pr.fork, do: pr.github_user, else: pr.owner)
-    last_commit = (get("repos/#{owner}/#{pr.repo}/commits?sha=#{pr.branch}") |> List.first)
+    last_commit = Commits.filter(owner, pr.repo, %{sha: pr.branch}, Github.client)
+                  |> List.first
+
     commit = if last_commit["sha"] do # 404 returned when user deletes branch
-      statuses = (pr.statuses_url <> "#{last_commit["sha"]}") |> get
+      statuses = Statuses.find(pr.owner, pr.repo, last_commit["sha"])
       last_status = statuses
                     |> Stream.filter(&( &1["context"] =~ ~r/travis/ ))
                     |> Enum.take(1) # List is already sorted, first is the latest
@@ -139,7 +96,7 @@ defmodule SlackCoder.Github.Helper do
     commit || pr.latest_commit
   end
 
-  def conflict_notification(pr, refreshed_pr) do
+  def conflict_notification(refreshed_pr, pr) do
     user = user_for_pr(pr)
     # Prior was mergeable but now it is not (nil means analysis in process)
     if user && pr.mergeable && refreshed_pr.mergeable == false do
@@ -148,11 +105,13 @@ defmodule SlackCoder.Github.Helper do
       Logger.debug "Merge conflict for PR-#{pr.number}, sending to: #{inspect message_for}"
       notify(slack_users, :conflict, message_for, message, refreshed_pr)
     end
+
+    refreshed_pr
   end
 
   def find_latest_comment(%PR{number: number, repo: repo, owner: owner} = pr) do
-     latest_issue_comment = get("repos/#{owner}/#{repo}/issues/#{number}/comments") |> List.last
-     latest_pr_comment = get("repos/#{owner}/#{repo}/pulls/#{number}/comments") |> List.last
+     latest_issue_comment = IssueComments.find(owner, repo, number, Github.client) |> List.last
+     latest_pr_comment = PullComments.find(owner, repo, number, Github.client) |> List.last
      case {latest_issue_comment, latest_pr_comment} do
        {date1, date2} when date1 != nil or date2 != nil ->
          {which, date} = greatest_date_for(date1["updated_at"], date2["updated_at"])

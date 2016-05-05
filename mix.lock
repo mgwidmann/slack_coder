@@ -33,7 +33,7 @@
   "rollbax": {:hex, :rollbax, "0.5.4"},
   "slack": {:git, "https://github.com/mgwidmann/Elixir-Slack", "1504edc05a77d42b753b283c23e37a6426135fe4", [branch: "im_list_updated"]},
   "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.0"},
-  "tentacat": {:hex, :tentacat, "0.5.0"},
+  "tentacat": {:git, "https://github.com/mgwidmann/tentacat.git", "6c93bee07f1804a57908bda3b7eb1f2843c307e8", [branch: "allow_url_parameters"]},
   "timex": {:hex, :timex, "2.1.4"},
   "timex_ecto": {:hex, :timex_ecto, "1.0.4"},
   "tzdata": {:hex, :tzdata, "0.5.7"},

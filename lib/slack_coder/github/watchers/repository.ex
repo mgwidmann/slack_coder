@@ -55,7 +55,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
         Logger.debug "Stopping watcher for: PR-#{pr.number} #{pr.title}"
         [message_for | slack_users] = user_for_pr(pr)
                                       |> slack_user_with_monitors
-        response = get("repos/#{pr.owner}/#{pr.repo}/pulls/#{pr.number}")
+        response = Pulls.find(pr.owner, pr.repo, pr.number, Github.client)
         merged = response["merged"] || response["merged_at"] != nil
         PR.reg_changeset(pr, %{merged_at: response["merged_at"], closed_at: response["closed_at"]})
           |> Repo.update
