@@ -4,7 +4,6 @@ defmodule SlackCoder.Github.Helper do
   alias SlackCoder.Repo
   alias SlackCoder.Services.CommitService
   require Logger
-  require Beaker.TimeSeries
   alias Tentacat.Pulls
   alias Tentacat.Commits
   alias Tentacat.Repositories.Statuses
@@ -44,9 +43,12 @@ defmodule SlackCoder.Github.Helper do
   end
 
   defp _status(pr) do
-    commit = pr
-             |> refresh_pr_from_db
-             |> get_latest_commit
+    commit = with %PR{} = pr <- refresh_pr_from_db(pr),
+                  %{} = raw_commit <- get_latest_commit(pr),
+                  {travis, codeclimate} <- statuses_for_commit(raw_commit, pr),
+                  %Commit{} = commit <- find_commit_from_db(travis, raw_commit, pr),
+                  %Commit{} = commit <- update_commit(commit, raw_commit, travis, codeclimate, pr), do: commit
+
 
     refreshed_pr = Pulls.find(pr.owner, pr.repo, pr.number, Github.client)
                   |> build_pr(pr)
@@ -61,10 +63,13 @@ defmodule SlackCoder.Github.Helper do
 
   defp get_latest_commit(pr) do
     owner = if(pr.fork, do: pr.github_user, else: pr.owner)
-    last_commit = Commits.filter(owner, pr.repo, %{sha: pr.branch}, Github.client)
-                  |> List.first
 
-    commit = if last_commit["sha"] do # 404 returned when user deletes branch
+    Commits.filter(owner, pr.repo, %{sha: pr.branch}, Github.client)
+    |> List.first
+  end
+
+  defp statuses_for_commit(last_commit, pr) do
+    if last_commit["sha"] do # 404 returned when user deletes branch
       statuses = Statuses.find(pr.owner, pr.repo, last_commit["sha"])
       last_status = statuses
                     |> Stream.filter(&( &1["context"] =~ ~r/travis/ ))
@@ -74,26 +79,33 @@ defmodule SlackCoder.Github.Helper do
                     |> Stream.filter(&( &1["context"] =~ ~r/codeclimate/ ))
                     |> Enum.take(1) # List is already sorted, first is the latest
                     |> List.first
-      commit = if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
-        pr.latest_commit
-      else
-        Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
-      end
-      cs = Commit.changeset(commit, %{
-            status: if(pr.mergeable, do: last_status["state"] || "pending", else: "conflict"),
-            code_climate_status: code_climate["state"] || "pending",
-            travis_url: last_status["target_url"],
-            code_climate_url: code_climate["target_url"],
-            sha: last_commit["sha"],
-            github_user: last_commit["author"]["login"],
-            github_user_avatar: last_commit["author"]["avatar_url"],
-            latest_status_id: last_status["id"],
-            pr_id: pr.id
-           })
-      {:ok, commit} = CommitService.save(cs)
-      commit
+
+      {last_status, code_climate}
     end
-    commit || pr.latest_commit
+  end
+
+  defp find_commit_from_db(last_status, last_commit, pr) do
+    if pr.latest_commit && pr.latest_commit.latest_status_id == last_status["id"] do
+      pr.latest_commit
+    else
+      Repo.get_by(Commit, sha: last_commit["sha"]) || %Commit{}
+    end
+  end
+
+  defp update_commit(commit, last_commit, last_status, code_climate, pr) do
+    cs = Commit.changeset(commit, %{
+          status: if(pr.mergeable, do: last_status["state"] || "pending", else: "conflict"),
+          code_climate_status: code_climate["state"] || "pending",
+          travis_url: last_status["target_url"],
+          code_climate_url: code_climate["target_url"],
+          sha: last_commit["sha"],
+          github_user: last_commit["author"]["login"],
+          github_user_avatar: last_commit["author"]["avatar_url"],
+          latest_status_id: last_status["id"],
+          pr_id: pr.id
+         })
+    {:ok, commit} = CommitService.save(cs)
+    commit
   end
 
   def conflict_notification(refreshed_pr, pr) do
