@@ -78,6 +78,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
     end
   end
 
+  @backoff Application.get_env(:slack_coder, :pr_backoff_start, 1)
   def stale_pr({latest_comment_data, cs}) do
     latest_comment = cs.data.latest_comment || cs.changes[:latest_comment] # Original or new
     pr_latest_comment = cs.changes[:latest_comment] || latest_comment # Updated or original
@@ -87,8 +88,8 @@ defmodule SlackCoder.Github.Watchers.Repository do
       cs = put_change(cs, :backoff, backoff)
       true
     end
-    if Date.compare(latest_comment, pr_latest_comment) != 0 do
-      cs = put_change(cs, :backoff, Application.get_env(:slack_coder, :pr_backoff_start, 1))
+    if Date.compare(latest_comment, pr_latest_comment) != 0 && cs.data.backoff != @backoff do
+      cs = put_change(cs, :backoff, @backoff)
       notify_unstale(cs.data, latest_comment_data)
     end
     {:ok, pr} = SlackCoder.Repo.save(cs)

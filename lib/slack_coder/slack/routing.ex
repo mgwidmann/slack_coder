@@ -1,4 +1,4 @@
-defmodule SlackCoder.Config do
+defmodule SlackCoder.Slack.Routing do
   import SlackCoder.Slack.Helper
   require Logger
 

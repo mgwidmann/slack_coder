@@ -1,7 +1,7 @@
 defmodule SlackCoder.Slack do
   use Slack
   import SlackCoder.Slack.Helper
-  alias SlackCoder.Config
+  alias SlackCoder.Slack.Routing
   alias SlackCoder.Users.Supervisor, as: Users
   alias SlackCoder.Users.User
   require Logger
@@ -61,7 +61,7 @@ defmodule SlackCoder.Slack do
     try do
       s_user = user(slack, if(Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker), else: user))
       message = message_for(s_user, message)
-      slack_user = Config.route_message(slack, s_user)
+      slack_user = Routing.route_message(slack, s_user)
       if slack_user do
         Logger.info "Sending message (#{s_user[:name]}): #{message}"
         send_message(message, slack_user.id, slack)
@@ -83,7 +83,7 @@ defmodule SlackCoder.Slack do
   def handle_close(reason, slack, _state) do
     Logger.error inspect(reason)
     caretaker = user(slack, Application.get_env(:slack_coder, :caretaker))
-    caretaker_im = Config.route_message(slack, caretaker)
+    caretaker_im = Routing.route_message(slack, caretaker)
     if caretaker_im do
       send_message("Crashing: #{inspect reason}", caretaker_im.id, slack)
     end
@@ -94,7 +94,7 @@ defmodule SlackCoder.Slack do
   def handle_connect(slack, state) do
     try do
       Process.register(self, :slack)
-      channel = Config.channel(slack)
+      channel = Routing.channel(slack)
       if channel, do: send_message(@online_message, channel.id, slack)
     rescue
       e ->
