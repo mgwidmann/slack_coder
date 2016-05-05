@@ -58,7 +58,7 @@ defmodule SlackCoder.Github.Helper do
 
   def pulls(repo, existing_prs \\ []) do
     me = self
-    spawn_link fn->
+    Task.start fn->
       send(me, {:pr_response, _pulls(repo, existing_prs)})
     end
   end
@@ -83,7 +83,7 @@ defmodule SlackCoder.Github.Helper do
   def status(pr) do
     if can_send_notifications? || pr.latest_commit == nil do
       me = self
-      spawn_link fn ->
+      Task.start fn ->
         send(me, {:commit_results, _status(pr)})
       end
     end
@@ -254,10 +254,14 @@ defmodule SlackCoder.Github.Helper do
     notify(users, type, message_for, message, pr)
   end
   def notify([], type, message_for, message, pr) do
-    spawn_link __MODULE__, :notify, [{message_for, type, slack_user_called_out?(message_for, pr), message_for, message, pr}]
+    Task.start fn ->
+      notify({message_for, type, slack_user_called_out?(message_for, pr), message_for, message, pr})
+    end
   end
   def notify(slack_user, type, message_for, message, pr) do
-    spawn_link __MODULE__, :notify, [{slack_user, type, slack_user_called_out?(slack_user, pr), message_for, message, pr}]
+    Task.start fn ->
+      notify({slack_user, type, slack_user_called_out?(slack_user, pr), message_for, message, pr})
+    end
   end
 
   def notify({slack_user, type, called_out, message_for, message, pr}) do
