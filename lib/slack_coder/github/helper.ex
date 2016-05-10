@@ -21,8 +21,7 @@ defmodule SlackCoder.Github.Helper do
                             {:ok, data} -> data
                             {:error, _} -> %{"message" => body}
                           end
-               stack = try(do: throw(:exception), catch: (_ -> System.stacktrace))
-               Logger.warn "#{full_url}\nStatus #{code}: #{response["message"]}\n#{Exception.format_stacktrace stack}"
+               Logger.warn "#{full_url}\nStatus #{code}: #{response["message"]}"
                nil
              {:error, %HTTPoison.Error{reason: reason}} ->
                Logger.error "Failed to fetch: (#{reason}) #{url}"
