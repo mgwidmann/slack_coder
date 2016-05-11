@@ -15,12 +15,12 @@
     <%= link @pr.title, to: @pr.html_url, target: "_blank" %>
   </td>
   <td>
-    <%= link_if @pr.latest_commit.travis_url, to: @pr.latest_commit.travis_url, class: "label label-#{status_class(@pr.latest_commit.status)} text-uppercase", target: "_blank" do %>
+    <%= link_if Map.get(@pr.latest_commit, :travis_url), to: Map.get(@pr.latest_commit, :travis_url), class: "label label-#{status_class(@pr.latest_commit.status)} text-uppercase", target: "_blank" do %>
       <%= to_string(@pr.latest_commit.status) %>
     <% end %>
   </td>
   <td>
-    <%= if @pr.latest_commit.code_climate_url do %>
+    <%= if Map.get(@pr.latest_commit, :code_climate_url) do %>
       <%= link to: @pr.latest_commit.code_climate_url, target: "_blank" do %>
         <i class="code-climate"></i>
       <% end %>
