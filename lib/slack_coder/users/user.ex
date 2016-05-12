@@ -1,10 +1,11 @@
 defmodule SlackCoder.Users.User do
   use GenServer
+  require Logger
+  import SlackCoder.Users.Help
   alias SlackCoder.Repo
   alias SlackCoder.Models.User
   alias SlackCoder.Slack
-  import SlackCoder.Users.Help
-  require Logger
+  alias SlackCoder.Github.Notification
 
   # Server API
 
@@ -17,7 +18,7 @@ defmodule SlackCoder.Users.User do
   end
 
   for type <- SlackCoder.Users.Help.message_types() do
-    def handle_cast({unquote(type), called_out, user_for, message}, user) do
+    def handle_cast(%Notification{type: unquote(type), called_out?: called_out, message: message, message_for: user_for}, user) do
       if configured_to_send_message(unquote(type), called_out, user_for, user) do
         Slack.send_to(user.slack, message)
       else
@@ -27,8 +28,8 @@ defmodule SlackCoder.Users.User do
     end
   end
   # Don't send unknown messages
-  def handle_cast({unknown, called_out, user_for, message}, user) do
-    Logger.warn "User #{user.name}(#{user.slack}) received unhandled message: #{inspect {unknown, user_for, message}}"
+  def handle_cast(notification = %Notification{}, user) do
+    Logger.warn "User #{user.name}(#{user.slack}) received unhandled message: #{inspect notification}"
     {:noreply, user}
   end
 

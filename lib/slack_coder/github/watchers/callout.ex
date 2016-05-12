@@ -1,12 +1,12 @@
 defmodule SlackCoder.Github.Watchers.Callout do
   use GenServer
   use Timex
-  import SlackCoder.Github.Helper
   import Ecto.Query, only: [from: 2]
   alias SlackCoder.Repo
   alias Tentacat.Issues.Comments
   alias Tentacat.Pulls.Comments, as: PullComments
   alias SlackCoder.Github
+  alias SlackCoder.Github.Watchers.PullRequest.Helper
 
   @poll_minutes 1
   @poll_interval 60_000 * @poll_minutes # 5 minutes
@@ -51,7 +51,7 @@ defmodule SlackCoder.Github.Watchers.Callout do
   end
 
   defp watch_pr(github_user, pr_number, {repo, owner}) do
-    pr = PullComments.list(owner, repo, pr_number, Github.client) |> build_pr
+    pr = PullComments.list(owner, repo, pr_number, Github.client) |> Helper.build_or_update
 
     SlackCoder.Github.Supervisor.start_watcher(pr)
     |> SlackCoder.Github.Watchers.PullRequest.add_callout(github_user)

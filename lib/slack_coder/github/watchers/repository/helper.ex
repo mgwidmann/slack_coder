@@ -1,0 +1,110 @@
+defmodule SlackCoder.Github.Watchers.Repository.Helper do
+  alias SlackCoder.Repo
+  alias Tentacat.Pulls
+  alias SlackCoder.Models.PR
+  alias SlackCoder.Github.Watchers.PullRequest.Helper
+  import SlackCoder.Github.TimeHelper
+  import Ecto.Changeset, only: [put_change: 3]
+
+  def pulls(repo, existing_prs \\ []) do
+    me = self
+    Task.start fn->
+      send(me, {:pr_response, _pulls(repo, existing_prs)})
+    end
+  end
+
+  defp _pulls(repo, existing_prs) do
+    users = Repo.all(User)
+            |> Enum.map(&(&1.github))
+    owner = Application.get_env(:slack_coder, :repos, [])[repo][:owner]
+
+    Pulls.list(owner, repo, Github.client)
+    |> Stream.filter(fn pr ->
+          pr["user"]["login"] in users
+      end)
+    |> Stream.map(fn(pr)->
+        Helper.build_or_update(pr, Enum.find(existing_prs, &( &1.number == pr["number"] )))
+      end)
+    |> Enum.to_list
+  end
+
+  def find_latest_comment_date(%PR{number: number, repo: repo, owner: owner} = pr) do
+    latest_issue_comment = IssueComments.find(owner, repo, number, Github.client) |> List.last
+    latest_pr_comment = PullComments.find(owner, repo, number, Github.client) |> List.last
+    case greatest_date_for(latest_issue_comment["updated_at"], latest_pr_comment["updated_at"]) do
+      {:first, date} ->
+        %{latest_comment: date || pr.opened_at, latest_comment_url: latest_issue_comment["html_url"]}
+      {:second, date} ->
+        %{latest_comment: date || pr.opened_at, latest_comment_url: latest_pr_comment["html_url"]}
+    end
+  end
+
+  def handle_closed_pr(changeset = %Ecto.Changeset{}, []), do: changeset
+  def handle_closed_pr(changeset = %Ecto.Changeset{}, old_prs) when is_list(old_prs) do
+    old_prs
+    |> Enum.find(&( &1.number == changeset.data.number))
+    |> handle_closed_pr(changeset)
+  end
+  def handle_closed_pr(nil, cs), do: cs
+  def handle_closed_pr(pr = %PR{merged_at: merged, closed_at: closed}, cs) when not (is_nil(merged) or is_nil(closed)) do
+    changeset = if merged do
+                put_change(cs, :notifications, [:merged | cs.changes[:notifications] || cs.notifications])
+              else
+                put_change(cs, :notifications, [:closed | cs.changes[:notifications] || cs.notifications])
+              end
+    SlackCoder.Github.Supervisor.stop_watcher(pr)
+    SlackCoder.Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
+    changeset
+  end
+  def handle_closed_pr(_, cs), do: cs
+
+  def notifications(pr = %PR{notifications: []}), do: pr
+  for type <- [:stale, :unstale, :merged, :closed] do
+    def notifications(pr = %PR{notifications: [unquote(type) | notifications]}) do
+      %PR{ Notification.unquote(type)(pr) | notifications: notifications} |> notifications
+    end
+  end
+
+  def build_changeset(params, pr) do
+    PR.reg_changeset(pr, params)
+  end
+
+  def update_pr(cs) do
+    {:ok, pr} = SlackCoder.Services.PRService.save(cs)
+    pr
+  end
+
+  def stale_notification(cs) do
+    hours = Date.diff(cs.changes.latest_comment, now, :hours)
+    if hours >= cs.data.backoff && Notification.can_send_notifications? do
+      backoff = next_backoff(cs.data.backoff, hours)
+      cs
+      |> put_change(:backoff, backoff)
+      |> put_change(:notifications, [:stale | cs.changes[:notifications] || cs.data.notifications])
+    else
+      cs
+    end
+  end
+
+  @backoff Application.get_env(:slack_coder, :pr_backoff_start, 1)
+  def unstale_notification(cs, latest_comment, pr_latest_comment) do
+    if Date.compare(latest_comment, pr_latest_comment) != 0 && cs.data.backoff != @backoff do
+      cs
+      |> put_change(:backoff, @backoff)
+      |> put_change(:notifications, [:unstale | cs.changes[:notifications] || cs.data.notifications])
+    else
+      cs
+    end
+  end
+
+  def next_backoff(backoff, greater_than) do
+    next_exponent = trunc(:math.log2(backoff) + 1)
+    next_notification = trunc(:math.pow(2, next_exponent))
+    if next_notification > greater_than do
+      next_notification
+    else
+      next_backoff(next_notification, greater_than)
+    end
+  end
+
+end

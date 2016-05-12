@@ -1,6 +1,6 @@
 defmodule SlackCoder.Github.Watchers.PullRequest do
   use GenServer
-  import SlackCoder.Github.Helper
+  import SlackCoder.Github.Watchers.PullRequest.Helper
 
   @poll_interval 60_000
 

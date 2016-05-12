@@ -1,6 +1,5 @@
 defmodule SlackCoder.Models.Commit do
   use SlackCoder.Web, :model
-  alias SlackCoder.Github.Helper
 
   schema "commits" do
     field :sha, :string

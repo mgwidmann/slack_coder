@@ -5,7 +5,7 @@ defmodule SlackCoder.PRChannel do
     socket = socket
              |> assign(:current_user, SlackCoder.Users.Supervisor.user(github) |> SlackCoder.Users.User.get)
     socket = socket # Need updated socket...
-             |> assign(:monitors, SlackCoder.Github.Helper.github_user_with_monitors(socket.assigns.current_user))
+             |> assign(:monitors, SlackCoder.Github.Notification.github_user_with_monitors(socket.assigns.current_user))
     {:ok, socket}
   end
   def join("prs:all", _, _socket) do
