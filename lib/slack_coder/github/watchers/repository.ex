@@ -1,8 +1,6 @@
 defmodule SlackCoder.Github.Watchers.Repository do
   use GenServer
   require Logger
-  import Ecto.Changeset, only: [put_change: 3]
-  import SlackCoder.Github.TimeHelper
   import SlackCoder.Github.Watchers.Repository.Helper
 
 

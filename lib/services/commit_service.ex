@@ -38,6 +38,6 @@ defmodule SlackCoder.Services.CommitService do
   def notify({%Commit{status: "success"}, pr}) do
     Notification.success(pr)
   end
-  def notify({_, pr}), do: nil # Pending or anything
+  def notify({_commit, _pr}), do: nil # Pending or anything
 
 end

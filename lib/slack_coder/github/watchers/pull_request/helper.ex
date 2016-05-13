@@ -20,11 +20,11 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
           |> build_or_update(pr)
           |> conflict_notification(pr)
 
-    commit = with %{} = raw_commit      <- get_latest_commit(pr),
-                  {travis, codeclimate} <- statuses_for_commit(pr, raw_commit),
-                  %Commit{} = commit    <- find_latest_commit(pr, travis["id"], raw_commit["sha"]),
-                  params                <- build_params(pr, raw_commit, travis, codeclimate),
-                  %Commit{} = commit    <- update_commit(commit, params), do: commit
+    commit = (with %{} = raw_commit      <- get_latest_commit(pr),
+                   {travis, codeclimate} <- statuses_for_commit(pr, raw_commit),
+                   %Commit{} = commit    <- find_latest_commit(pr, travis["id"], raw_commit["sha"]),
+                   %{} = params          <- build_params(pr, raw_commit, travis, codeclimate),
+                   %Commit{} = commit    <- update_commit(commit, params), do: commit)
 
     %PR{ pr | latest_commit: commit || pr.latest_commit}
   end
