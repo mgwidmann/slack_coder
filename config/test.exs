@@ -54,3 +54,5 @@ config :logger, level: :warn
 
 # Set a higher stacktrace during test
 config :phoenix, :stacktrace_depth, 20
+
+import_config "test_stubs.exs"

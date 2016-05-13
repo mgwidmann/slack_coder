@@ -47,3 +47,5 @@ import_config "#{Mix.env}.exs"
 config :phoenix, :generators,
   migration: true,
   binary_id: false
+
+config :slack_coder, ecto_repos: [SlackCoder.Repo]

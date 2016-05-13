@@ -59,6 +59,7 @@ defmodule SlackCoder.Mixfile do
       {:oauth2, "~> 0.5"},
       {:beaker, github: "mgwidmann/beaker", branch: "ecto_2"},
       {:rollbax, "~> 0.5.4"},
+      {:stub_alias, github: "mgwidmann/stub_alias"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev},

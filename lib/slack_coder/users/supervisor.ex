@@ -1,6 +1,8 @@
 defmodule SlackCoder.Users.Supervisor do
   import Supervisor.Spec
+  import StubAlias
   require Logger
+  stub_alias SlackCoder.Users.User
 
   def start_link() do
     users = SlackCoder.Repo.all(SlackCoder.Models.User)
@@ -17,16 +19,16 @@ defmodule SlackCoder.Users.Supervisor do
       {:ok, user_pid} ->
         user_pid
       {:error, {:already_started, user_pid}} ->
-        SlackCoder.Users.User.update(user_pid, user)
+        User.update(user_pid, user)
         user_pid
       {:error, :already_present} ->
         user_pid = user(user.slack)
-        SlackCoder.Users.User.update(user_pid, user)
+        User.update(user_pid, user)
         user_pid
     end
   end
 
-  defp user_spec(user), do: worker(SlackCoder.Users.User, [user], id: "User-#{user.slack}-#{user.github}")
+  defp user_spec(user), do: worker(User, [user], id: "User-#{user.slack}-#{user.github}")
 
   def user(slack_or_github) when is_atom(slack_or_github), do: to_string(slack_or_github) |> user
   def user(slack_or_github) do
@@ -46,7 +48,7 @@ defmodule SlackCoder.Users.Supervisor do
       _pid ->
         Supervisor.which_children(__MODULE__)
         |> Enum.map(fn
-          {_, user_pid, _, _} -> SlackCoder.Users.User.get(user_pid)
+          {_, user_pid, _, _} -> User.get(user_pid)
         end)
     end
   end

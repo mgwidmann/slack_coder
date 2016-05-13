@@ -10,7 +10,7 @@ defmodule SlackCoder.Github.RepositoryTest do
     Ecto.Adapters.SQL.Sandbox.checkout(SlackCoder.Repo)
   end
 
-  describe "stale notifications" do
+  xdescribe "stale notifications" do
     let :now, do: Timex.Date.now
     let :two_hours_ago, do: Timex.Date.now |> Timex.Date.subtract(Timex.Time.to_timestamp(2, :hours))
     let :three_hours_ago, do: Timex.Date.now |> Timex.Date.subtract(Timex.Time.to_timestamp(3, :hours))

@@ -6,15 +6,15 @@ defmodule SlackCoder.ErrorViewTest do
 
   describe "renders" do
     it "renders 404.html" do
-      expect(render_to_string(SlackCoder.ErrorView, "404.html", [])) |> to_eq("Page not found")
+      expect(render_to_string(SlackCoder.ErrorView, "404.html", [])) |> to_include("404 Not Found")
     end
 
     it "render 500.html" do
-      expect(render_to_string(SlackCoder.ErrorView, "500.html", [])) |> to_eq("Server internal error")
+      expect(render_to_string(SlackCoder.ErrorView, "500.html", [])) |> to_include("500 That&#39;s broken")
     end
 
     it "render any other" do
-      expect(render_to_string(SlackCoder.ErrorView, "505.html", [])) |> to_eq("Server internal error")
+      expect(render_to_string(SlackCoder.ErrorView, "505.html", [])) |> to_include("500 That&#39;s broken")
     end
   end
 end

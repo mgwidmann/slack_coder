@@ -1,9 +1,10 @@
 defmodule SlackCoder.Slack do
   use Slack
+  import StubAlias
   import SlackCoder.Slack.Helper
   alias SlackCoder.Slack.Routing
-  alias SlackCoder.Users.Supervisor, as: Users
-  alias SlackCoder.Users.User
+  stub_alias SlackCoder.Users.Supervisor, as: Users
+  stub_alias SlackCoder.Users.User
   require Logger
   @online_message """
   :slack: *Slack* :computer: *Coder* online!

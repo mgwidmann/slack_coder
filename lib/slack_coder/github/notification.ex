@@ -1,5 +1,8 @@
 defmodule SlackCoder.Github.Notification do
   import SlackCoder.Github.TimeHelper
+  import StubAlias
+  stub_alias SlackCoder.Users.User
+  stub_alias SlackCoder.Users.Supervisor, as: Users
 
   defstruct [:slack_user, :type, :called_out?, :message_for, :message]
 
@@ -125,20 +128,20 @@ defmodule SlackCoder.Github.Notification do
   end
 
   defp user_with_monitors(user, map_to) do
-    SlackCoder.Users.Supervisor.users
+    Users.users
     |> Stream.filter(&(user.github in &1.monitors))
     |> Enum.map(&(Map.get(&1, map_to)))
   end
 
   defp slack_user_called_out?(slack_user, pr) do
-    SlackCoder.Users.Supervisor.user(slack_user)
-    |> SlackCoder.Users.User.get
+    Users.user(slack_user)
+    |> User.get
     |> SlackCoder.Github.Supervisor.called_out?(pr)
   end
 
   def user_for_pr(pr) do
-    SlackCoder.Users.Supervisor.user(pr.github_user)
-    |> SlackCoder.Users.User.get
+    Users.user(pr.github_user)
+    |> User.get
   end
 
 end
