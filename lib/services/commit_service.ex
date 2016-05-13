@@ -9,7 +9,7 @@ defmodule SlackCoder.Services.CommitService do
       {:ok, commit} ->
         if changeset.changes[:status] do
           commit
-          |> load_pr
+          |> Repo.preload(:pr)
           |> broadcast_commit
           |> notify
         end
@@ -20,24 +20,19 @@ defmodule SlackCoder.Services.CommitService do
     end
   end
 
-  def load_pr(commit) do
-    pr = Repo.preload commit, :pr
-    {commit, pr}
-  end
-
-  def broadcast_commit({commit, pr}) do
-    pr = %PR{ pr | latest_commit: commit, github_user_avatar: commit.github_user_avatar } # temporary for view only
+  def broadcast_commit(commit) do
+    pr = %PR{ commit.pr | latest_commit: commit, github_user_avatar: commit.github_user_avatar } # temporary for view only
     html = SlackCoder.PageView.render("pull_request.html", pr: pr)
     SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
-    {commit, pr}
+    commit
   end
 
-  def notify({%Commit{status: status}, pr}) when status in ["failure", "error"] do
-    Notification.failure(pr)
+  def notify(commit = %Commit{status: status}) when status in ["failure", "error"] do
+    Notification.failure(commit.pr)
   end
-  def notify({%Commit{status: "success"}, pr}) do
-    Notification.success(pr)
+  def notify(commit = %Commit{status: "success"}) do
+    Notification.success(commit.pr)
   end
-  def notify({_commit, _pr}), do: nil # Pending or anything
+  def notify(_commit), do: nil # Pending or anything
 
 end

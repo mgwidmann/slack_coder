@@ -7,9 +7,10 @@ defmodule SlackCoder.Github do
   end
 
   @callback_url "http://#{Application.get_env(:slack_coder, :github)[:callback_host]}/api/github/event"
+  @events ~w(push issue_comment commit_comment issues pull_request pull_request_review_comment status)
   @hook_config %{
     name: "web",
-    events: ["push", "issue_comment", "commit_comment", "issues", "pull_request", "pull_request_review_comment", "status"],
+    events: @events,
     config: %{
       url: @callback_url,
       content_type: "json"
@@ -26,6 +27,8 @@ defmodule SlackCoder.Github do
     end
     hook
   end
+
+  def events(), do: @events
 
   defp find_hook(%{"config" => %{"url" => url}}) do
     @callback_url == url

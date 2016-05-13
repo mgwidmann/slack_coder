@@ -62,8 +62,8 @@ defmodule SlackCoder.Users.User do
 
   # Client API
 
-  def notification(user_pid, {type, called_out, user, message}) do
-    GenServer.cast user_pid, {type, called_out, user, message}
+  def notification(user_pid, notification = %Notification{}) do
+    GenServer.cast user_pid, notification
   end
 
   def help(user_pid, message) do

@@ -1,8 +1,11 @@
 defmodule SlackCoder.Github.Watchers.Repository.Helper do
+  use Timex
   alias SlackCoder.Repo
   alias Tentacat.Pulls
-  alias SlackCoder.Models.PR
-  alias SlackCoder.Github.Watchers.PullRequest.Helper
+  alias Tentacat.Issues.Comments, as: IssueComments
+  alias Tentacat.Pulls.Comments, as: PullComments
+  alias SlackCoder.Models.{PR, User}
+  alias SlackCoder.{Github, Github.Notification, Github.Watchers.PullRequest.Helper}
   import SlackCoder.Github.TimeHelper
   import Ecto.Changeset, only: [put_change: 3]
 
@@ -29,8 +32,8 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
   end
 
   def find_latest_comment_date(%PR{number: number, repo: repo, owner: owner} = pr) do
-    latest_issue_comment = IssueComments.find(owner, repo, number, Github.client) |> List.last
-    latest_pr_comment = PullComments.find(owner, repo, number, Github.client) |> List.last
+    latest_issue_comment = IssueComments.list(owner, repo, number, Github.client) |> List.last
+    latest_pr_comment = PullComments.list(owner, repo, number, Github.client) |> List.last
     case greatest_date_for(latest_issue_comment["updated_at"], latest_pr_comment["updated_at"]) do
       {:first, date} ->
         %{latest_comment: date || pr.opened_at, latest_comment_url: latest_issue_comment["html_url"]}
@@ -74,8 +77,8 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
     pr
   end
 
-  def stale_notification(cs) do
-    hours = Date.diff(cs.changes.latest_comment, now, :hours)
+  def stale_notification(cs = %Ecto.Changeset{changes: %{latest_comment: time}}) when not is_nil(time) do
+    hours = Date.diff(time, now, :hours)
     if hours >= cs.data.backoff && Notification.can_send_notifications? do
       backoff = next_backoff(cs.data.backoff, hours)
       cs
@@ -85,10 +88,11 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
       cs
     end
   end
+  def stale_notification(cs), do: cs # Latest comment not available, can't check stale notification
 
   @backoff Application.get_env(:slack_coder, :pr_backoff_start, 1)
-  def unstale_notification(cs, latest_comment, pr_latest_comment) do
-    if Date.compare(latest_comment, pr_latest_comment) != 0 && cs.data.backoff != @backoff do
+  def unstale_notification(cs = %Ecto.Changeset{changes: %{latest_comment: new_time}, data: %PR{latest_comment: old_time}}) when not (is_nil(new_time) or is_nil(old_time)) do
+    if Date.compare(new_time, old_time) != 0 && cs.data.backoff != @backoff do
       cs
       |> put_change(:backoff, @backoff)
       |> put_change(:notifications, [:unstale | cs.changes[:notifications] || cs.data.notifications])
@@ -96,6 +100,7 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
       cs
     end
   end
+  def unstale_notification(cs), do: cs # Latest comment not available, can't check unstale notification
 
   def next_backoff(backoff, greater_than) do
     next_exponent = trunc(:math.log2(backoff) + 1)

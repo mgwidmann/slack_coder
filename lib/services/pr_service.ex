@@ -10,7 +10,7 @@ defmodule SlackCoder.Services.PRService do
     |> Repo.save
     |> case do
       {:ok, pr} ->
-        {:ok, Repository.notifications(pr)}
+        {:ok, Helper.notifications(pr)}
       errored_changeset ->
         Logger.error "Unable to save PR: #{inspect errored_changeset}"
         errored_changeset

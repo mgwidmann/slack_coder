@@ -13,7 +13,8 @@ defmodule SlackCoder.Github.Notification do
       [message_for | slack_users] ->
         message = ":heavy_multiplication_x: *MERGE CONFLICTS* #{pr.title} \n#{pr.html_url}"
         notify(slack_users, :conflict, message_for, message, pr)
-      _ -> nil
+        pr
+      _ -> pr
     end
   end
 
@@ -22,7 +23,8 @@ defmodule SlackCoder.Github.Notification do
       [message_for | slack_users] ->
         message = ":facepalm: *BUILD FAILURE* #{pr.title} :-1:\n#{pr.latest_commit.travis_url}\n#{pr.html_url}"
         notify(slack_users, :fail, message_for, message, pr)
-      _ -> nil
+        pr
+      _ -> pr
     end
   end
 
@@ -31,7 +33,8 @@ defmodule SlackCoder.Github.Notification do
       [message_for | slack_users] ->
         message = ":bananadance: #{pr.title} :success:\n#{pr.html_url}"
         notify(slack_users, :pass, message_for, message, pr)
-      _ -> nil
+        pr
+      _ -> pr
     end
   end
 
@@ -43,7 +46,8 @@ defmodule SlackCoder.Github.Notification do
         #{pr.html_url}
         """
         notify(slack_users, :merge, message_for, message, pr)
-      _ -> nil
+        pr
+      _ -> pr
     end
   end
 
@@ -57,7 +61,8 @@ defmodule SlackCoder.Github.Notification do
         #{pr.html_url}
         """
         notify(slack_users, :stale, message_for, message, pr)
-      _ -> nil
+        pr
+      _ -> pr
     end
   end
 
@@ -66,7 +71,8 @@ defmodule SlackCoder.Github.Notification do
       [message_for | slack_users] ->
         message = ":email: *CHATTER* #{pr.title} :memo:\n#{latest_comment_url || pr.html_url}"
         notify(slack_users, :unstale, message_for, message, pr)
-      _ -> nil
+        pr
+      _ -> pr
     end
   end
 

@@ -2,8 +2,13 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
   alias SlackCoder.Github.Notification
   alias SlackCoder.Models.Commit
   alias SlackCoder.Models.PR
+  alias SlackCoder.Repo
+  alias SlackCoder.Services.PRService
+  alias SlackCoder.Services.CommitService
+  alias SlackCoder.Github
   alias Tentacat.Pulls
   alias Tentacat.Commits
+  alias Tentacat.Repositories.Statuses
   import SlackCoder.Github.TimeHelper
 
   def status(pr) do
@@ -21,7 +26,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
           |> conflict_notification(pr)
 
     commit = (with %{} = raw_commit      <- get_latest_commit(pr),
-                   {travis, codeclimate} <- statuses_for_commit(pr, raw_commit),
+                   {travis, codeclimate} <- statuses_for_commit(pr, raw_commit["sha"]),
                    %Commit{} = commit    <- find_latest_commit(pr, travis["id"], raw_commit["sha"]),
                    %{} = params          <- build_params(pr, raw_commit, travis, codeclimate),
                    %Commit{} = commit    <- update_commit(commit, params), do: commit)
@@ -83,14 +88,15 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
 
   defp statuses_for_commit(_pr, nil), do: nil # 404 returned when user deletes branch
   defp statuses_for_commit(pr, sha) do
-    statuses = Statuses.find(pr.owner, pr.repo, sha)
+    status = Statuses.find(pr.owner, pr.repo, sha, Github.client)
+    statuses = status["statuses"]
 
     last_status = statuses # List is already sorted, first is the latest
                   |> Enum.find(&( &1["context"] =~ ~r/travis/))
     code_climate = statuses # List is already sorted, first is the latest
                   |> Enum.find(&( &1["context"] =~ ~r/codeclimate/))
 
-    {last_status, code_climate}
+    {last_status || status["state"], code_climate}
   end
 
   # if pr has latest commit object use that
