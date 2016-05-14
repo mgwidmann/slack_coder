@@ -8,6 +8,7 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
   alias SlackCoder.{Github, Github.Notification, Github.Watchers.PullRequest.Helper}
   import SlackCoder.Github.TimeHelper
   import Ecto.Changeset, only: [put_change: 3]
+  require Logger
 
   def pulls(repo, existing_prs \\ []) do
     me = self

@@ -10,6 +10,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
   alias Tentacat.Commits
   alias Tentacat.Repositories.Statuses
   import SlackCoder.Github.TimeHelper
+  require Logger
 
   def status(pr) do
     if Notification.can_send_notifications? || pr.latest_commit == nil do
