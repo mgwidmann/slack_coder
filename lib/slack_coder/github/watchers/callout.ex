@@ -31,11 +31,18 @@ defmodule SlackCoder.Github.Watchers.Callout do
 
     {:ok, since} = Timex.format(state.last_checked, "{ISOz}")
 
-    Comments.filter_all(owner, state.repo, %{since: since}, Github.client)
-    |> Enum.map(&( {issue_number(&1["issue_url"]), &1["body"]} ))
-    |> start_watchers(state.github_users, {state.repo, owner})
+    success = try do
+      Comments.filter_all(owner, state.repo, %{since: since}, Github.client)
+      |> Enum.map(&( {issue_number(&1["issue_url"]), &1["body"]} ))
+      |> start_watchers(state.github_users, {state.repo, owner})
+      true
+    rescue # Rate limiting from Github causes exceptions, until a better solution
+      e -> # within Tentacat presents itself, just log the exception...
+        Logger.error "Error updating Callouts: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
+        false
+    end
 
-    {:noreply, Map.put(state, :last_checked, DateTime.local)}
+    {:noreply, if(success, do: Map.put(state, :last_checked, DateTime.local), else: state)}
   end
 
   defp issue_number(url), do: String.split(url, "/") |> List.last |> String.to_integer
