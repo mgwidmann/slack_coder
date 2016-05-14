@@ -7,6 +7,7 @@ defmodule SlackCoder.Github.Watchers.Callout do
   alias Tentacat.Pulls.Comments, as: PullComments
   alias SlackCoder.Github
   alias SlackCoder.Github.Watchers.PullRequest.Helper
+  require Logger
 
   @poll_minutes 1
   @poll_interval 60_000 * @poll_minutes # 5 minutes
