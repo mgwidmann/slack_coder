@@ -66,6 +66,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
                       opened_at: date_for(pr["created_at"]),
                       closed_at: date_for(pr["closed_at"]),
                       merged_at: date_for(pr["merged_at"]),
+                      mergeable: not pr["mergeable_state"] in ["dirty"],
                       owner: owner,
                       repo: repo,
                       branch: pr["head"]["ref"],
