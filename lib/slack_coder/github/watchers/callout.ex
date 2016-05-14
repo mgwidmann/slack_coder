@@ -39,7 +39,7 @@ defmodule SlackCoder.Github.Watchers.Callout do
       true
     rescue # Rate limiting from Github causes exceptions, until a better solution
       e -> # within Tentacat presents itself, just log the exception...
-        Logger.error "Error updating Callouts: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
+        # Logger.error "Error updating Callouts: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
         false
     end
 

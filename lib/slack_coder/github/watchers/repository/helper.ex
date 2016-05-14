@@ -17,7 +17,7 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
         send(me, {:pr_response, _pulls(repo, existing_prs)})
       rescue # Rate limiting from Github causes exceptions, until a better solution
         e -> # within Tentacat presents itself, just log the exception...
-          Logger.error "Error updating Repository info: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
+          # Logger.error "Error updating Repository info: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
       end
     end
   end
