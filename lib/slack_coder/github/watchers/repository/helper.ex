@@ -12,7 +12,12 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
   def pulls(repo, existing_prs \\ []) do
     me = self
     Task.start fn->
-      send(me, {:pr_response, _pulls(repo, existing_prs)})
+      try do
+        send(me, {:pr_response, _pulls(repo, existing_prs)})
+      rescue # Rate limiting from Github causes exceptions, until a better solution
+        e -> # within Tentacat presents itself, just log the exception...
+          Logger.error "#{Exception.message(e)}\n#{Exception.format_stacktrace}"
+      end
     end
   end
 

@@ -15,7 +15,12 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
     if Notification.can_send_notifications? || pr.latest_commit == nil do
       me = self
       Task.start fn ->
-        send(me, {:commit_results, _status(pr)})
+        try do
+          send(me, {:commit_results, _status(pr)})
+        rescue # Rate limiting from Github causes exceptions, until a better solution
+          e -> # within Tentacat presents itself, just log the exception...
+            Logger.error "#{Exception.message(e)}\n#{Exception.format_stacktrace}"
+        end
       end
     end
   end
