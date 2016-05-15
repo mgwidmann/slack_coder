@@ -32,11 +32,17 @@ defmodule SlackCoder.Github.Watchers.Repository do
           |> Stream.map(fn(pr)->
             SlackCoder.Github.Supervisor.start_watcher(pr)
 
-            pr
-            |> find_latest_comment_date
-            |> build_changeset(pr)
-            |> handle_closed_pr(old_prs)
-            |> update_pr
+            try do
+              pr
+              |> find_latest_comment_date
+              |> build_changeset(pr)
+              |> handle_closed_pr(old_prs)
+              |> update_pr
+            rescue
+              e ->
+                Logger.error "Unable to set webhook: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
+                pr
+            end
           end)
           |> Enum.reject(fn(pr)->
             pr.closed_at || pr.merged_at
