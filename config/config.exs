@@ -49,3 +49,5 @@ config :phoenix, :generators,
   binary_id: false
 
 config :slack_coder, ecto_repos: [SlackCoder.Repo]
+
+config :tzdata, :autoupdate, :disabled
