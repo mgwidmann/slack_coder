@@ -18,6 +18,7 @@ defmodule SlackCoder.VerifyUser do
   end
 
   defp verify(%User{admin: true}, _params), do: true
+  defp verify(%User{id: _id}, %{"id" => "new"}), do: true
   defp verify(%User{id: id}, %{"id" => sid}) when is_binary(sid) do
     case Integer.parse(sid) do
       {^id, ""} -> true
