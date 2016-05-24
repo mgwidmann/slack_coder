@@ -6,10 +6,6 @@ defmodule SlackCoder.Github.RepositoryTest do
   alias SlackCoder.Github.Watchers.Repository, as: Watcher
   use Timex
 
-  before :each do
-    Ecto.Adapters.SQL.Sandbox.checkout(SlackCoder.Repo)
-  end
-
   xdescribe "stale notifications" do
     let :now, do: Timex.Date.now
     let :two_hours_ago, do: Timex.Date.now |> Timex.Date.subtract(Timex.Time.to_timestamp(2, :hours))

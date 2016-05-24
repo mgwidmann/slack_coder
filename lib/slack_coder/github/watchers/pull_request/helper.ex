@@ -19,8 +19,9 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
         try do
           send(me, {:commit_results, _status(pr)})
         rescue # Rate limiting from Github causes exceptions, until a better solution
-          e -> # within Tentacat presents itself, just log the exception...
+          _ -> # within Tentacat presents itself, just log the exception...
             # Logger.error "Error updating PR info: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
+            nil
         end
       end
     end
@@ -50,7 +51,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
                            merged_at: date_for(pr["merged_at"]),
                            mergeable: mergeable
                          })
-                         |> Repo.update
+                         |> PRService.update
     %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"] }
   end
   def build_or_update(pr, new_pr = %PR{}) do

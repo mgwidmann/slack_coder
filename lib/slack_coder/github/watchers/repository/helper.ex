@@ -1,9 +1,11 @@
 defmodule SlackCoder.Github.Watchers.Repository.Helper do
   use Timex
+  import StubAlias
   alias SlackCoder.Repo
   alias Tentacat.Pulls
-  alias Tentacat.Issues.Comments, as: IssueComments
-  alias Tentacat.Pulls.Comments, as: PullComments
+  stub_alias Tentacat.Issues.Comments, as: IssueComments
+  stub_alias Tentacat.Pulls.Comments, as: PullComments
+  stub_alias SlackCoder.Github.Supervisor, as: GithubSupervisor
   alias SlackCoder.Models.{PR, User}
   alias SlackCoder.{Github, Github.Notification, Github.Watchers.PullRequest.Helper}
   import SlackCoder.Github.TimeHelper
@@ -16,8 +18,9 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
       try do
         send(me, {:pr_response, _pulls(repo, existing_prs)})
       rescue # Rate limiting from Github causes exceptions, until a better solution
-        e -> # within Tentacat presents itself, just log the exception...
+        _ -> # within Tentacat presents itself, just log the exception...
           # Logger.error "Error updating Repository info: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
+          nil
       end
     end
   end
@@ -52,20 +55,29 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
   def handle_closed_pr(changeset = %Ecto.Changeset{}, old_prs) when is_list(old_prs) do
     old_prs
     |> Enum.find(&( &1.number == changeset.data.number))
-    |> handle_closed_pr(changeset)
+    |> _handle_closed_pr(changeset)
   end
-  def handle_closed_pr(nil, cs), do: cs
-  def handle_closed_pr(pr = %PR{merged_at: merged, closed_at: closed}, cs) when not (is_nil(merged) or is_nil(closed)) do
-    changeset = if merged do
-                put_change(cs, :notifications, [:merged | cs.changes[:notifications] || cs.notifications])
-              else
-                put_change(cs, :notifications, [:closed | cs.changes[:notifications] || cs.notifications])
-              end
-    SlackCoder.Github.Supervisor.stop_watcher(pr)
+
+  defp _handle_closed_pr(nil, cs), do: cs
+  defp _handle_closed_pr(pr = %PR{}, cs = %Ecto.Changeset{changes: %{merged_at: merged}}) when not is_nil(merged) do
+    cleanup_pr(pr)
+
+    cs
+    |> put_change(:notifications, [:merged | cs.changes[:notifications] || cs.data.notifications])
+  end
+  defp _handle_closed_pr(pr = %PR{}, cs = %Ecto.Changeset{changes: %{closed_at: closed}}) when not is_nil(closed) do
+    cleanup_pr(pr)
+
+    cs
+    |> put_change(:notifications, [:closed | cs.changes[:notifications] || cs.data.notifications])
+  end
+  defp _handle_closed_pr(_, cs), do: cs
+
+  defp cleanup_pr(pr) do
+    GithubSupervisor.stop_watcher(pr)
     SlackCoder.Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
-    changeset
   end
-  def handle_closed_pr(_, cs), do: cs
+
 
   def notifications(pr = %PR{notifications: []}), do: pr
   for type <- [:stale, :unstale, :merged, :closed] do

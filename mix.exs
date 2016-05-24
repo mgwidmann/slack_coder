@@ -17,7 +17,7 @@ defmodule SlackCoder.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :beaker, :rollbax,
-                   :phoenix_ecto, :slack, :httpoison, :postgrex, :tzdata, :os_mon],
+                   :phoenix_ecto, :slack, :httpoison, :postgrex, :tzdata],
      mod: mod(Mix.env)]
   end
 
