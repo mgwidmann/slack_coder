@@ -11,11 +11,19 @@ defmodule SlackCoder.Users.Help do
   _More to come..._
 
   *Config*
+  config mute
+  config unmute
   #{@zipped_message_types |> Enum.map(fn([config, type])-> "config #{config} #{type} <on/off>" end) |>Enum.join("\n")}
   """
   @unknown_message "I'm sorry. I'm too dumb to comprehend what you mean. :disappointed:"
   def handle_message(["help" | _command], config) do
     {config, @help_text}
+  end
+  def handle_message(["config", "unmute"], config) do
+    mute(config, false)
+  end
+  def handle_message(["config", "mute"], config) do
+    mute(config, true)
   end
   def handle_message(["config" | settings_list], config) do
     settings(settings_list, config)
@@ -45,6 +53,10 @@ defmodule SlackCoder.Users.Help do
     {config, "Don't think thats a configuration setting, try `help` to get more info"}
   end
 
+  defp mute(config, mute) do
+    {:muted, mute, mute_reply(mute)}
+  end
+
   @static_config %{}
   @default_config Enum.into(Enum.map(@zipped_message_types, &({Enum.join(&1, "_"), true})), @static_config)
   def default_config(), do: @default_config
@@ -71,5 +83,8 @@ defmodule SlackCoder.Users.Help do
   defp for_who("callouts"), do: "for PRs you're called out on"
 
   defp settings_reply(config, who, value), do: "#{config_for_reply(config)} #{for_who(who)} has been #{turned_to(value)}"
+
+  defp mute_reply(true), do: "Ok, I will be quiet. Let me know when I can talk again with `config unmute`"
+  defp mute_reply(false), do: "Glad to help. I'll let you know of anything that happens from now on."
 
 end
