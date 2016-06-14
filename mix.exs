@@ -16,7 +16,7 @@ defmodule SlackCoder.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :beaker, :rollbax,
+    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :beaker, :flames,
                    :phoenix_ecto, :slack, :httpoison, :postgrex, :tzdata],
      mod: mod(Mix.env)]
   end
@@ -57,7 +57,7 @@ defmodule SlackCoder.Mixfile do
       {:ecto, "2.0.0-rc.1", override: true},
       {:oauth2, "~> 0.5"},
       {:beaker, github: "mgwidmann/beaker", branch: "ecto_2"},
-      {:rollbax, "~> 0.5.4"},
+      {:flames, "~> 0.1.0"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev},

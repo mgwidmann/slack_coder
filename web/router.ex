@@ -22,6 +22,8 @@ defmodule SlackCoder.Router do
     plug :accepts, ["json"]
   end
 
+  forward "/errors", Flames.Web
+
   scope "/", SlackCoder do
     pipe_through :browser # Use the default browser stack
 

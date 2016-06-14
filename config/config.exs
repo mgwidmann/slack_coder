@@ -26,20 +26,19 @@ config :slack_coder, :github_oauth,
   client_secret: "your-github-client-secret",
   redirect_uri: "http://localhost:4000/auth/github/callback"
 
+config :slack_coder, ecto_repos: [SlackCoder.Repo]
+
+config :flames,
+  repo: SlackCoder.Repo,
+  endpoint: SlackCoder.Endpoint
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
 config :logger,
-  backends: [:console, Rollbax.Notifier]
-
-config :logger, Rollbax.Notifier,
-  level: :warn
-
-config :rollbax,
-  access_token: "bfb7314f563b47e0bdbb2b0d5cf983e0",
-  environment: "dev"
+  backends: [:console, Flames.Logger]
 
 import_config "#{Mix.env}.exs"
 
