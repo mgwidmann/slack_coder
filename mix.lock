@@ -9,6 +9,7 @@
   "decimal": {:hex, :decimal, "1.1.1", "a8ff5b673105e6cdaca96f799aeefc6f07142881b616c65db16e14e556b16e76", [:mix], []},
   "ecto": {:hex, :ecto, "2.0.0-rc.1", "c3378c0f1fd55f130a2088aa21fce9fef3e6c165e2fc77a57e3a9ca6e1a148e9", [:mix], [{:sbroker, "~> 0.7", [hex: :sbroker, optional: true]}, {:postgrex, "~> 0.11.1", [hex: :postgrex, optional: true]}, {:poolboy, "~> 1.5", [hex: :poolboy, optional: false]}, {:poison, "~> 1.5 or ~> 2.0", [hex: :poison, optional: true]}, {:mariaex, "~> 0.7.1", [hex: :mariaex, optional: true]}, {:decimal, "~> 1.0", [hex: :decimal, optional: false]}]},
   "exjsx": {:hex, :exjsx, "3.1.0", "d419162cb2d5be80070835c2c2b8c78c8c45907706c991d23f3750dae506d1e9", [:mix], [{:jsx, "~> 2.4.0", [hex: :jsx, optional: false]}]},
+  "flames": {:git, "https://github.com/mgwidmann/flames.git", "c6fa4d3a597db99ed6495017732878251e07619f", []},
   "fs": {:hex, :fs, "0.9.2", "ed17036c26c3f70ac49781ed9220a50c36775c6ca2cf8182d123b6566e49ec59", [:rebar], []},
   "gettext": {:hex, :gettext, "0.11.0", "80c1dd42d270482418fa158ec5ba073d2980e3718bacad86f3d4ad71d5667679", [:mix], []},
   "hackney": {:hex, :hackney, "1.6.0", "8d1e9440c9edf23bf5e5e2fe0c71de03eb265103b72901337394c840eec679ac", [:rebar3], [{:ssl_verify_fun, "1.1.0", [hex: :ssl_verify_fun, optional: false]}, {:mimerl, "1.0.2", [hex: :mimerl, optional: false]}, {:metrics, "1.0.1", [hex: :metrics, optional: false]}, {:idna, "1.2.0", [hex: :idna, optional: false]}, {:certifi, "0.4.0", [hex: :certifi, optional: false]}]},
