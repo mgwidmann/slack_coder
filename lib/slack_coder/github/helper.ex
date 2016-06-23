@@ -73,8 +73,10 @@ defmodule SlackCoder.Github.Helper do
         pr ->
           pr["user"]["login"] in users
       end)
-    |> Stream.map(fn(pr)->
-        build_pr(pr, Enum.find(existing_prs, &( &1.number == pr["number"] )))
+    |> Stream.map(fn
+        pr = %PR{} -> pr
+        pr ->
+          build_pr(pr, Enum.find(existing_prs, &( &1.number == pr["number"] )))
       end)
     |> Enum.to_list
   end
@@ -185,6 +187,7 @@ defmodule SlackCoder.Github.Helper do
   def build_pr(pr, nil), do: build_pr(pr)
   def build_pr(pr, %PR{id: id} = existing_pr) when is_integer(id) do
     mergeable = not pr["mergeable_state"] in ["dirty"]
+    if(!pr["title"] || pr["title"] == "", do: Logger.error("PR title cannot be blank #{inspect pr}"))
     {:ok, existing_pr} = PR.reg_changeset(existing_pr, %{
                            title: pr["title"],
                            closed_at: date_for(pr["closed_at"]),
