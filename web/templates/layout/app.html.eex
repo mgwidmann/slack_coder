@@ -39,9 +39,13 @@
             <%= link "Logout", to: auth_path(@conn, :delete), method: :delete %>
           </div>
         <% end %>
-        <div class="pull-right">
+        <div class="pull-right text-right">
           <a href="/beaker/">
             <i class="glyphicon glyphicon-time"></i> Application Metrics
+          </a>
+          <br/>
+          <a href="/errors">
+            <i class="glyphicon glyphicon-remove-circle"></i> Errors
           </a>
         </div>
       </div>
