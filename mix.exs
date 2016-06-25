@@ -4,7 +4,7 @@ defmodule SlackCoder.Mixfile do
   def project do
     [app: :slack_coder,
      version: "0.0.1",
-     elixir: "~> 1.2",
+     elixir: "~> 1.3",
      elixirc_paths: elixirc_paths(Mix.env),
      compilers: [:phoenix] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
@@ -16,7 +16,7 @@ defmodule SlackCoder.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :beaker, :rollbax,
+    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :beaker, :flames,
                    :phoenix_ecto, :slack, :httpoison, :postgrex, :tzdata],
      mod: mod(Mix.env)]
   end
@@ -40,10 +40,10 @@ defmodule SlackCoder.Mixfile do
   defp deps do
     [
       # Prod dependencies
-      {:phoenix, "~> 1.1.0"},
-      {:phoenix_ecto, "3.0.0-beta.2", override: true},
+      {:phoenix, "~> 1.2.0"},
+      {:phoenix_ecto, "~> 3.0"},
       {:postgrex, "~> 0.11"},
-      {:phoenix_html, "~> 2.3"},
+      {:phoenix_html, "~> 2.6"},
       {:cowboy, "~> 1.0"},
       {:timex_ecto, "~> 1.0"},
       # {:slack, "~> 0.2.0"},
@@ -55,10 +55,10 @@ defmodule SlackCoder.Mixfile do
       {:tentacat, github: "mgwidmann/tentacat", branch: "allow_url_parameters"},
       {:httpoison, "~> 0.8"},
       {:exjsx, "~> 3.2", override: true},
-      {:ecto, "2.0.0-rc.1", override: true},
-      {:oauth2, "~> 0.5"},
-      {:beaker, github: "mgwidmann/beaker", branch: "ecto_2"},
-      {:rollbax, "~> 0.5.4"},
+      {:ecto, "2.0.0", override: true},
+      {:oauth2, "~> 0.6"},
+      {:beaker, github: "hahuang65/beaker"},
+      {:flames, github: "mgwidmann/flames"},
       {:stub_alias, github: "mgwidmann/stub_alias"},
 
       # Dev only

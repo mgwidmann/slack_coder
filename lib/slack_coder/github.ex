@@ -1,4 +1,6 @@
 defmodule SlackCoder.Github do
+  require Logger
+
   def client do
     Tentacat.Client.new(%{
       user: Application.get_env(:slack_coder, :github)[:user],
@@ -17,15 +19,20 @@ defmodule SlackCoder.Github do
     }
   }
   def set_hook(owner, repo) do
-    hooks = Tentacat.Hooks.list(owner, repo, client)
-    hook = hooks |> Enum.find(&find_hook/1)
-    if hook do
-      hook = Tentacat.Hooks.update(owner, repo, hook["id"], @hook_config, client)
+    with hooks when is_list(hooks) <- Tentacat.Hooks.list(owner, repo, client),
+         stream = %Stream{}        <- Stream.each(hooks, &(delete_ngrok(&1, owner, repo))),
+         hook when is_map(hook)    <- Enum.find(stream, &find_hook/1) do
+       Tentacat.Hooks.update(owner, repo, hook["id"], @hook_config, client)
     else
-      hooks |> Enum.each(&(delete_ngrok(&1, owner, repo)))
-      {201, hook} = Tentacat.Hooks.create(owner, repo, @hook_config, client)
+      {status, %{}} ->
+        case Tentacat.Hooks.create(owner, repo, @hook_config, client) do
+          {201, hook} ->
+            hook
+          resp ->
+            Logger.warn "Unable to set webhook for #{owner}/#{repo}, response: #{inspect resp}"
+            nil
+        end
     end
-    hook
   end
 
   def events(), do: @events

@@ -33,10 +33,15 @@ defmodule SlackCoder.Github.Watchers.Callout do
     {:ok, since} = Timex.format(state.last_checked, "{ISOz}")
 
     success = try do
-      Comments.filter_all(owner, state.repo, %{since: since}, Github.client)
-      |> Enum.map(&( {issue_number(&1["issue_url"]), &1["body"]} ))
-      |> start_watchers(state.github_users, {state.repo, owner})
-      true
+      with comments when is_list(comments) <- Comments.filter_all(owner, state.repo, %{since: since}, Github.client),
+           comments when is_list(comments) <- Enum.map(comments, &( {issue_number(&1["issue_url"]), &1["body"]} ))
+                                              |> start_watchers(state.github_users, {state.repo, owner}) do
+        true
+      else
+        {status, response} ->
+          Logger.warn "Unable to get comments, #{status} #{inspect response}"
+          false
+      end
     rescue # Rate limiting from Github causes exceptions, until a better solution
       _ -> # within Tentacat presents itself, just log the exception...
         # Logger.error "Error updating Callouts: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
@@ -59,10 +64,14 @@ defmodule SlackCoder.Github.Watchers.Callout do
   end
 
   defp watch_pr(github_user, pr_number, {repo, owner}) do
-    pr = PullComments.list(owner, repo, pr_number, Github.client) |> Helper.build_or_update
-
-    SlackCoder.Github.Supervisor.start_watcher(pr)
-    |> SlackCoder.Github.Watchers.PullRequest.add_callout(github_user)
+    with pr when is_map(pr) <- PullComments.find(owner, repo, pr_number, Github.client),
+         pr                 <- Helper.build_or_update(pr) do
+      SlackCoder.Github.Supervisor.start_watcher(pr)
+      |> SlackCoder.Github.Watchers.PullRequest.add_callout(github_user)
+    else
+      {status, response} ->
+        Logger.warn "Unable to fetch comments for PR #{pr_number}, #{status} #{inspect response}"
+    end
   end
 
 end

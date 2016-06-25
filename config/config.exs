@@ -32,14 +32,11 @@ config :logger, :console,
   metadata: [:request_id]
 
 config :logger,
-  backends: [:console, Rollbax.Notifier]
+  backends: [:console, Flames.Logger]
 
-config :logger, Rollbax.Notifier,
-  level: :warn
-
-config :rollbax,
-  access_token: "bfb7314f563b47e0bdbb2b0d5cf983e0",
-  environment: "dev"
+config :flames,
+  repo: SlackCoder.Repo,
+  endpoint: SlackCoder.Endpoint
 
 import_config "#{Mix.env}.exs"
 

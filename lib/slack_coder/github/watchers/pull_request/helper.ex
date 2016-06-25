@@ -27,18 +27,21 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
     end
   end
 
-  defp _status(pr) do
-    pr = Pulls.find(pr.owner, pr.repo, pr.number, Github.client)
-          |> build_or_update(pr)
-          |> conflict_notification(pr)
+  defp _status(existing_pr) do
+    with pr when is_map(pr) <- Pulls.find(existing_pr.owner, existing_pr.repo, existing_pr.number, Github.client),
+         pr when is_map(pr) <- build_or_update(pr, existing_pr) |> conflict_notification(existing_pr) do
+      commit = (with %{} = raw_commit      <- get_latest_commit(pr),
+                     {travis, codeclimate} <- statuses_for_commit(pr, raw_commit["sha"]),
+                     %Commit{} = commit    <- find_latest_commit(pr, travis["id"], raw_commit["sha"]),
+                     %{} = params          <- build_params(pr, raw_commit, travis, codeclimate),
+                     %Commit{} = commit    <- update_commit(commit, params), do: commit)
 
-    commit = (with %{} = raw_commit      <- get_latest_commit(pr),
-                   {travis, codeclimate} <- statuses_for_commit(pr, raw_commit["sha"]),
-                   %Commit{} = commit    <- find_latest_commit(pr, travis["id"], raw_commit["sha"]),
-                   %{} = params          <- build_params(pr, raw_commit, travis, codeclimate),
-                   %Commit{} = commit    <- update_commit(commit, params), do: commit)
-
-    %PR{ pr | latest_commit: commit || pr.latest_commit}
+      %PR{ pr | latest_commit: commit || pr.latest_commit}
+    else
+      {status, response} ->
+        Logger.warn "Unable to fetch PR #{existing_pr.number}, #{status} #{inspect response}"
+        existing_pr
+    end
   end
 
   def build_or_update(pr), do: build_or_update(pr, Repo.get_by(PR, number: pr["number"]) || %PR{})

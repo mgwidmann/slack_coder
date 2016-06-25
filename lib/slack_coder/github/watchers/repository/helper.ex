@@ -30,24 +30,34 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
             |> Enum.map(&(&1.github))
     owner = Application.get_env(:slack_coder, :repos, [])[repo][:owner]
 
-    Pulls.list(owner, repo, Github.client)
-    |> Stream.filter(fn pr ->
+    with prs when is_list(prs) <- Pulls.list(owner, repo, Github.client) do
+      Stream.filter(prs, fn pr ->
           pr["user"]["login"] in users
       end)
-    |> Stream.map(fn(pr)->
-        Helper.build_or_update(pr, Enum.find(existing_prs, &( &1.number == pr["number"] )))
-      end)
-    |> Enum.to_list
+      |> Stream.map(fn(pr)->
+          Helper.build_or_update(pr, Enum.find(existing_prs, &( &1.number == pr["number"] )))
+        end)
+      |> Enum.to_list
+    else
+      {status, response} ->
+        Logger.warn "Unable to fetch new pull requests, #{status} #{inspect response}"
+        existing_prs
+    end
   end
 
   def find_latest_comment_date(%PR{number: number, repo: repo, owner: owner} = pr) do
-    latest_issue_comment = IssueComments.list(owner, repo, number, Github.client) |> List.last
-    latest_pr_comment = PullComments.list(owner, repo, number, Github.client) |> List.last
-    case greatest_date_for(latest_issue_comment["updated_at"], latest_pr_comment["updated_at"]) do
-      {:first, date} ->
-        %{latest_comment: date || pr.opened_at, latest_comment_url: latest_issue_comment["html_url"]}
-      {:second, date} ->
-        %{latest_comment: date || pr.opened_at, latest_comment_url: latest_pr_comment["html_url"]}
+    with  latest_issue_comment when is_map(latest_issue_comment) <- IssueComments.list(owner, repo, number, Github.client) |> List.last,
+          latest_pr_comment when is_map(latest_pr_comment)       <- PullComments.list(owner, repo, number, Github.client) |> List.last do
+      case greatest_date_for(latest_issue_comment["updated_at"], latest_pr_comment["updated_at"]) do
+        {:first, date} ->
+          %{latest_comment: date || pr.opened_at, latest_comment_url: latest_issue_comment["html_url"]}
+        {:second, date} ->
+          %{latest_comment: date || pr.opened_at, latest_comment_url: latest_pr_comment["html_url"]}
+      end
+    else
+      {status, response} ->
+        Logger.warn "Unable to fetch latest comment date for PR #{number}, #{status} #{inspect response}"
+        pr.opened_at
     end
   end
 
