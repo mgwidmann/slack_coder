@@ -14,9 +14,10 @@ defmodule SlackCoder do
       # Define workers and child supervisors to be supervised
       worker(SlackCoder.Slack, [Application.get_env(:slack_coder, :slack_api_token), []]),
       # Start the endpoint when the application starts
-      supervisor(SlackCoder.Endpoint, []),
+      supervisor(SlackCoder.Endpoint, [])
+    ] ++ if(System.get_env("NO_GITHUB"), do: [], else: [
       supervisor(SlackCoder.Github.Supervisor, [])
-    ]
+    ])
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
