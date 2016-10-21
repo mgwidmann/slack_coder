@@ -22,11 +22,13 @@ defmodule SlackCoder.Github do
     with hooks when is_list(hooks) <- Tentacat.Hooks.list(owner, repo, client),
          stream = %Stream{}        <- Stream.each(hooks, &(delete_ngrok(&1, owner, repo))),
          hook when is_map(hook)    <- Enum.find(stream, &find_hook/1) do
+       IO.puts "Updating hook id #{hook["id"]}"
        Tentacat.Hooks.update(owner, repo, hook["id"], @hook_config, client)
     else
-      {status, %{}} ->
+      _ ->
         case Tentacat.Hooks.create(owner, repo, @hook_config, client) do
           {201, hook} ->
+            IO.puts "got hook #{inspect hook}"
             hook
           resp ->
             Logger.warn "Unable to set webhook for #{owner}/#{repo}, response: #{inspect resp}"

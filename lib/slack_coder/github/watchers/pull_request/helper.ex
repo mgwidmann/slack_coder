@@ -55,7 +55,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
                            mergeable: mergeable
                          })
                          |> PRService.update
-    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"] }
+    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"], webhook: existing_pr.webhook }
   end
   def build_or_update(pr, new_pr = %PR{}) do
     repo = pr["base"]["repo"]["name"]
@@ -75,7 +75,8 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
                       repo: repo,
                       branch: pr["head"]["ref"],
                       fork: pr["head"]["repo"]["owner"]["login"] != pr["base"]["repo"]["owner"]["login"],
-                      github_user_avatar: pr["user"]["avatar_url"]
+                      github_user_avatar: pr["user"]["avatar_url"],
+                      webhook: new_pr.webhook
                     })
                   |> PRService.save
     new_pr

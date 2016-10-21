@@ -1,11 +1,16 @@
 defmodule SlackCoder.Github.Watchers.PullRequest do
   use GenServer
   import SlackCoder.Github.Watchers.PullRequest.Helper
+  alias SlackCoder.Models.PR
 
   @poll_interval 60_000
 
   def start_link(pr) do
     GenServer.start_link __MODULE__, {pr, []}
+  end
+
+  def init({%PR{webhook: true} = pr, []}) do
+    {:ok, {pr, []}}
   end
 
   def init({pr, []}) do
@@ -35,6 +40,11 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     {:noreply, {pr, [github_user | callouts] |> Enum.uniq}}
   end
 
+  def handle_cast({:update, pr}, {old_pr, callouts}) do
+    new_pr = pr |> build_or_update(old_pr)
+    {:noreply, {new_pr, callouts}}
+  end
+
   def add_callout(pr_pid, github_user) do
     GenServer.cast(pr_pid, {:add_callout, github_user})
   end
@@ -42,6 +52,11 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   def is_called_out?(:undefined, _github_user), do: false
   def is_called_out?(pr_pid, github_user) do
     GenServer.call(pr_pid, {:called_out?, github_user})
+  end
+
+  def update(pr_pid, pr) do
+    GenServer.cast(pr_pid, {:update, pr})
+    pr_pid
   end
 
   def fetch(:undefined), do: nil

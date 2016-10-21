@@ -23,6 +23,8 @@ defmodule SlackCoder.Models.PR do
     field :html_url, :string
     field :mergeable, :boolean
 
+    field :webhook, :boolean, virtual: true
+
     has_many :commits, SlackCoder.Models.Commit
 
     field :latest_commit, :map, virtual: true
@@ -31,7 +33,7 @@ defmodule SlackCoder.Models.PR do
   end
 
   @required_fields ~w(owner repo branch github_user title number html_url opened_at)
-  @optional_fields ~w(statuses_url latest_comment latest_comment_url backoff merged_at closed_at latest_commit mergeable github_user_avatar fork)
+  @optional_fields ~w(statuses_url latest_comment latest_comment_url backoff merged_at closed_at latest_commit mergeable github_user_avatar fork watched)
 
   @doc """
   Creates a changeset based on the `model` and `params`.

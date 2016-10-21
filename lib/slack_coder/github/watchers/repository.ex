@@ -19,7 +19,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
         SlackCoder.Github.set_hook(repo_config[:owner], repo)
       rescue # Rate limiting from Github causes exceptions, until a better solution
         e -> # within Tentacat presents itself, just log the exception...
-          Logger.error "Unable to set webhook: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
+          Logger.error "Unable to set webhook 1: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
       end
     end
     pulls(repo) # Async fetch
@@ -40,7 +40,7 @@ defmodule SlackCoder.Github.Watchers.Repository do
               |> update_pr
             rescue
               e ->
-                Logger.error "Unable to set webhook: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
+                Logger.error "Unable to set webhook 2: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
                 pr
             end
           end)
