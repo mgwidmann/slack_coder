@@ -5,9 +5,11 @@ defmodule SlackCoder.Services.PRService do
 
   def save(changeset) do
     changeset
-    |> Helper.stale_notification
-    |> Helper.unstale_notification
-    |> Repo.save
+    |> Helper.stale_notification()
+    |> Helper.unstale_notification()
+    |> Helper.closed_notification()
+    |> Helper.merged_notification()
+    |> Repo.insert_or_update()
     |> case do
       {:ok, pr} ->
         {:ok, Helper.notifications(pr)}

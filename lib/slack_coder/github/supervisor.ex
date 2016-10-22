@@ -1,24 +1,28 @@
 defmodule SlackCoder.Github.Supervisor do
   import Supervisor.Spec
+  alias SlackCoder.Repo
+  alias SlackCoder.Models.PR
   require Logger
 
   def start_link() do
-    repos = Application.get_env(:slack_coder, :repos, []) |> Keyword.keys
-    Logger.info "Starting Repository watchers for: #{inspect repos}"
-    children = repos |> Enum.flat_map(fn(repo)->
-      [worker(SlackCoder.Github.Watchers.Repository, [repo], id: "Repo-#{repo}"),
-      worker(SlackCoder.Github.Watchers.Callout, [repo], id: "Callout-#{repo}")]
-    end)
+    prs = Repo.all PR.active
+    children = prs |> Enum.map(&worker_for/1)
 
     opts = [strategy: :one_for_one, name: SlackCoder.Github.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
+  defp worker_for(pr) do
+    worker(SlackCoder.Github.Watchers.PullRequest, [pr], id: worker_id(pr), restart: :transient)
+  end
+
+  @worker_id_prefix "PR-"
+  defp worker_id(pr), do: "#{@worker_id_prefix}#{pr.number}"
+
   def start_watcher(pr) do
-    case Supervisor.start_child(SlackCoder.Github.Supervisor,
-      worker(SlackCoder.Github.Watchers.PullRequest, [pr], id: "PR-#{pr.number}")) do
+    case Supervisor.start_child(SlackCoder.Github.Supervisor, worker_for(pr)) do
         {:ok, watcher} ->
-          Logger.debug "Starting watcher for: PR-#{pr.number} #{pr.title}"
+          Logger.debug "Starting watcher for: #{worker_id(pr)} #{pr.title}"
           watcher
         {:error, {:already_started, watcher}} ->
           watcher
@@ -27,14 +31,23 @@ defmodule SlackCoder.Github.Supervisor do
     end
   end
 
+  def stop_watcher(nil), do: nil
   def stop_watcher(pr) do
-    Supervisor.terminate_child(SlackCoder.Github.Supervisor, "PR-#{pr.number}")
+    Supervisor.terminate_child(SlackCoder.Github.Supervisor, worker_id(pr))
+    Supervisor.delete_child(SlackCoder.Github.Supervisor, worker_id(pr))
+  end
+
+  def find_or_start_watcher(pr) do
+    case find_watcher(pr) do
+      nil -> start_watcher(pr)
+      pid -> pid
+    end
   end
 
   def find_watcher(pr) do
     number = pr.number |> to_string
     child = Supervisor.which_children(SlackCoder.Github.Supervisor)
-            |> Enum.find(&(match?({"PR-" <> ^number, _, _, _}, &1)))
+            |> Enum.find(&(match?({@worker_id_prefix <> ^number, _, _, _}, &1)))
     case child do
       nil -> nil
       {_, worker, _, _} -> worker

@@ -12,37 +12,37 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
   import SlackCoder.Github.TimeHelper
   require Logger
 
-  def status(pr) do
-    if Notification.can_send_notifications? || pr.latest_commit == nil do
-      me = self
-      Task.start fn ->
-        try do
-          send(me, {:commit_results, _status(pr)})
-        rescue # Rate limiting from Github causes exceptions, until a better solution
-          _ -> # within Tentacat presents itself, just log the exception...
-            # Logger.error "Error updating PR info: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
-            nil
-        end
-      end
-    end
-  end
-
-  defp _status(existing_pr) do
-    with pr when is_map(pr) <- Pulls.find(existing_pr.owner, existing_pr.repo, existing_pr.number, Github.client),
-         pr when is_map(pr) <- build_or_update(pr, existing_pr) |> conflict_notification(existing_pr) do
-      commit = (with %{} = raw_commit      <- get_latest_commit(pr),
-                     {travis, codeclimate} <- statuses_for_commit(pr, raw_commit["sha"]),
-                     %Commit{} = commit    <- find_latest_commit(pr, travis["id"], raw_commit["sha"]),
-                     %{} = params          <- build_params(pr, raw_commit, travis, codeclimate),
-                     %Commit{} = commit    <- update_commit(commit, params), do: commit)
-
-      %PR{ pr | latest_commit: commit || pr.latest_commit}
-    else
-      {status, response} ->
-        Logger.warn "Unable to fetch PR #{existing_pr.number}, #{status} #{inspect response}"
-        existing_pr
-    end
-  end
+  # def status(pr) do
+  #   if Notification.can_send_notifications? || pr.latest_commit == nil do
+  #     me = self
+  #     Task.start fn ->
+  #       try do
+  #         send(me, {:commit_results, _status(pr)})
+  #       rescue # Rate limiting from Github causes exceptions, until a better solution
+  #         _ -> # within Tentacat presents itself, just log the exception...
+  #           # Logger.error "Error updating PR info: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
+  #           nil
+  #       end
+  #     end
+  #   end
+  # end
+  #
+  # defp _status(existing_pr) do
+  #   with pr when is_map(pr) <- Pulls.find(existing_pr.owner, existing_pr.repo, existing_pr.number, Github.client),
+  #        pr when is_map(pr) <- build_or_update(pr, existing_pr) |> conflict_notification(existing_pr) do
+  #     commit = (with %{} = raw_commit      <- get_latest_commit(pr),
+  #                    {travis, codeclimate} <- statuses_for_commit(pr, raw_commit["sha"]),
+  #                    %Commit{} = commit    <- find_latest_commit(pr, travis["id"], raw_commit["sha"]),
+  #                    %{} = params          <- build_params(pr, raw_commit, travis, codeclimate),
+  #                    %Commit{} = commit    <- update_commit(commit, params), do: commit)
+  #
+  #     %PR{ pr | latest_commit: commit || pr.latest_commit}
+  #   else
+  #     {status, response} ->
+  #       Logger.warn "Unable to fetch PR #{existing_pr.number}, #{status} #{inspect response}"
+  #       existing_pr
+  #   end
+  # end
 
   def build_or_update(pr), do: build_or_update(pr, Repo.get_by(PR, number: pr["number"]) || %PR{})
   def build_or_update(pr, nil), do: build_or_update(pr)
@@ -54,8 +54,8 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
                            merged_at: date_for(pr["merged_at"]),
                            mergeable: mergeable
                          })
-                         |> PRService.update
-    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"], webhook: existing_pr.webhook }
+                         |> PRService.save
+    %PR{ existing_pr | github_user_avatar: pr["user"]["avatar_url"] }
   end
   def build_or_update(pr, new_pr = %PR{}) do
     repo = pr["base"]["repo"]["name"]
@@ -75,8 +75,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
                       repo: repo,
                       branch: pr["head"]["ref"],
                       fork: pr["head"]["repo"]["owner"]["login"] != pr["base"]["repo"]["owner"]["login"],
-                      github_user_avatar: pr["user"]["avatar_url"],
-                      webhook: new_pr.webhook
+                      github_user_avatar: pr["user"]["avatar_url"]
                     })
                   |> PRService.save
     new_pr
@@ -91,15 +90,15 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
     refreshed_pr
   end
 
-  defp get_latest_commit(pr) do
-    owner = if(pr.fork, do: pr.github_user, else: pr.owner)
+  # defp get_latest_commit(pr) do
+  #   owner = if(pr.fork, do: pr.github_user, else: pr.owner)
+  #
+  #   Commits.filter(owner, pr.repo, %{sha: pr.branch}, Github.client)
+  #   |> List.first
+  # end
 
-    Commits.filter(owner, pr.repo, %{sha: pr.branch}, Github.client)
-    |> List.first
-  end
-
-  defp statuses_for_commit(_pr, nil), do: nil # 404 returned when user deletes branch
-  defp statuses_for_commit(pr, sha) do
+  def statuses_for_commit(_pr, nil), do: nil # 404 returned when user deletes branch
+  def statuses_for_commit(pr, sha) do
     status = Statuses.find(pr.owner, pr.repo, sha, Github.client)
     statuses = status["statuses"]
 
@@ -112,17 +111,17 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
   end
 
   # if pr has latest commit object use that
-  defp find_latest_commit(%PR{latest_commit: commit = %Commit{latest_status_id: id}}, id, _) do
+  def find_latest_commit(%PR{latest_commit: commit = %Commit{latest_status_id: id}}, id, _) do
     commit
   end
-  defp find_latest_commit(_, _, commit_sha) do
+  def find_latest_commit(_, _, commit_sha) do
     # When rebooted, this commit may have already been reported on, or its new
     Repo.get_by(Commit, sha: commit_sha) || %Commit{sha: commit_sha}
   end
 
   @pending "pending"
   @conflict "conflict"
-  defp build_params(pr, last_commit, last_status, code_climate) do
+  def build_params(pr, last_commit, last_status, code_climate) do
     %{
       status: if(pr.mergeable, do: last_status["state"] || @pending, else: @conflict),
       code_climate_status: code_climate["state"] || @pending,
@@ -136,7 +135,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest.Helper do
      }
   end
 
-  defp update_commit(commit, params) do
+  def update_commit(commit, params) do
     {:ok, commit} = commit
                     |> Commit.changeset(params)
                     |> CommitService.save

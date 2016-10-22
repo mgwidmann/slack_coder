@@ -9,57 +9,57 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
   alias SlackCoder.Models.{PR, User}
   alias SlackCoder.{Github, Github.Notification, Github.Watchers.PullRequest.Helper}
   import SlackCoder.Github.TimeHelper
-  import Ecto.Changeset, only: [put_change: 3]
+  import Ecto.Changeset, only: [put_change: 3, get_change: 2]
   require Logger
-
-  def pulls(repo, existing_prs \\ []) do
-    me = self
-    Task.start fn->
-      try do
-        send(me, {:pr_response, _pulls(repo, existing_prs)})
-      rescue # Rate limiting from Github causes exceptions, until a better solution
-        _ -> # within Tentacat presents itself, just log the exception...
-          # Logger.error "Error updating Repository info: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
-          nil
-      end
-    end
-  end
-
-  defp _pulls(repo, existing_prs) do
-    users = Repo.all(User)
-            |> Enum.map(&(&1.github))
-    owner = Application.get_env(:slack_coder, :repos, [])[repo][:owner]
-
-    with prs when is_list(prs) <- Pulls.list(owner, repo, Github.client) do
-      Stream.filter(prs, fn pr ->
-          pr["user"]["login"] in users
-      end)
-      |> Stream.map(fn(pr)->
-          Helper.build_or_update(pr, Enum.find(existing_prs, &( &1.number == pr["number"] )))
-        end)
-      |> Enum.to_list
-    else
-      {status, response} ->
-        Logger.warn "Unable to fetch new pull requests, #{status} #{inspect response}"
-        existing_prs
-    end
-  end
-
-  def find_latest_comment_date(%PR{number: number, repo: repo, owner: owner} = pr) do
-    with  latest_issue_comment when is_map(latest_issue_comment) <- IssueComments.list(owner, repo, number, Github.client) |> List.last,
-          latest_pr_comment when is_map(latest_pr_comment)       <- PullComments.list(owner, repo, number, Github.client) |> List.last do
-      case greatest_date_for(latest_issue_comment["updated_at"], latest_pr_comment["updated_at"]) do
-        {:first, date} ->
-          %{latest_comment: date || pr.opened_at, latest_comment_url: latest_issue_comment["html_url"]}
-        {:second, date} ->
-          %{latest_comment: date || pr.opened_at, latest_comment_url: latest_pr_comment["html_url"]}
-      end
-    else
-      {status, response} ->
-        Logger.warn "Unable to fetch latest comment date for PR #{number}, #{status} #{inspect response}"
-        pr.opened_at
-    end
-  end
+  #
+  # def pulls(repo, existing_prs \\ []) do
+  #   me = self
+  #   Task.start fn->
+  #     try do
+  #       send(me, {:pr_response, _pulls(repo, existing_prs)})
+  #     rescue # Rate limiting from Github causes exceptions, until a better solution
+  #       _ -> # within Tentacat presents itself, just log the exception...
+  #         # Logger.error "Error updating Repository info: #{Exception.message(e)}\n#{Exception.format_stacktrace}"
+  #         nil
+  #     end
+  #   end
+  # end
+  #
+  # defp _pulls(repo, existing_prs) do
+  #   users = Repo.all(User)
+  #           |> Enum.map(&(&1.github))
+  #   owner = Application.get_env(:slack_coder, :repos, [])[repo][:owner]
+  #
+  #   with prs when is_list(prs) <- Pulls.list(owner, repo, Github.client) do
+  #     Stream.filter(prs, fn pr ->
+  #         pr["user"]["login"] in users
+  #     end)
+  #     |> Stream.map(fn(pr)->
+  #         Helper.build_or_update(pr, Enum.find(existing_prs, &( &1.number == pr["number"] )))
+  #       end)
+  #     |> Enum.to_list
+  #   else
+  #     {status, response} ->
+  #       Logger.warn "Unable to fetch new pull requests, #{status} #{inspect response}"
+  #       existing_prs
+  #   end
+  # end
+  #
+  # def find_latest_comment_date(%PR{number: number, repo: repo, owner: owner} = pr) do
+  #   with  latest_issue_comment when is_map(latest_issue_comment) <- IssueComments.list(owner, repo, number, Github.client) |> List.last,
+  #         latest_pr_comment when is_map(latest_pr_comment)       <- PullComments.list(owner, repo, number, Github.client) |> List.last do
+  #     case greatest_date_for(latest_issue_comment["updated_at"], latest_pr_comment["updated_at"]) do
+  #       {:first, date} ->
+  #         %{latest_comment: date || pr.opened_at, latest_comment_url: latest_issue_comment["html_url"]}
+  #       {:second, date} ->
+  #         %{latest_comment: date || pr.opened_at, latest_comment_url: latest_pr_comment["html_url"]}
+  #     end
+  #   else
+  #     {status, response} ->
+  #       Logger.warn "Unable to fetch latest comment date for PR #{number}, #{status} #{inspect response}"
+  #       pr.opened_at
+  #   end
+  # end
 
   def handle_closed_pr(changeset = %Ecto.Changeset{}, []), do: changeset
   def handle_closed_pr(changeset = %Ecto.Changeset{}, old_prs) when is_list(old_prs) do
@@ -88,7 +88,6 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
     SlackCoder.Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
   end
 
-
   def notifications(pr = %PR{notifications: []}), do: pr
   for type <- [:stale, :unstale, :merged, :closed] do
     def notifications(pr = %PR{notifications: [unquote(type) | notifications]}) do
@@ -104,6 +103,26 @@ defmodule SlackCoder.Github.Watchers.Repository.Helper do
     {:ok, pr} = SlackCoder.Services.PRService.save(cs)
     pr
   end
+
+  def merged_notification(cs = %Ecto.Changeset{changes: %{merged_at: time}}) when not is_nil(time) do
+    IO.puts "merged notification!"
+    cs
+    |> put_change(:notifications, [:merged | cs.changes[:notifications] || cs.data.notifications])
+  end
+  def merged_notification(cs) do
+    IO.puts("not merged notification...")
+    cs
+  end
+
+  def closed_notification(cs = %Ecto.Changeset{changes: %{closed_at: time}}) when not is_nil(time) do
+    if get_change(cs, :merged_at) do # Both are present when things get merged
+      cs
+    else
+      cs
+      |> put_change(:notifications, [:closed | cs.changes[:notifications] || cs.data.notifications])
+    end
+  end
+  def closed_notification(cs), do: cs
 
   def stale_notification(cs = %Ecto.Changeset{changes: %{latest_comment: time}}) when not is_nil(time) do
     hours = Date.diff(time, now, :hours)
