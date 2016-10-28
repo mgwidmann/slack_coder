@@ -21,14 +21,14 @@ defmodule SlackCoder.Github.Notification do
   def failure(pr) do
     case user_for_pr(pr) |> slack_user_with_monitors do
       [message_for | slack_users] ->
-        message = ":facepalm: *FAILURE* *#{pr.title}* :-1:\n#{pr.latest_commit.travis_url}\n#{pr.html_url}"
+        message = ":facepalm: *FAILURE* *#{pr.title}* :-1:\n#{pr.build_url}\n#{pr.html_url}"
         notify(slack_users, :fail, message_for, message, pr)
         pr
       _ -> pr
     end
   end
 
-  def success(pr) do
+  def successful(pr) do
     case user_for_pr(pr) |> slack_user_with_monitors do
       [message_for | slack_users] ->
         message = ":bananadance: *SUCCESS* *#{pr.title}* :success:\n#{pr.html_url}"
@@ -79,10 +79,10 @@ defmodule SlackCoder.Github.Notification do
     end
   end
 
-  def unstale(pr, latest_comment_url) do
+  def unstale(pr) do
     case user_for_pr(pr) |> slack_user_with_monitors do
       [message_for | slack_users] ->
-        message = ":email: *CHATTER* *#{pr.title}* :memo:\n#{latest_comment_url || pr.html_url}"
+        message = ":email: *CHATTER* *#{pr.title}* :memo:\n#{pr.latest_comment_url || pr.html_url}"
         notify(slack_users, :unstale, message_for, message, pr)
         pr
       _ -> pr

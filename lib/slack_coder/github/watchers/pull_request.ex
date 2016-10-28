@@ -1,6 +1,6 @@
 defmodule SlackCoder.Github.Watchers.PullRequest do
   use GenServer
-  import SlackCoder.Github.Watchers.PullRequest.Helper
+  import SlackCoder.Github.TimeHelper
   alias SlackCoder.Models.PR
   alias SlackCoder.Services.PRService
   alias SlackCoder.Repo
@@ -18,6 +18,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
            existing_pr -> existing_pr
          end
     :timer.send_interval @stale_check_interval, :stale_check
+    SlackCoder.Github.ShaMapper.register(pr.sha)
     {:ok, {pr, []}}
   end
 
@@ -40,10 +41,12 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     {:reply, pr, {pr, callouts}}
   end
 
-  def handle_call({:update, raw_pr, nil}, _from, {pr, callouts}) do
+  def handle_call({:update, raw_pr}, _from, {pr, callouts}) do
     pr = update_pr(raw_pr, pr)
     {:reply, pr, {pr, callouts}}
   end
+
+  def handle_call(_, state), do: {:reply, :ignored, state}
 
   # def handle_call({:called_out?, github_user}, _from, {pr, callouts}) do
   #   {:reply, github_user in callouts, {pr, callouts}}
@@ -58,21 +61,18 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     {:noreply, {pr, callouts}}
   end
 
-  def handle_cast({:update, raw_pr, nil}, {old_pr, callouts}) do
-    {:noreply, {update_pr(raw_pr, old_pr), callouts}}
+  def handle_cast({:build, sha, url, state}, {%PR{sha: sha} = pr, callouts}) do
+    {:ok, pr} = pr |> PR.reg_changeset(%{build_status: state, build_url: url}) |> PRService.save
+    {:noreply, {pr, callouts}}
   end
 
-  def handle_cast({:update, raw_pr, raw_commit}, {old_pr, callouts}) do
-    new_pr = update_pr(raw_pr, old_pr)
+  def handle_cast({:analysis, sha, url, state}, {%PR{sha: sha} = pr, callouts}) do
+    {:ok, pr} = pr |> PR.reg_changeset(%{analysis_status: state, analysis_url: url}) |> PRService.save
+    {:noreply, {pr, callouts}}
+  end
 
-    {travis, codeclimate} = statuses_for_commit(new_pr, raw_commit["sha"])
-
-    params = build_params(new_pr, raw_commit, travis, codeclimate)
-    commit = new_pr
-             |> find_latest_commit(travis["id"], raw_commit["sha"])
-             |> update_commit(params)
-
-    {:noreply, {%PR{ new_pr | latest_commit: commit}, callouts}}
+  def handle_cast({:update, raw_pr}, {old_pr, callouts}) do
+    {:noreply, {update_pr(raw_pr, old_pr), callouts}}
   end
 
   @backoff Application.get_env(:slack_coder, :pr_backoff_start, 1)
@@ -81,10 +81,32 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     {:noreply, {updated_pr, callouts}}
   end
 
+  def handle_cast(_, state), do: {:noreply, state}
+
   defp update_pr(raw_pr, old_pr) do
-    raw_pr
-    |> build_or_update(old_pr)
-    |> conflict_notification(old_pr)
+    {:ok, new_pr} = old_pr |> PR.reg_changeset(extract_pr_data(raw_pr)) |> PRService.save
+    new_pr
+  end
+
+  def extract_pr_data(raw_pr) do
+    %{
+      owner: raw_pr["base"]["repo"]["owner"]["login"],
+      repo: raw_pr["base"]["repo"]["name"],
+      branch: raw_pr["head"]["ref"],
+      fork: raw_pr["head"]["repo"]["owner"]["login"] != raw_pr["base"]["repo"]["owner"]["login"],
+      latest_comment: nil,
+      latest_comment_url: nil,
+      opened_at: date_for(raw_pr["created_at"]),
+      closed_at: date_for(raw_pr["closed_at"]),
+      merged_at: date_for(raw_pr["merged_at"]),
+      title: raw_pr["title"],
+      number: raw_pr["number"],
+      html_url: raw_pr["_links"]["html"]["href"],
+      mergeable: not raw_pr["mergeable_state"] in ["dirty"],
+      github_user: raw_pr["user"]["login"],
+      github_user_avatar: raw_pr["user"]["avatar_url"],
+      sha: raw_pr["head"]["sha"]
+    }
   end
 
   # def add_callout(pr_pid, github_user) do
@@ -96,27 +118,31 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   #   GenServer.call(pr_pid, {:called_out?, github_user})
   # end
 
-  def update(pr_pid, pr, commit \\ nil)
-  def update(nil, _, _), do: nil
-  def update(pr_pid, pr, commit) do
-    GenServer.cast(pr_pid, {:update, pr, commit})
+  def update(pr_pid, pr) when is_pid(pr_pid) do
+    GenServer.cast(pr_pid, {:update, pr})
     pr_pid
   end
+  def update(_, _), do: nil
 
-  def update_sync(nil, _), do: nil
-  def update_sync(pr_pid, pr) do
+  def update_sync(pr_pid, pr) when is_pid(pr_pid) do
     GenServer.call(pr_pid, {:update, pr, nil})
   end
+  def update_sync(_, _), do: nil
 
-  def unstale(:undefined), do: nil
-  def unstale(pr_pid) do
+  def unstale(pr_pid) when is_pid(pr_pid) do
     GenServer.cast(pr_pid, :unstale)
     pr_pid
   end
+  def unstale(_), do: nil
 
-  def fetch(:undefined), do: nil
-  def fetch(pid) do
+  def status(pr_pid, type, sha, url, state) when is_pid(pr_pid) do
+    GenServer.cast(pr_pid, {type, sha, url, state})
+  end
+  def status(_, _, _, _, _), do: nil
+
+  def fetch(pid) when is_pid(pid) do
     GenServer.call(pid, :fetch)
   end
+  def fetch(_), do: nil
 
 end

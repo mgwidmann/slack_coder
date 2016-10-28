@@ -62,10 +62,7 @@ defmodule SlackCoder.Mixfile do
       {:stub_alias, github: "mgwidmann/stub_alias"},
 
       # Dev only
-      {:phoenix_live_reload, "~> 1.0", only: :dev},
-
-      # Test only
-      {:pavlov, github: "sproutapp/pavlov", only: :test}
+      {:phoenix_live_reload, "~> 1.0", only: :dev}
     ]
   end
 end

@@ -8,7 +8,7 @@ defmodule SlackCoder.GithubController do
   plug :verify_event
 
   def event(conn = %{assigns: %{event: event}}, params) do
-    EventProcessor.process(event, params)
+    EventProcessor.process_async(event, params)
     Logger.info "Github Event: #{event}"
     conn |> text("ok")
   end
@@ -19,6 +19,7 @@ defmodule SlackCoder.GithubController do
     if Enum.member?(@valid_events, event) do
       conn |> assign(:event, String.to_existing_atom(event))
     else
+      Logger.warn "Received invalid event: #{event}"
       conn
       |> put_status(:unprocessable_entity)
       |> text("not ok")

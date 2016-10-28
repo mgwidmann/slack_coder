@@ -3,15 +3,12 @@ defmodule SlackCoder.Models.PR do
 
   schema "prs" do
     field :owner, :string
-    field :statuses_url, :string
     field :repo, :string
     field :branch, :string
-    field :github_user, :string
-    field :github_user_avatar, :string, virtual: true
     field :fork, :boolean
     # Stale PR checking
     field :latest_comment, Timex.Ecto.DateTime
-    field :latest_comment_url, :string, virtual: true
+    field :latest_comment_url, :string
     field :notifications, SlackCoder.Models.Types.StringList, virtual: true, default: []
     field :opened_at, Timex.Ecto.DateTime
     field :closed_at, Timex.Ecto.DateTime
@@ -22,16 +19,23 @@ defmodule SlackCoder.Models.PR do
     field :number, :integer
     field :html_url, :string
     field :mergeable, :boolean
+    field :github_user, :string
+    field :github_user_avatar, :string
+    # Build status info
+    field :sha, :string
+    field :build_status, :string
+    field :analysis_status, :string
+    field :build_url, :string
+    field :analysis_url, :string
 
-    has_many :commits, SlackCoder.Models.Commit
-
-    field :latest_commit, :map, virtual: true
+    belongs_to :user, SlackCoder.Models.User
 
     timestamps
   end
 
   @required_fields ~w(owner repo branch github_user title number html_url opened_at)
-  @optional_fields ~w(statuses_url latest_comment latest_comment_url backoff merged_at closed_at latest_commit mergeable github_user_avatar fork)
+  @optional_fields ~w(latest_comment latest_comment_url notifications backoff merged_at closed_at mergeable
+                      github_user_avatar fork sha build_status analysis_status build_url analysis_url user_id)
 
   @doc """
   Creates a changeset based on the `model` and `params`.
