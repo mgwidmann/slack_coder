@@ -44,9 +44,6 @@ config :slack_coder, SlackCoder.Repo,
   hostname: "localhost",
   pool_size: 10
 
-config :slack_coder, :github,
-  callback_host: System.get_env("NGROK") || raise "Please provide ngrok host environment variable (i.e. NGROK=a9fdc9d8.ngrok.io)"
-
 if File.exists? "config/dev.secret.exs" do
   import_config "dev.secret.exs"
 end
