@@ -5,16 +5,16 @@ defmodule SlackCoder.ErrorViewTest do
   import Phoenix.View
 
   describe "renders" do
-    it "renders 404.html" do
-      expect(render_to_string(SlackCoder.ErrorView, "404.html", [])) |> to_eq("Page not found")
+    test "renders 404.html" do
+      assert render_to_string(SlackCoder.ErrorView, "404.html", []) =~ ~r/404 Not Found/
     end
 
-    it "render 500.html" do
-      expect(render_to_string(SlackCoder.ErrorView, "500.html", [])) |> to_eq("Server internal error")
+    test "render 500.html" do
+      assert render_to_string(SlackCoder.ErrorView, "500.html", []) =~ ~r/500 That&#39;s broken/
     end
 
-    it "render any other" do
-      expect(render_to_string(SlackCoder.ErrorView, "505.html", [])) |> to_eq("Server internal error")
+    test "render any other" do
+      assert render_to_string(SlackCoder.ErrorView, "505.html", []) =~ ~r/500 That&#39;s broken/
     end
   end
 end

@@ -22,8 +22,6 @@ defmodule SlackCoder.Router do
     plug :accepts, ["json"]
   end
 
-  forward "/errors", Flames.Web
-
   scope "/", SlackCoder do
     pipe_through :browser # Use the default browser stack
 
@@ -40,6 +38,12 @@ defmodule SlackCoder.Router do
         post "/users/external/:github", UserController, :create_external
       end
     end
+  end
+
+  scope "/api", SlackCoder do
+    pipe_through :api
+
+    post "/github/event", GithubController, :event
   end
 
   forward "/beaker", Beaker.Web

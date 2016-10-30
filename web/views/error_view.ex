@@ -2,11 +2,11 @@ defmodule SlackCoder.ErrorView do
   use SlackCoder.Web, :view
 
   def render("404.html", _assigns) do
-    render "not_found.html", %{}
+    File.read!("priv/static/404.html")
   end
 
   def render("500.html", _assigns) do
-    render "crash.html", %{}
+    File.read!("priv/static/500.html")
   end
 
   # In case no render clause matches or no

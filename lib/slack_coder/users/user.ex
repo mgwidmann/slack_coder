@@ -1,10 +1,11 @@
 defmodule SlackCoder.Users.User do
   use GenServer
+  require Logger
+  import SlackCoder.Users.Help
   alias SlackCoder.Repo
   alias SlackCoder.Models.User
   alias SlackCoder.Slack
-  import SlackCoder.Users.Help
-  require Logger
+  alias SlackCoder.Github.Notification
 
   # Server API
 
@@ -17,7 +18,7 @@ defmodule SlackCoder.Users.User do
   end
 
   for type <- SlackCoder.Users.Help.message_types() do
-    def handle_cast({unquote(type), called_out, user_for, message}, user) do
+    def handle_cast(%Notification{type: unquote(type), called_out?: called_out, message: message, message_for: user_for}, user) do
       if configured_to_send_message(unquote(type), called_out, user_for, user) do
         Slack.send_to(user.slack, message)
       else
@@ -27,22 +28,16 @@ defmodule SlackCoder.Users.User do
     end
   end
   # Don't send unknown messages
-  def handle_cast({unknown, called_out, user_for, message}, user) do
-    Logger.warn "User #{user.name}(#{user.slack}) received unhandled message: #{inspect {unknown, user_for, message}}"
+  def handle_cast(notification = %Notification{}, user) do
+    Logger.warn "User #{user.name}(#{user.slack}) received unhandled message: #{inspect notification}"
     {:noreply, user}
   end
 
   def handle_cast({:help, message}, user) do
-    raw_reply = handle_message(message |> String.downcase |> String.split(" "), user.config |> Map.from_struct |> Map.delete(:__meta__))
-    case raw_reply do
-      {:muted, muted, reply} ->
-        {:ok, user} = User.changeset(user, %{muted: muted}) |> Repo.update
-        Slack.send_to(user.slack, reply)
-      {new_config, reply} ->
-        {:ok, user} = User.changeset(user, %{config: new_config}) |> Repo.update
-        if reply do
-          Slack.send_to(user.slack, reply)
-        end
+    {new_config, reply} = handle_message(message |> String.downcase |> String.split(" "), user.config |> Map.from_struct |> Map.delete(:__meta__))
+    {:ok, user} = User.changeset(user, %{config: new_config}) |> Repo.update
+    if reply do
+      Slack.send_to(user.slack, reply)
     end
     {:noreply, user}
   end
@@ -60,15 +55,15 @@ defmodule SlackCoder.Users.User do
     config_monitors = if (config_monitors = Map.get(user.config, :"#{type}_monitors")) != nil, do: config_monitors, else: true
     config_callouts = if (config_callouts = Map.get(user.config, :"#{type}_callouts")) != nil, do: config_callouts, else: true
 
-    (user.slack == user_for && config_callouts) ||
-      (user.slack == user_for && config_self) ||
-      (user.slack != user_for && config_monitors)
+    (user.slack == user_for && config_callouts && called_out) ||
+      (user.slack == user_for && config_self && !called_out) ||
+      (user.slack != user_for && config_monitors && !called_out)
   end
 
   # Client API
 
-  def notification(user_pid, {type, called_out, user, message}) do
-    GenServer.cast user_pid, {type, called_out, user, message}
+  def notification(user_pid, notification = %Notification{}) do
+    GenServer.cast user_pid, notification
   end
 
   def help(user_pid, message) do

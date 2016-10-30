@@ -52,5 +52,10 @@ config :slack_coder, SlackCoder.Endpoint,
 # Print only warnings and errors during test
 config :logger, level: :warn
 
+config :logger,
+  backends: [:console]
+
 # Set a higher stacktrace during test
 config :phoenix, :stacktrace_depth, 20
+
+import_config "test_stubs.exs"

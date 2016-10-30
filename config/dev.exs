@@ -12,7 +12,8 @@ config :slack_coder, SlackCoder.Endpoint,
   code_reloader: true,
   cache_static_lookup: false,
   check_origin: false,
-  watchers: [node: ["node_modules/brunch/bin/brunch", "watch", "--stdin"]]
+  watchers: [node: ["node_modules/brunch/bin/brunch", "watch", "--stdin",
+               cd: Path.expand("../", __DIR__)]]
 
 # Watch static and templates for browser reloading.
 config :slack_coder, SlackCoder.Endpoint,
@@ -27,7 +28,10 @@ config :slack_coder, SlackCoder.Endpoint,
 # Do not include metadata nor timestamps in development logs
 config :logger, :console,
   format: "[$level] $message\n",
-  level: :info
+  level: :debug
+
+config :logger,
+  truncate: :infinity
 
 # Set a higher stacktrace during development.
 # Do not configure such in production as keeping

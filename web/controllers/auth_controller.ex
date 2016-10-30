@@ -29,10 +29,8 @@ defmodule SlackCoder.AuthController do
     # Request the user's data with the access token
     user = get_user!(token)
     github = user.github
-    db_user = from(u in User, where: u.github == ^github) |> Repo.one
-    if db_user do
-      {:ok, db_user} = User.changeset(db_user, user) |> Repo.update
-    end
+    db_user = from(u in User, where: u.github == ^github) |> Repo.one |> update_user(user)
+
     # Store the user in the session under `:current_user` and redirect to /.
     # In most cases, we'd probably just store the user's ID that can be used
     # to fetch from the database. In this case, since this example app has no
@@ -60,8 +58,13 @@ defmodule SlackCoder.AuthController do
 
   defp get_user!(token) do
     # Fetch github user from github using token
-    {:ok, %{body: %{"name" => name, "login" => login, "avatar_url" => avatar, "html_url" => html}}} = OAuth2.AccessToken.get(token, "/user")
-    %{name: name, github: login, avatar_url: avatar, html_url: html}
+    {:ok, %{body: user}} = OAuth2.AccessToken.get(token, "/user")
+    %{name: user["name"], github: user["login"], avatar_url: user["avatar_url"], html_url: user["html_url"]}
+  end
+
+  defp update_user(nil, _), do: nil
+  defp update_user(db_user, user) do
+    User.changeset(db_user, user) |> Repo.update!
   end
 
 end

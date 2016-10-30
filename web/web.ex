@@ -24,6 +24,7 @@ defmodule SlackCoder.Web do
       alias SlackCoder.Models.Types.StringList
       alias SlackCoder.Models.Types.Boolean
       require Logger
+      import StubAlias
     end
   end
 
@@ -39,6 +40,7 @@ defmodule SlackCoder.Web do
 
       import SlackCoder.Router.Helpers
       require Logger
+      import StubAlias
     end
   end
 
@@ -56,6 +58,7 @@ defmodule SlackCoder.Web do
       alias SlackCoder.Models.User
 
       import SlackCoder.Router.Helpers
+      import StubAlias
     end
   end
 
@@ -74,6 +77,7 @@ defmodule SlackCoder.Web do
       import Ecto.Model
       import Ecto.Query, only: [from: 1, from: 2]
       require Logger
+      import StubAlias
     end
   end
 

@@ -1,9 +1,10 @@
 defmodule SlackCoder.Slack do
   use Slack
+  import StubAlias
   import SlackCoder.Slack.Helper
   alias SlackCoder.Slack.Routing
-  alias SlackCoder.Users.Supervisor, as: Users
-  alias SlackCoder.Users.User
+  stub_alias SlackCoder.Users.Supervisor, as: Users
+  stub_alias SlackCoder.Users.User
   require Logger
   @online_message """
   :slack: *Slack* :computer: *Coder* online!
@@ -13,7 +14,7 @@ defmodule SlackCoder.Slack do
   @doc """
   Sends the message to `user` to be processed and delivered.
   Two types accepted:
-      send_to(:user, {:type, :message_for, "message"})
+      send_to(:user, %SlackCoder.Github.Notification{})
       send_to(:user, "message")
   The first delivers the message to `user` process where based upon
   its logic and the `user`'s configuration it will either be delivered or
@@ -21,16 +22,16 @@ defmodule SlackCoder.Slack do
   that they may deliver messages to `:slack` through the RTM service.
   """
   def send_to(user, message)
-  def send_to(user, {type, called_out, message_for, message}) when is_binary(user) do
-    String.to_atom(user) |> send_to({type, called_out, message_for, message})
+  def send_to(user, notification = %SlackCoder.Github.Notification{}) when is_binary(user) do
+    String.to_atom(user) |> send_to(notification)
   end
 
-  def send_to(user, {type, called_out, message_for, message}) do
+  def send_to(user, notification = %SlackCoder.Github.Notification{}) do
     user_pid = Users.user(user)
     if user_pid do
-      User.notification user_pid, {type, called_out, message_for, String.strip(message)}
+      User.notification user_pid, notification
     else
-      Logger.error "Attempt to deliver message to #{inspect user}, but pid cannot be found. Message: #{message}"
+      Logger.error "Attempt to deliver message to #{inspect user}, but pid cannot be found. Notification: #{inspect notification}"
     end
   end
 
@@ -57,6 +58,7 @@ defmodule SlackCoder.Slack do
     send pid, slack
     {:ok, state}
   end
+
   def handle_info({user, message}, slack, state) do
     try do
       s_user = user(slack, if(Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker), else: user))
@@ -64,7 +66,10 @@ defmodule SlackCoder.Slack do
       slack_user = Routing.route_message(slack, s_user)
       if slack_user do
         Logger.info "Sending message (#{s_user[:name]}): #{message}"
-        send_message(message, slack_user.id, slack)
+
+        message
+        |> String.strip
+        |> send_message(slack_user.id, slack)
       else
         Logger.error "Unable to send message to #{inspect user}"
       end

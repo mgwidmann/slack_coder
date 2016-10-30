@@ -24,9 +24,9 @@
     <%= unless @prs[github(@current_user, @user)] do %>
       <div class="text-center">
         <h2>
-          Pull Requests are refreshed every <%= SlackCoder.Github.Watchers.Repository.poll_minutes %> minutes.
+          Looks like you have no Pull Requests!
           <br/>
-          <small>You may have to wait until then to see your PRs show up here</small>
+          <small>You should start coding some Elixir!</small>
         </h2>
       </div>
     <% end %>

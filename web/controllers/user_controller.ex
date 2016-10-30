@@ -65,7 +65,7 @@ defmodule SlackCoder.UserController do
   end
 
   defp user_for_github(github) do
-    github_user = SlackCoder.Github.Helper.get("users/#{github}", %{})
+    github_user = Tentacat.Users.find github, SlackCoder.Github.client
     %User{github: github, name: github_user["name"], html_url: github_user["html_url"], avatar_url: github_user["avatar_url"]}
   end
 

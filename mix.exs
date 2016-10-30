@@ -4,7 +4,7 @@ defmodule SlackCoder.Mixfile do
   def project do
     [app: :slack_coder,
      version: "0.0.1",
-     elixir: "~> 1.2",
+     elixir: "~> 1.3",
      elixirc_paths: elixirc_paths(Mix.env),
      compilers: [:phoenix] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
@@ -40,10 +40,10 @@ defmodule SlackCoder.Mixfile do
   defp deps do
     [
       # Prod dependencies
-      {:phoenix, "~> 1.1.0"},
-      {:phoenix_ecto, "3.0.0-beta.2", override: true},
+      {:phoenix, "~> 1.2.0"},
+      {:phoenix_ecto, "~> 3.0"},
       {:postgrex, "~> 0.11"},
-      {:phoenix_html, "~> 2.3"},
+      {:phoenix_html, "~> 2.6"},
       {:cowboy, "~> 1.0"},
       {:timex_ecto, "~> 1.0"},
       # {:slack, "~> 0.2.0"},
@@ -51,20 +51,18 @@ defmodule SlackCoder.Mixfile do
       # {:slack, path: "../Elixir-Slack"},
       {:websocket_client, git: "https://github.com/mgwidmann/websocket_client.git", override: true, branch: "fix_error_logging"},
       # {:websocket_client, git: "https://github.com/jeremyong/websocket_client.git"},
+      # {:tentacat, "~> 0.5.0"},
+      {:tentacat, "~> 0.5.3"},
       {:httpoison, "~> 0.8"},
-      {:exjsx, "~> 3.1"},
-      # {:ecto, "~> 1.1.0"},
-      {:ecto, "2.0.0-rc.1", override: true},
-      {:oauth2, "~> 0.5"},
-      {:beaker, github: "mgwidmann/beaker", branch: "ecto_2"},
+      {:exjsx, "~> 3.2", override: true},
+      {:ecto, "2.0.0", override: true},
+      {:oauth2, "~> 0.6"},
+      {:beaker, github: "hahuang65/beaker"},
       {:flames, github: "mgwidmann/flames"},
-      # {:flames, path: "../flames"},
+      {:stub_alias, github: "mgwidmann/stub_alias"},
 
       # Dev only
-      {:phoenix_live_reload, "~> 1.0", only: :dev},
-
-      # Test only
-      {:pavlov, github: "sproutapp/pavlov", only: :test}
+      {:phoenix_live_reload, "~> 1.0", only: :dev}
     ]
   end
 end

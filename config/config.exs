@@ -26,12 +26,6 @@ config :slack_coder, :github_oauth,
   client_secret: "your-github-client-secret",
   redirect_uri: "http://localhost:4000/auth/github/callback"
 
-config :slack_coder, ecto_repos: [SlackCoder.Repo]
-
-config :flames,
-  repo: SlackCoder.Repo,
-  endpoint: SlackCoder.Endpoint
-
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
@@ -40,9 +34,17 @@ config :logger, :console,
 config :logger,
   backends: [:console, Flames.Logger]
 
+config :flames,
+  repo: SlackCoder.Repo,
+  endpoint: SlackCoder.Endpoint
+
 import_config "#{Mix.env}.exs"
 
 # Configure phoenix generators
 config :phoenix, :generators,
   migration: true,
   binary_id: false
+
+config :slack_coder, ecto_repos: [SlackCoder.Repo]
+
+config :tzdata, :autoupdate, :disabled

@@ -4,7 +4,6 @@ defmodule SlackCoder.Endpoint do
   plug Beaker.Integrations.Phoenix
 
   socket "/socket", SlackCoder.UserSocket
-  socket "/errors/socket", Flames.UserSocket
 
   # Serve at "/" the static files from "priv/static" directory.
   #

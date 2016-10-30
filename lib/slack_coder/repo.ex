@@ -2,14 +2,6 @@ defmodule SlackCoder.Repo do
   use Ecto.Repo, otp_app: :slack_coder
   use Beaker.Integrations.Ecto
 
-  def save(%Ecto.Changeset{data: %{id: nil}} = changeset) do
-    insert(changeset)
-  end
-
-  def save(%Ecto.Changeset{data: %{id: _id}} = changeset) do
-    update(changeset)
-  end
-
   # Fun addition
   def count(queryable) do
     import Ecto.Query
