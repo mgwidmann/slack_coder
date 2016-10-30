@@ -24,6 +24,9 @@ defmodule SlackCoder.VerifyUser do
       _ -> false
     end
   end
+  defp verify(%User{id: nil}, params) do
+    params["id"] == nil
+  end
   defp verify(_, _), do: false
 
   defp admin?(conn, opts) do

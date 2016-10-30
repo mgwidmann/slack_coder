@@ -32,7 +32,8 @@ config :logger, :console,
   metadata: [:request_id]
 
 config :logger,
-  backends: [:console, Flames.Logger]
+  # backends: [:console, Flames.Logger]
+  backends: [:console]
 
 config :flames,
   repo: SlackCoder.Repo,
