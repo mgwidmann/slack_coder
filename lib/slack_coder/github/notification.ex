@@ -107,7 +107,7 @@ defmodule SlackCoder.Github.Notification do
     notify(slack_user, type, message_for, message, pr)
     notify(users, type, message_for, message, pr)
   end
-  def notify([], type, message_for, message, pr) do
+  def notify([], type, message_for, message, _pr) do
     Task.start fn ->
       notify(%__MODULE__{
         slack_user: message_for,
@@ -118,7 +118,7 @@ defmodule SlackCoder.Github.Notification do
       })
     end
   end
-  def notify(slack_user, type, message_for, message, pr) do
+  def notify(slack_user, type, message_for, message, _pr) do
     Task.start fn ->
       notify(%__MODULE__{
         slack_user: slack_user,

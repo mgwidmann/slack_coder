@@ -1,5 +1,4 @@
 defmodule SlackCoder.Stubs.Users.Supervisor do
-  alias SlackCoder.Models.User
 
   def users do
     []

@@ -1,4 +1,5 @@
 ExUnit.start()
+ExUnit.configure(exclude: [pending: true])
 
 Mix.Task.run "ecto.create", ["--quiet"]
 Mix.Task.run "ecto.migrate", ["--quiet"]

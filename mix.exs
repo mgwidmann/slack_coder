@@ -52,7 +52,7 @@ defmodule SlackCoder.Mixfile do
       {:websocket_client, git: "https://github.com/mgwidmann/websocket_client.git", override: true, branch: "fix_error_logging"},
       # {:websocket_client, git: "https://github.com/jeremyong/websocket_client.git"},
       # {:tentacat, "~> 0.5.0"},
-      {:tentacat, github: "mgwidmann/tentacat", branch: "allow_url_parameters"},
+      {:tentacat, "~> 0.5.3"},
       {:httpoison, "~> 0.8"},
       {:exjsx, "~> 3.2", override: true},
       {:ecto, "2.0.0", override: true},

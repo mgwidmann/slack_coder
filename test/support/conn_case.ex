@@ -17,8 +17,7 @@ defmodule SlackCoder.ConnCase do
 
   using do
     quote do
-      use Pavlov.Case, async: true
-      import Pavlov.Syntax.Expect
+      use ExUnit.Case, async: true
 
       # The default endpoint for testing
       @endpoint SlackCoder.Endpoint

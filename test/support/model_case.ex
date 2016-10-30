@@ -16,14 +16,13 @@ defmodule SlackCoder.ModelCase do
 
   using do
     quote do
-      use Pavlov.Case, async: true
-      import Pavlov.Syntax.Expect
+      use ExUnit.Case, async: true
       alias SlackCoder.Repo
       import Ecto.Model
       import Ecto.Query, only: [from: 2]
       import SlackCoder.ModelCase
 
-      before :each do
+      setup do
         Ecto.Adapters.SQL.Sandbox.checkout(SlackCoder.Repo)
       end
     end

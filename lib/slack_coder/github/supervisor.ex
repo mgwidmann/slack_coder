@@ -1,7 +1,5 @@
 defmodule SlackCoder.Github.Supervisor do
   import Supervisor.Spec
-  alias SlackCoder.Repo
-  alias SlackCoder.Models.PR
   require Logger
 
   def start_link() do

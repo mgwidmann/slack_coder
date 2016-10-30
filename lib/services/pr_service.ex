@@ -1,8 +1,8 @@
 defmodule SlackCoder.Services.PRService do
+  use Timex
   alias SlackCoder.Repo
   alias SlackCoder.Github.Notification
   alias SlackCoder.Models.PR
-  use Timex
   import Ecto.Changeset, only: [put_change: 3, get_change: 2]
   import SlackCoder.Github.TimeHelper
   require Logger

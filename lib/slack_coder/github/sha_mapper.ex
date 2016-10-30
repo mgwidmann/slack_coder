@@ -1,6 +1,5 @@
 defmodule SlackCoder.Github.ShaMapper do
   use GenServer
-  alias SlackCoder.Models.PR
   @moduledoc """
   Github's webhook API delivers `push` and `status` events which has a lot of data about what just occurred except for
   the information of what PR it belongs to (which it may not).

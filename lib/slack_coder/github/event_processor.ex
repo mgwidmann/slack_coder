@@ -41,7 +41,7 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   # Issues have been changed/created. Ignoring this.
-  def process(:issues, params) do
+  def process(:issues, _params) do
     # Logger.info "EventProcessor received issues event: #{inspect params, pretty: true}"
   end
 
@@ -79,8 +79,8 @@ defmodule SlackCoder.Github.EventProcessor do
     |> PullRequest.update(params["pull_request"])
   end
 
-  def process(:pull_request, %{"action" => other} = params) do
-    # Logger.warn "EventProcessor received #{other} event: #{inspect params, pretty: true}"
+  def process(:pull_request, %{"action" => _other} = _params) do
+    # Ignore
   end
 
   def process(:pull_request_review_comment, params) do
@@ -104,8 +104,8 @@ defmodule SlackCoder.Github.EventProcessor do
     |> PullRequest.status(:analysis, sha, url, state)
   end
 
-  def process(:ping, params) do
-    # Logger.info "EventProcessor received ping event: #{inspect params, pretty: true}"
+  def process(:ping, _params) do
+    # Ignore
   end
 
   def process(unknown_event, params) do
