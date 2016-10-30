@@ -47,6 +47,13 @@ defmodule SlackCoder.Models.PR do
     model
     |> cast(params, @required_fields, @optional_fields)
     |> cast_assoc(:commits)
+    |> update_status()
+  end
+
+  def update_status(changeset = %Ecto.Changeset{changes: %{sha: _sha}}) do
+    changeset
+    |> put_change(:build_status, "pending")
+    |> put_change(:analysis_status, "pending")
   end
 
   def reg_changeset(model, params \\ %{}) do
