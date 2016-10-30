@@ -28,7 +28,9 @@ config :slack_coder, SlackCoder.Endpoint,
 # Do not include metadata nor timestamps in development logs
 config :logger, :console,
   format: "[$level] $message\n",
-  level: :debug,
+  level: :debug
+
+config :logger,
   truncate: :infinity
 
 # Set a higher stacktrace during development.
