@@ -46,7 +46,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     {:reply, pr, {pr, callouts}}
   end
 
-  def handle_call(_, state), do: {:reply, :ignored, state}
+  def handle_call(_, _, state), do: {:reply, :ignored, state}
 
   # def handle_call({:called_out?, github_user}, _from, {pr, callouts}) do
   #   {:reply, github_user in callouts, {pr, callouts}}
@@ -125,7 +125,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   def update(_, _), do: nil
 
   def update_sync(pr_pid, pr) when is_pid(pr_pid) do
-    GenServer.call(pr_pid, {:update, pr, nil})
+    GenServer.call(pr_pid, {:update, pr})
   end
   def update_sync(_, _), do: nil
 
