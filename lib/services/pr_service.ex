@@ -72,12 +72,12 @@ defmodule SlackCoder.Services.PRService do
   end
   def conflict_notification(cs), do: cs
 
-  def successful_notification(cs = %Ecto.Changeset{changes: %{build_status: "success"}, data: %PR{build_status: "pending"}}) do
+  def successful_notification(cs = %Ecto.Changeset{changes: %{build_status: "success"}, data: %PR{build_status: status}}) when status in ["pending", "failure"] do
     cs |> put_change(:notifications, [:success | cs.changes[:notifications] || cs.data.notifications])
   end
   def successful_notification(cs), do: cs
 
-  def failure_notification(cs = %Ecto.Changeset{changes: %{build_status: "failure"}, data: %PR{build_status: "pending"}}) do
+  def failure_notification(cs = %Ecto.Changeset{changes: %{build_status: "failure"}, data: %PR{build_status: status}}) when status in ["pending", "success"] do
     cs |> put_change(:notifications, [:failure | cs.changes[:notifications] || cs.data.notifications])
   end
   def failure_notification(cs), do: cs
@@ -93,7 +93,7 @@ defmodule SlackCoder.Services.PRService do
   end
 
   def notifications(pr = %PR{notifications: []}), do: pr
-  for type <- [:stale, :unstale, :merged, :closed, :conflict, :successful, :failure] do
+  for type <- [:stale, :unstale, :merged, :closed, :conflict, :success, :failure] do
     def notifications(pr = %PR{notifications: [unquote(type) | notifications]}) do
       %PR{ Notification.unquote(type)(pr) | notifications: notifications} |> notifications
     end

@@ -28,7 +28,7 @@ defmodule SlackCoder.Github.Notification do
     end
   end
 
-  def successful(pr) do
+  def success(pr) do
     case user_for_pr(pr) |> slack_user_with_monitors do
       [message_for | slack_users] ->
         message = ":bananadance: *SUCCESS* *#{pr.title}* :success:\n#{pr.html_url}"
