@@ -112,7 +112,6 @@ defmodule SlackCoder.Github.Notification do
       notify(%__MODULE__{
         slack_user: message_for,
         type: type,
-        # called_out?: slack_user_called_out?(message_for, pr),
         message_for: message_for,
         message: message
       })
@@ -123,7 +122,6 @@ defmodule SlackCoder.Github.Notification do
       notify(%__MODULE__{
         slack_user: slack_user,
         type: type,
-        # called_out?: slack_user_called_out?(slack_user, pr),
         message_for: message_for,
         message: message
       })
@@ -151,12 +149,6 @@ defmodule SlackCoder.Github.Notification do
     |> Stream.filter(&(user.github in &1.monitors))
     |> Enum.map(&(Map.get(&1, map_to)))
   end
-
-  # defp slack_user_called_out?(slack_user, pr) do
-  #   Users.user(slack_user)
-  #   |> User.get
-  #   |> SlackCoder.Github.Supervisor.called_out?(pr)
-  # end
 
   def user_for_pr(pr) do
     Users.user(pr.github_user)

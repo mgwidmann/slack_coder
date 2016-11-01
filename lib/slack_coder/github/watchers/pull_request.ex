@@ -22,21 +22,6 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     {:ok, {pr, []}}
   end
 
-  # def init({pr, []}) do
-  #   status(pr) # Async request
-  #   :timer.send_interval @stale_check_interval, :update_status
-  #   {:ok, {pr, []}}
-  # end
-  #
-  # def handle_info(:update_status, {pr, _callouts} = state) do
-  #   status(pr)
-  #   {:noreply, state}
-  # end
-  #
-  # def handle_info({:commit_results, pr}, {_old_pr, callouts}) do
-  #   {:noreply, {pr, callouts}}
-  # end
-
   def handle_call(:fetch, _from, {pr, callouts}) do
     {:reply, pr, {pr, callouts}}
   end
@@ -47,14 +32,6 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
 
   def handle_call(_, _, state), do: {:reply, :ignored, state}
-
-  # def handle_call({:called_out?, github_user}, _from, {pr, callouts}) do
-  #   {:reply, github_user in callouts, {pr, callouts}}
-  # end
-  #
-  # def handle_cast({:add_callout, github_user}, {pr, callouts}) do
-  #   {:noreply, {pr, [github_user | callouts] |> Enum.uniq}}
-  # end
 
   def handle_cast(:stale_check, {pr, callouts}) do
     pr |> PR.reg_changeset() |> PRService.save # Sends notification when it is time
@@ -108,15 +85,6 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
       sha: raw_pr["head"]["sha"]
     }
   end
-
-  # def add_callout(pr_pid, github_user) do
-  #   GenServer.cast(pr_pid, {:add_callout, github_user})
-  # end
-  #
-  # def is_called_out?(:undefined, _github_user), do: false
-  # def is_called_out?(pr_pid, github_user) do
-  #   GenServer.call(pr_pid, {:called_out?, github_user})
-  # end
 
   def update(pr_pid, pr) when is_pid(pr_pid) do
     GenServer.cast(pr_pid, {:update, pr})

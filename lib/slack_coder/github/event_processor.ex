@@ -83,6 +83,7 @@ defmodule SlackCoder.Github.EventProcessor do
     # Ignore
   end
 
+  # A comment was added to a pull request
   def process(:pull_request_review_comment, params) do
     Logger.debug "EventProcessor received pull_request_review_comment event"
 
@@ -91,12 +92,14 @@ defmodule SlackCoder.Github.EventProcessor do
     |> PullRequest.unstale()
   end
 
+  # Build has changed status for a CI system
   def process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha} = params) when ci_system in ["continuous-integration/travis-ci/pr", "semaphoreci"] do
     Logger.debug "EventProcessor received build status event of state #{state}"
     ShaMapper.find(sha)
     |> PullRequest.status(:build, sha, url, state)
   end
 
+  # Build has change status for an Analysis system
   def process(:status, %{"context" => "codeclimate", "state" => state, "target_url" => url, "sha" => sha} = params) do
     Logger.debug "EventProcessor received analysis status event of state #{state}"
 
@@ -104,6 +107,7 @@ defmodule SlackCoder.Github.EventProcessor do
     |> PullRequest.status(:analysis, sha, url, state)
   end
 
+  # Nothing to do for pings, already responded with a 200 so just exit
   def process(:ping, _params) do
     # Ignore
   end

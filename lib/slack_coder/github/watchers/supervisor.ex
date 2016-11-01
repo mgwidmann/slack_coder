@@ -73,9 +73,4 @@ defmodule SlackCoder.Github.Watchers.Supervisor do
     end)
   end
 
-  # def called_out?(%SlackCoder.Models.User{github: github}, pr) do
-  #   find_watcher(pr)
-  #   |> SlackCoder.Github.Watchers.PullRequest.is_called_out?(github)
-  # end
-
 end
