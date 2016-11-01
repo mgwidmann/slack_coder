@@ -1,4 +1,6 @@
 defmodule SlackCoder.Users.Help do
+  require Logger
+  alias SlackCoder.Models.User
 
   @message_types [:stale, :unstale, :fail, :pass, :close, :merge, :conflict]
   @message_classes [:self, :monitors, :callouts]
@@ -14,13 +16,28 @@ defmodule SlackCoder.Users.Help do
   #{@zipped_message_types |> Enum.map(fn([config, type])-> "config #{config} #{type} <on/off>" end) |>Enum.join("\n")}
   """
   @unknown_message "I'm sorry. I'm too dumb to comprehend what you mean. :disappointed:"
-  def handle_message(["help" | _command], config) do
+  def handle_message({["help" | _command], _original_message}, config, _admin) do
     {config, @help_text}
   end
-  def handle_message(["config" | settings_list], config) do
+  def handle_message({["config" | settings_list], _original_message}, config, _admin) do
     settings(settings_list, config)
   end
-  def handle_message(_, config) do
+  @announcement ["announce", "announcement"]
+  @announcement_regex
+  def handle_message({[announce | _message], original_message}, config, %User{admin: true} = user) when announce in @announcement do
+    full_message = """
+                   *Announcement*
+                   >>> #{String.replace(original_message, ~r/(#{Enum.join(@announcement, "|")}) /i, "")}
+                   """
+    Task.start fn ->
+      SlackCoder.Users.Supervisor.users
+      |> Stream.reject(&(match?(^user, &1)))
+      |> Enum.each(&(SlackCoder.Slack.send_to(&1.slack, full_message)))
+    end
+    {config, full_message}
+  end
+  def handle_message(message, config, _admin) do
+    Logger.info "Received unhandled message: #{inspect message}"
     {config, @unknown_message}
   end
 

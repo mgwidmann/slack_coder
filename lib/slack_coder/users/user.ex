@@ -34,7 +34,9 @@ defmodule SlackCoder.Users.User do
   end
 
   def handle_cast({:help, message}, user) do
-    {new_config, reply} = handle_message(message |> String.downcase |> String.split(" "), user.config |> Map.from_struct |> Map.delete(:__meta__))
+    {new_config, reply} = handle_message({message |> String.downcase |> String.split(" "), message},
+                                         user.config |> Map.from_struct |> Map.delete(:__meta__),
+                                         user)
     {:ok, user} = User.changeset(user, %{config: new_config}) |> Repo.update
     if reply do
       Slack.send_to(user.slack, reply)
