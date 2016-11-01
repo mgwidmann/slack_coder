@@ -1,5 +1,6 @@
 defmodule SlackCoder.Github do
   require Logger
+  alias SlackCoder.Github.EventProcessor
 
   def client do
     Tentacat.Client.new(%{
@@ -12,4 +13,11 @@ defmodule SlackCoder.Github do
     gollum issue_comment issues label member membership milestone page_build ping public pull_request pull_request_review
     pull_request_review_comment push release repository status team_add watch)
   def events(), do: @events
+
+  def ingest(owner, repository) do
+    raw_prs = Tentacat.Pulls.list(owner, repository, client)
+    raw_prs |> Enum.each(fn(pr)->
+      EventProcessor.process_async(:pull_request, %{"action" => "opened", "number" => pr["number"], "pull_request" => pr})
+    end)
+  end
 end

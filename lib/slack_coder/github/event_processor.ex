@@ -14,6 +14,10 @@ defmodule SlackCoder.Github.EventProcessor do
     Task.start __MODULE__, :process, [event, params]
   end
 
+  @doc """
+  Processes a Github event synchronously. See `proccess_async/2` for more info.
+  """
+  def process(event, parameters)
   # Would like to be able to reset a PR here but there doesn't seem to be enough info
   # to determine what PR the push belonged to without querying Github's API.
   def process(:push, %{"before" => old_sha, "after" => new_sha} = params) do
