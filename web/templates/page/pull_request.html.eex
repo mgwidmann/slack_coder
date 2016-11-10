@@ -16,7 +16,7 @@
   </td>
   <td>
     <%= link_if @pr.build_url, to: @pr.build_url, class: "label label-#{status_class(@pr.build_status)} text-uppercase", target: "_blank" do %>
-      <%= to_string(@pr.build_status) %>
+      <%= to_string(@pr.build_status || "Unknown") %>
     <% end %>
   </td>
   <td>
