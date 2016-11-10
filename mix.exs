@@ -58,7 +58,7 @@ defmodule SlackCoder.Mixfile do
       {:ecto, "2.0.0", override: true},
       {:oauth2, "~> 0.6"},
       {:beaker, github: "hahuang65/beaker"},
-      {:flames, github: "mgwidmann/flames"},
+      {:flames, "~> 0.2.0"},
       {:stub_alias, github: "mgwidmann/stub_alias"},
 
       # Dev only
