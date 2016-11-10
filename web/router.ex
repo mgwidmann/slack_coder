@@ -47,6 +47,7 @@ defmodule SlackCoder.Router do
   end
 
   forward "/beaker", Beaker.Web
+  forward "/errors", Flames.Web
 
   scope "/auth", SlackCoder do
     pipe_through :browser
