@@ -15,7 +15,7 @@ defmodule SlackCoder.ApplicationHelper do
         user.github == except
     end)
     |> Enum.map(fn(user)->
-      {"#{user.name} (#{user.github})", user.github}
+      {"#{user.name} (#{user.github})", String.downcase(user.github)}
     end)
   end
 end

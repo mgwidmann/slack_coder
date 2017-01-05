@@ -67,7 +67,7 @@ defmodule SlackCoder.Github.Watchers.Supervisor do
     |> Stream.filter(&(&1)) # Remove nils
     |> Enum.reduce(%{}, fn
       pr, prs ->
-        user = pr.github_user |> String.to_atom
+        user = pr.github_user |> String.downcase() |> String.to_atom
         list = prs[user] || []
         Map.put(prs, user, [pr | list])
     end)
