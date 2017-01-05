@@ -134,7 +134,7 @@ defmodule SlackCoder.Github.Notification do
 
   def slack_user_with_monitors(user) do
     message_for = user.slack
-    users = user_with_monitors(user, :github)
+    users = user_with_monitors(user, :slack)
     Enum.uniq([message_for | users])
   end
 
