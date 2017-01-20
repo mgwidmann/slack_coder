@@ -3,6 +3,8 @@ defmodule SlackCoder.Services.PRService do
   alias SlackCoder.Repo
   alias SlackCoder.Github.Notification
   alias SlackCoder.Models.PR
+  alias SlackCoder.PageView
+  alias SlackCoder.Endpoint
   import Ecto.Changeset, only: [put_change: 3, get_change: 2]
   import SlackCoder.Github.TimeHelper
   require Logger
@@ -100,8 +102,8 @@ defmodule SlackCoder.Services.PRService do
   end
 
   def broadcast(pr) do
-    html = SlackCoder.PageView.render("pull_request.html", pr: pr)
-    SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
+    html = PageView.render("pull_request.html", pr: pr)
+    Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
     pr
   end
 end
