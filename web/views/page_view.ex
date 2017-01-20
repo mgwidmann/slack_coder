@@ -3,7 +3,7 @@ defmodule SlackCoder.PageView do
 
   def status_class(status) when is_binary(status), do: status_class(String.to_existing_atom(status))
   def status_class(:success), do: :success
-  def status_class(:failed), do: :danger
+  def status_class(:failure), do: :danger
   def status_class(:pending), do: :warning
   def status_class(:error), do: :danger
   def status_class(:conflict), do: :highlight
