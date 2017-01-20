@@ -1,6 +1,7 @@
 defmodule SlackCoder.Github do
   require Logger
   alias SlackCoder.Github.EventProcessor
+  alias SlackCoder.Github.Watchers.Supervisor, as: PullRequestSupervisor
 
   def client do
     Tentacat.Client.new(%{
@@ -18,6 +19,12 @@ defmodule SlackCoder.Github do
     raw_prs = Tentacat.Pulls.list(owner, repository, client)
     raw_prs |> Enum.each(fn(pr)->
       EventProcessor.process_async(:pull_request, %{"action" => "opened", "number" => pr["number"], "pull_request" => pr})
+    end)
+    # Look for closed PRs
+    prs = PullRequestSupervisor.pull_requests() |> Map.values() |> List.flatten()
+    ((prs |> Enum.map(&(&1.number))) -- (raw_prs |> Enum.map(&(&1["number"])))) |> Enum.each(fn(pr_number)->
+      pr = Tentacat.Pulls.find(owner, repository, pr_number, client)
+      EventProcessor.process_async(:pull_request, %{"action" => "closed", "number" => pr_number, "pull_request" => pr})
     end)
   end
 end

@@ -132,12 +132,14 @@ defmodule SlackCoder.Github.Notification do
     SlackCoder.Slack.send_to(slack_user, notification)
   end
 
+  def slack_user_with_monitors(nil), do: []
   def slack_user_with_monitors(user) do
     message_for = user.slack
     users = user_with_monitors(user, :slack)
     Enum.uniq([message_for | users])
   end
 
+  def github_user_with_monitors(nil), do: []
   def github_user_with_monitors(user) do
     message_for = user.github
     users = user_with_monitors(user, :github)

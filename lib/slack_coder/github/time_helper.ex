@@ -1,6 +1,6 @@
 defmodule SlackCoder.Github.TimeHelper do
   use Timex
-  
+
   def now do
     to_local(DateTime.local)
   end
@@ -28,7 +28,7 @@ defmodule SlackCoder.Github.TimeHelper do
 
   def date_for(nil), do: nil
   def date_for(string) do
-     {:ok, date} = Timex.parse(string, "{ISO}")
+     {:ok, date} = Timex.parse(string, "{ISO:Extended:Z}")
      date
   end
 end
