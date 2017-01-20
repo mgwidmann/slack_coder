@@ -19,7 +19,7 @@ defmodule SlackCoder.Services.PRService do
     |> Repo.insert_or_update()
     |> case do
       {:ok, pr} ->
-        {:ok, notifications(pr)}
+        {:ok, pr |> notifications() |> broadcast()}
       errored_changeset ->
         Logger.error "Unable to save PR: #{inspect errored_changeset}"
         errored_changeset
@@ -97,5 +97,11 @@ defmodule SlackCoder.Services.PRService do
     def notifications(pr = %PR{notifications: [unquote(type) | notifications]}) do
       %PR{ Notification.unquote(type)(pr) | notifications: notifications} |> notifications
     end
+  end
+
+  def broadcast(pr) do
+    html = SlackCoder.PageView.render("pull_request.html", pr: pr)
+    SlackCoder.Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
+    pr
   end
 end
