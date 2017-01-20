@@ -21,13 +21,13 @@ defmodule SlackCoder.Github.Watchers.Supervisor do
 
   def start_watcher(pr) do
     case Supervisor.start_child(__MODULE__, worker_for(pr)) do
-        {:ok, watcher} ->
-          Logger.debug "Starting watcher for: #{worker_id(pr)} #{pr.title}"
-          watcher
-        {:error, {:already_started, watcher}} ->
-          watcher
-        {:error, :already_present} ->
-          find_watcher(pr)
+      {:ok, watcher} ->
+        Logger.debug "Starting watcher for: #{worker_id(pr)} #{pr.title}"
+        watcher
+      {:error, {:already_started, watcher}} ->
+        watcher
+      {:error, :already_present} ->
+        find_watcher(pr)
     end
   end
 

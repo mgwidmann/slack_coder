@@ -14,7 +14,7 @@ defmodule SlackCoder.Github do
     pull_request_review_comment push release repository status team_add watch)
   def events(), do: @events
 
-  def ingest(owner, repository) do
+  def synchronize(owner, repository) do
     raw_prs = Tentacat.Pulls.list(owner, repository, client)
     raw_prs |> Enum.each(fn(pr)->
       EventProcessor.process_async(:pull_request, %{"action" => "opened", "number" => pr["number"], "pull_request" => pr})
