@@ -17,7 +17,7 @@ defmodule SlackCoder.GithubController do
     event = get_req_header(conn, @event_header) |> List.first
 
     if Enum.member?(@valid_events, event) do
-      conn |> assign(:event, String.to_existing_atom(event))
+      conn |> assign(:event, String.to_atom(event))
     else
       Logger.warn "Received invalid event: #{event}"
       conn
