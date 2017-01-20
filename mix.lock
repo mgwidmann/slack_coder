@@ -38,7 +38,7 @@
   "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.1", "28a4d65b7f59893bc2c7de786dec1e1555bd742d336043fe644ae956c3497fbe", [:make, :rebar], []},
   "stub_alias": {:git, "https://github.com/mgwidmann/stub_alias.git", "c55fb1c44ec7f1076deac7a8ff490e164f9ac713", []},
   "tentacat": {:hex, :tentacat, "0.5.3", "71e448c9004bf72f0014d3b9d7592493501122d3ab551f95aa3003c5deb9fb92", [:mix], [{:exjsx, "~> 3.2", [hex: :exjsx, optional: false]}, {:httpoison, "~> 0.8", [hex: :httpoison, optional: false]}]},
-  "timex": {:hex, :timex, "2.2.1", "0d69012a7fd69f4cbdaa00cc5f2a5f30f1bed56072fb362ed4bddf60db343022", [:mix], [{:combine, "~> 0.7", [hex: :combine, optional: false]}, {:gettext, "~> 0.10", [hex: :gettext, optional: false]}, {:tzdata, "~> 0.1.8 or ~> 0.5", [hex: :tzdata, optional: false]}]},
-  "timex_ecto": {:hex, :timex_ecto, "1.1.3", "7a53a0781db7b15de604ffe244c7ed5347bdbf6ce045f6a8fc492f4994a1e32b", [:mix], [{:ecto, "~> 1.1 or ~> 2.0 or ~> 2.0.0-rc3", [hex: :ecto, optional: false]}, {:timex, "~> 2.1", [hex: :timex, optional: false]}]},
+  "timex": {:hex, :timex, "3.1.8", "a32f636c4260dd7515a3767be3d3a163dc09d15f0e9e689254b7bab152b29209", [:mix], [{:combine, "~> 0.7", [hex: :combine, optional: false]}, {:gettext, "~> 0.10", [hex: :gettext, optional: false]}, {:tzdata, "~> 0.1.8 or ~> 0.5", [hex: :tzdata, optional: false]}]},
+  "timex_ecto": {:hex, :timex_ecto, "3.1.1", "37d54f6879d96a6789bb497296531cfb853631de78e152969d95cff03c1368dd", [:mix], [{:ecto, "~> 2.1.0", [hex: :ecto, optional: false]}, {:timex, "~> 3.0", [hex: :timex, optional: false]}]},
   "tzdata": {:hex, :tzdata, "0.5.10", "087e8dfe8c0283473115ad8ca6974b898ecb55ca5c725427a142a79593391e90", [:mix], [{:hackney, "~> 1.0", [hex: :hackney, optional: false]}]},
   "websocket_client": {:git, "https://github.com/mgwidmann/websocket_client.git", "a685410bf167c48d4a7f65636c120ed6ed081770", [branch: "fix_error_logging"]}}
