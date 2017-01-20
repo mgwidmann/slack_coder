@@ -101,6 +101,10 @@ defmodule SlackCoder.Services.PRService do
     end
   end
 
+  def broadcast(%PR{closed_at: closed, merged_at: merged} = pr) when not is_nil(closed) or not is_nil(merged) do
+    Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
+    pr
+  end
   def broadcast(pr) do
     html = PageView.render("pull_request.html", pr: pr)
     Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
