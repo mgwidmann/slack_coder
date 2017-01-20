@@ -55,7 +55,7 @@ defmodule SlackCoder.Mixfile do
       {:tentacat, "~> 0.5.3"},
       {:httpoison, "~> 0.8"},
       {:exjsx, "~> 3.2", override: true},
-      {:ecto, "2.0.0", override: true},
+      {:ecto, "~> 2.0", override: true},
       {:oauth2, "~> 0.6"},
       {:beaker, github: "hahuang65/beaker"},
       {:flames, "~> 0.2.2"},

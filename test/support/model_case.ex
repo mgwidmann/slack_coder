@@ -18,7 +18,7 @@ defmodule SlackCoder.ModelCase do
     quote do
       use ExUnit.Case, async: true
       alias SlackCoder.Repo
-      import Ecto.Model
+      import Ecto.Schema
       import Ecto.Query, only: [from: 2]
       import SlackCoder.ModelCase
 

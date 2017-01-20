@@ -26,7 +26,7 @@ defmodule SlackCoder.ConnCase do
       use Phoenix.ConnTest
 
       alias SlackCoder.Repo
-      import Ecto.Model
+      import Ecto.Schema
       import Ecto.Query, only: [from: 2]
 
       import SlackCoder.Router.Helpers

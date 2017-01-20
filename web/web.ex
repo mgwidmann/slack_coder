@@ -33,7 +33,7 @@ defmodule SlackCoder.Web do
       use Phoenix.Controller
       import Ecto
       alias SlackCoder.Repo
-      import Ecto.Model
+      import Ecto.Schema
       import Ecto.Query, only: [from: 1, from: 2]
 
       alias SlackCoder.Models.User
@@ -74,7 +74,7 @@ defmodule SlackCoder.Web do
       use Phoenix.Channel
       import Ecto
       alias SlackCoder.Repo
-      import Ecto.Model
+      import Ecto.Schema
       import Ecto.Query, only: [from: 1, from: 2]
       require Logger
       import StubAlias
