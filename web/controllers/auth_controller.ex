@@ -58,7 +58,7 @@ defmodule SlackCoder.AuthController do
 
   defp get_user!(token) do
     # Fetch github user from github using token
-    {:ok, %{body: user}} = OAuth2.AccessToken.get(token, "/user")
+    {:ok, %{body: user}} = OAuth2.Client.get(token, "/user")
     %{name: user["name"], github: user["login"], avatar_url: user["avatar_url"], html_url: user["html_url"]}
   end
 
