@@ -38,6 +38,11 @@ config :flames,
   repo: SlackCoder.Repo,
   endpoint: SlackCoder.Endpoint
 
+config :ueberauth, Ueberauth,
+  providers: [
+    github: {Ueberauth.Strategy.Github, [default_scope: "user,public_repo"]}
+  ]
+
 import_config "#{Mix.env}.exs"
 
 # Configure phoenix generators

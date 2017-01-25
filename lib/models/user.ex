@@ -12,13 +12,13 @@ defmodule SlackCoder.Models.User do
 
     field :admin, :boolean, default: false
 
-    embeds_one :config, SlackCoder.Models.User.Config
+    embeds_one :config, SlackCoder.Models.User.Config, on_replace: :update
 
     timestamps
   end
 
-  @required_fields ~w(slack github)
-  @optional_fields ~w(avatar_url html_url name monitors muted)
+  @required_fields ~w(slack github)a
+  @optional_fields ~w(avatar_url html_url name monitors muted)a
 
   @doc """
   Creates a changeset based on the `model` and `params`.
@@ -28,17 +28,19 @@ defmodule SlackCoder.Models.User do
   """
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
+    |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_required(@required_fields)
     |> cast_embed(:config, required: true)
     |> unique_constraint(:slack)
     |> unique_constraint(:github)
   end
 
-  @admin_fields Enum.uniq(~w(admin) ++ @required_fields)
-  @admin_required ~w(github)
+  @admin_fields Enum.uniq(~w(admin)a ++ @required_fields)
+  @admin_required ~w(github)a
   def admin_changeset(model, params \\ %{}) do
     model
-    |> cast(params, @admin_required, @optional_fields ++ @admin_fields)
+    |> cast(params, @admin_required ++ @optional_fields ++ @admin_fields)
+    |> validate_required(@admin_required)
   end
 
   for field <- [:slack, :github] do

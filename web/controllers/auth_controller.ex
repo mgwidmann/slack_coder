@@ -22,49 +22,45 @@ defmodule SlackCoder.AuthController do
   be used to request an access token. The access token will then be used to
   access protected resources on behalf of the user.
   """
-  def callback(conn, %{"provider" => "github", "code" => code}) do
-    # Exchange an auth code for an access token
-    token = get_token!(code)
+  def callback(%{assigns: %{ueberauth_failure: _fails}} = conn, _params) do
+    conn
+    |> put_flash(:error, "Failed to authenticate.")
+    |> redirect(to: "/")
+  end
 
-    # Request the user's data with the access token
-    user = get_user!(token)
-    github = user.github
-    db_user = from(u in User, where: u.github == ^github) |> Repo.one |> update_user(user)
-
-    # Store the user in the session under `:current_user` and redirect to /.
-    # In most cases, we'd probably just store the user's ID that can be used
-    # to fetch from the database. In this case, since this example app has no
-    # database, I'm just storing the user map.
-    #
-    # If you need to make additional resource requests, you may want to store
-    # the access token as well.
-    conn = conn
-          |> put_session(:access_token, token.access_token)
-    if db_user do
-      SlackCoder.Users.Supervisor.start_user(db_user)
-      conn
-      |> put_session(:current_user, db_user)
-      |> redirect(to: "/")
-    else
-      conn
-      |> put_session(:current_user, struct(User, user))
-      |> redirect(to: user_path(conn, :new))
+  def callback(%{assigns: %{ueberauth_auth: %Ueberauth.Auth{extra:
+      %Ueberauth.Auth.Extra{raw_info: %{token: %{access_token: token}, user: raw_user}}}}} = conn, _params) do
+    case raw_user |> find_or_create_user() do
+      {:ok, db_user} ->
+        conn
+        |> after_login(db_user)
+        |> redirect(to: "/")
+      {:new, db_user} ->
+        conn
+        |> after_login(db_user)
+        |> redirect(to: SlackCoder.Router.Helpers.user_path(conn, :edit, db_user.id))
     end
   end
 
   defp authorize_url!, do: SlackCoder.OAuth.Github.authorize_url!
 
-  defp get_token!(code),   do: SlackCoder.OAuth.Github.get_token!(code: code)
-
-  defp get_user!(token) do
-    # Fetch github user from github using token
-    {:ok, %{body: user}} = OAuth2.Client.get(token, "/user")
-    %{name: user["name"], github: user["login"], avatar_url: user["avatar_url"], html_url: user["html_url"]}
+  defp update_user(user, db_user) do
+    User.changeset(db_user || %User{}, user) |> Repo.insert_or_update!
   end
 
-  defp update_user(nil, _), do: nil
-  defp update_user(db_user, user) do
-    User.changeset(db_user, user) |> Repo.update!
+  defp find_or_create_user(raw_user) do
+    %{github: github} = simplified_user = %{name: raw_user["name"], github: raw_user["login"], slack: raw_user["login"], avatar_url: raw_user["avatar_url"], html_url: raw_user["html_url"], config: %{}}
+    db_user = from(u in User, where: u.github == ^github) |> Repo.one
+
+    user = simplified_user |> update_user(db_user)
+    SlackCoder.Users.Supervisor.start_user(user)
+    if db_user, do: {:ok, user}, else: {:new, user}
+  end
+
+  defp after_login(conn, user) do
+    conn
+    |> put_flash(:info, "Successfully authenticated.")
+    |> put_session(:current_user, user)
   end
 
 end

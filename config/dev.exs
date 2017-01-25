@@ -20,10 +20,14 @@ config :slack_coder, SlackCoder.Endpoint,
   live_reload: [
     patterns: [
       ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
-      ~r{web/views/.*(ex)$},
-      ~r{web/templates/.*(eex)$}
+      ~r{lib/*.(ex)$},
+      ~r{web/.*(ex)$},
+      ~r{web/.*(eex)$}
     ]
   ]
+
+config :logger,
+  backends: [:console]
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console,
