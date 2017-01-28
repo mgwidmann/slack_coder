@@ -55,8 +55,12 @@ socket.connect({})
 
 // Now that you are connected, you can join channels with a topic:
 let channel = socket.channel("prs:all", {github: window.github})
+let monitors = [];
 channel.join()
-  .receive("ok", resp => { console.log("Joined successfully", resp) })
+  .receive("ok", resp => {
+    console.log("Joined successfully", resp);
+    monitors = resp.monitors;
+  })
   .receive("error", resp => { console.log("Unable to join", resp) })
 
 $(document).ready(()=> {
@@ -67,7 +71,7 @@ $(document).ready(()=> {
     } else {
       if(window.github == resp.github) {
         $('#pull-requests').append(resp.html)
-      } else {
+      } else if (monitors.indexOf(resp.github.toLowerCase()) !== -1){
         $('#team-pull-requests').append(resp.html)
       }
     }

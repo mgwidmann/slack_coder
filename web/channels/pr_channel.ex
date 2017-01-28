@@ -8,7 +8,7 @@ defmodule SlackCoder.PRChannel do
              |> assign(:current_user, Users.user(github) |> User.get)
     socket = socket # Need updated socket...
              |> assign(:monitors, SlackCoder.Github.Notification.github_user_with_monitors(socket.assigns.current_user))
-    {:ok, socket}
+    {:ok, %{monitors: socket.assigns.current_user.monitors}, socket}
   end
   def join("prs:all", _, _socket) do
     {:error, %{"error" => "Must be signed in"}}
