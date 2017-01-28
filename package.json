@@ -1,5 +1,8 @@
 {
   "repository": {},
+  "scripts": {
+    "build": "node_modules/brunch/bin/brunch build"
+  },
   "dependencies": {
     "babel-brunch": "^6.0.6",
     "brunch": "^2.10.3",
