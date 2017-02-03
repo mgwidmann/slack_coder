@@ -13,7 +13,7 @@ defmodule SlackCoder.Github do
 
   @events ~w(commit_comment create delete deployment deployment_status download follow fork fork_apply gist
     gollum issue_comment issues label member membership milestone page_build ping public pull_request pull_request_review
-    pull_request_review_comment push release repository status team_add watch)
+    pull_request_review_comment push release repository status team team_add watch)
   def events(), do: @events
 
   def synchronize(owner, repository) do

@@ -117,7 +117,7 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   def process(unknown_event, params) do
-    Logger.warn "EventProcessor received unknown event #{inspect unknown_event} with params"
+    Logger.info "EventProcessor received unknown event #{inspect unknown_event} with params"
   end
 
   def pr_number(%{"comment" => %{"pull_request_url" => url}}) do
