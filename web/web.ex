@@ -36,7 +36,7 @@ defmodule SlackCoder.Web do
       import Ecto.Schema
       import Ecto.Query, only: [from: 1, from: 2]
 
-      alias SlackCoder.Models.User
+      alias SlackCoder.Models.{User, Message}
 
       import SlackCoder.Router.Helpers
       require Logger

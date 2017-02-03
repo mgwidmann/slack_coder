@@ -50,6 +50,12 @@ defmodule SlackCoder.UserController do
     end
   end
 
+  def messages(conn, params) do
+    messages = Message |> Repo.paginate(params |> Map.put("page_size", 50))
+    avatars = from(u in User, select: %{u.slack => u.avatar_url}) |> Repo.all |> Enum.reduce(%{}, &Map.merge/2) |> IO.inspect
+    render(conn, "messages.html", messages: messages, avatars: avatars)
+  end
+
   defp create_user(conn, user, changeset, setup_session) do
     changeset = Ecto.Changeset.put_embed changeset, :config, SlackCoder.Users.Help.default_config
 

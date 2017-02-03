@@ -1,0 +1,11 @@
+<tr id="message-<%= @message.id %>">
+  <td>
+    <img src="<%= @avatar %>" class="img-circle user-avatar" />
+  </td>
+  <td class="hidden-xs">
+    <%= @message.slack %> (<%= @message.user %>)
+  </td>
+  <td>
+    <%= @message.message %>
+  </td>
+</tr>

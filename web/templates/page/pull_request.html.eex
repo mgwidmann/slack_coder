@@ -2,13 +2,13 @@
   <td>
     <img src="<%= @pr.github_user_avatar %>" class="img-circle user-avatar" />
   </td>
-  <td>
+  <td class="hidden-xs">
     <%= @pr.github_user %>
   </td>
-  <td>
+  <td class="hidden-xs">
     <%= @pr.repo %>
   </td>
-  <td>
+  <td class="hidden-xs">
     <%= @pr.branch %>
   </td>
   <td>
@@ -19,14 +19,14 @@
       <%= to_string(@pr.build_status || "Unknown") %>
     <% end %>
   </td>
-  <td>
+  <td class="hidden-xs">
     <%= if @pr.analysis_url do %>
       <%= link to: @pr.analysis_url, target: "_blank" do %>
         <i class="code-climate"></i>
       <% end %>
     <% end %>
   </td>
-  <td>
+  <td class="hidden-xs">
     <%= if @pr.backoff > Application.get_env(:slack_coder, :pr_backoff_start, 1) do %>
       Stale for <%= staleness(@pr) %>
     <% end %>

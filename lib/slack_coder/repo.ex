@@ -1,5 +1,6 @@
 defmodule SlackCoder.Repo do
   use Ecto.Repo, otp_app: :slack_coder
+  use Scrivener
   use Beaker.Integrations.Ecto
 
   # Fun addition

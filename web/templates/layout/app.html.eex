@@ -16,17 +16,17 @@
   <body>
     <div class="header">
       <div class="container">
-        <div class="col-md-3 hidden-xs">
+        <div class="col-md-3 hidden-xs hidden-sm">
           <a class="logo" href="/"></a>
         </div>
-        <div class="col-md-6 col-xs-12 text-center">
+        <div class="col-md-6 col-sm-8 hidden-xs text-center">
           <h1>
             Slack Coder
           </h1>
           <p class="lead">Monitoring your <strong>dead</strong> pull requests</p>
         </div>
         <%= if @current_user do %>
-          <div class="col-md-3 col-xs-12 text-right">
+          <div class="col-md-3 col-sm-4 col-xs-12 text-right">
             <span>
               <img src="<%= @current_user.avatar_url %>" class="img-xs img-circle"/>
               <%= if @current_user.id do %>

@@ -1,0 +1,19 @@
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <span class="h3">
+      Messages
+    </span>
+  </div>
+  <div class="panel-body">
+    <table class="table table-striped">
+      <tbody id="messages">
+        <%= for message <- @messages do %>
+          <%= render "message.html", message: message, avatar: Map.get(@avatars, message.user) %>
+        <% end %>
+      </tbody>
+    </table>
+    <div class="text-center">
+      <%= pagination_links(@conn, @messages, path: &user_path/3, action: :messages) %>
+    </div>
+  </div>
+</section>

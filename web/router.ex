@@ -37,6 +37,8 @@ defmodule SlackCoder.Router do
 
         get "/users/external/:github", UserController, :external
         post "/users/external/:github", UserController, :create_external
+
+        get "/messages", UserController, :messages
       end
     end
   end

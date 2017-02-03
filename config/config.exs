@@ -43,6 +43,9 @@ config :ueberauth, Ueberauth,
     github: {Ueberauth.Strategy.Github, [default_scope: "user,public_repo"]}
   ]
 
+config :scrivener_html,
+  routes_helper: SlackCoder.Router.Helpers
+
 import_config "#{Mix.env}.exs"
 
 # Configure phoenix generators

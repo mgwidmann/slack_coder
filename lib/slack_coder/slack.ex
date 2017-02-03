@@ -5,6 +5,8 @@ defmodule SlackCoder.Slack do
   alias SlackCoder.Slack.Routing
   stub_alias SlackCoder.Users.Supervisor, as: Users
   stub_alias SlackCoder.Users.User
+  alias SlackCoder.Models.Message
+  alias SlackCoder.Repo
   require Logger
   @online_message """
   :slack: *Slack* :computer: *Coder* online!
@@ -65,7 +67,12 @@ defmodule SlackCoder.Slack do
       message = message_for(s_user, message)
       slack_user = Routing.route_message(slack, s_user)
       if slack_user do
-        Logger.info "Sending message (#{s_user[:name]}): #{message}"
+        Task.start fn ->
+          Logger.info "Sending message (#{s_user[:name]}): #{message}"
+          %Message{}
+          |> Message.changeset(%{slack: slack, user: s_user[:name], message: message |> String.strip})
+          |> Repo.insert!
+        end
 
         message
         |> String.strip

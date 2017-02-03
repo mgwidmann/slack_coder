@@ -1,5 +1,6 @@
 defmodule SlackCoder.UserView do
   use SlackCoder.Web, :view
+  import Scrivener.HTML
 
   def new_or_update_user_path(%Plug.Conn{path_info: ["admin" | _]} = conn, user) do
     user_path(conn, :create_external, user.github)
