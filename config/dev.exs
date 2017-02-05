@@ -53,4 +53,23 @@ config :slack_coder, SlackCoder.Repo,
 
 if File.exists? "config/dev.secret.exs" do
   import_config "dev.secret.exs"
+else
+  config :slack_coder,
+    slack_api_token: nil,
+    personal: true,
+    caretaker: :matt
+
+  config :slack_coder, :github,
+    pat: "a-github-token-that-wont-work",
+    user: "ausername"
+
+  config :ueberauth, Ueberauth.Strategy.Github.OAuth,
+    client_id: "someclientid",
+    client_secret: "someclientsecret"
+
+  config :slack_coder, :notifications,
+    min_hour: 0,
+    max_hour: 24,
+    always_allow: true,
+    days: [1,2,3,4,5,6,7]
 end

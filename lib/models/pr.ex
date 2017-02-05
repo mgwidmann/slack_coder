@@ -36,7 +36,7 @@ defmodule SlackCoder.Models.PR do
   @required_fields ~w(owner repo branch github_user title number html_url opened_at)
   @optional_fields ~w(latest_comment latest_comment_url notifications backoff merged_at closed_at mergeable
                       github_user_avatar fork sha build_status analysis_status build_url analysis_url user_id)
-
+  @all_fields @required_fields ++ @optional_fields
   @doc """
   Creates a changeset based on the `model` and `params`.
 
@@ -45,7 +45,8 @@ defmodule SlackCoder.Models.PR do
   """
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
+    |> cast(params, @all_fields)
+    |> validate_required(@required_fields)
     |> cast_assoc(:commits)
     |> update_status()
   end
@@ -59,7 +60,8 @@ defmodule SlackCoder.Models.PR do
 
   def reg_changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
+    |> cast(params, @all_fields)
+    |> validate_required(@required_fields)
   end
 
   def active(query \\ __MODULE__) do
