@@ -33,9 +33,9 @@ defmodule SlackCoder.Models.PR do
     timestamps
   end
 
-  @required_fields ~w(owner repo branch github_user title number html_url opened_at)
+  @required_fields ~w(owner repo branch github_user title number html_url opened_at)a
   @optional_fields ~w(latest_comment latest_comment_url notifications backoff merged_at closed_at mergeable
-                      github_user_avatar fork sha build_status analysis_status build_url analysis_url user_id)
+                      github_user_avatar fork sha build_status analysis_status build_url analysis_url user_id)a
   @all_fields @required_fields ++ @optional_fields
   @doc """
   Creates a changeset based on the `model` and `params`.
