@@ -23,30 +23,38 @@ defmodule SlackCoder.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", SlackCoder do
+  scope "/" do
     pipe_through :browser # Use the default browser stack
 
-    get "/", PageController, :index
+    get "/", SlackCoder.PageController, :index
 
     scope "/" do
       pipe_through :restricted
-      resources "/users", UserController, only: [:new, :create, :edit, :update]
+      resources "/users", SlackCoder.UserController, only: [:new, :create, :edit, :update]
 
       scope "/admin" do
         pipe_through :admin
 
-        get "/users/external/:github", UserController, :external
-        post "/users/external/:github", UserController, :create_external
+        forward "/graphiql", Absinthe.Plug.GraphiQL, schema: SlackCoder.Schemas.MainSchema
 
-        get "/messages", UserController, :messages
+        scope "/", SlackCoder do
+          get "/users/external/:github", UserController, :external
+          post "/users/external/:github", UserController, :create_external
+
+          get "/messages", UserController, :messages
+        end
       end
     end
   end
 
-  scope "/api", SlackCoder do
+  scope "/api" do
     pipe_through :api
 
-    post "/github/event", GithubController, :event
+    forward "/graphql", Absinthe.Plug, schema: SlackCoder.Schemas.MainSchema
+
+    scope "/", SlackCoder do
+      post "/github/event", GithubController, :event
+    end
   end
 
   forward "/beaker", Beaker.Web
