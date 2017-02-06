@@ -20,7 +20,7 @@ config :slack_coder, SlackCoder.Endpoint,
   live_reload: [
     patterns: [
       ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
-      ~r{lib/*.(ex)$},
+      ~r{lib/.*(ex)$},
       ~r{web/.*(ex)$},
       ~r{web/.*(eex)$}
     ]
