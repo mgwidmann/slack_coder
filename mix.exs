@@ -63,6 +63,9 @@ defmodule SlackCoder.Mixfile do
       {:stub_alias, github: "mgwidmann/stub_alias"},
       {:scrivener_html, "~> 1.5"},
       {:scrivener_ecto, "~> 1.0"},
+      {:absinthe, "~> 1.2"},
+      {:absinthe_plug, "~> 1.2"},
+      {:absinthe_ecto, github: "absinthe-graphql/absinthe_ecto"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev}
