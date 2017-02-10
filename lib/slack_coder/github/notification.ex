@@ -67,7 +67,7 @@ defmodule SlackCoder.Github.Notification do
   def stale(pr) do
     case user_for_pr(pr) |> slack_user_with_monitors do
       [message_for | slack_users] ->
-        stale_hours = Timex.Date.diff(pr.latest_comment, now, :hours)
+        stale_hours = Timex.diff(pr.latest_comment, now, :hours)
         message = """
         :hankey: *#{pr.title}*
         Stale for *#{stale_hours}* hours

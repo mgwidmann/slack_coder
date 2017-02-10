@@ -45,7 +45,7 @@ defmodule SlackCoder.Services.PRService do
   def closed_notification(cs), do: cs
 
   def stale_notification(cs = %Ecto.Changeset{changes: %{latest_comment: time}}) when not is_nil(time) do
-    hours = Date.diff(time, now, :hours)
+    hours = Timex.diff(time, now, :hours)
     if hours >= cs.data.backoff && Notification.can_send_notifications? do
       backoff = next_backoff(cs.data.backoff, hours)
       cs
@@ -59,7 +59,7 @@ defmodule SlackCoder.Services.PRService do
 
   @backoff Application.get_env(:slack_coder, :pr_backoff_start, 1)
   def unstale_notification(cs = %Ecto.Changeset{changes: %{latest_comment: new_time}, data: %PR{latest_comment: old_time}}) when not (is_nil(new_time) or is_nil(old_time)) do
-    if Date.compare(new_time, old_time) != 0 && cs.data.backoff != @backoff do
+    if Timex.compare(new_time, old_time) != 0 && cs.data.backoff != @backoff do
       cs
       |> put_change(:backoff, @backoff)
       |> put_change(:notifications, [:unstale | cs.changes[:notifications] || cs.data.notifications])

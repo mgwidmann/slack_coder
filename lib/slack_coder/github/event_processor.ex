@@ -20,13 +20,13 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(event, parameters)
   # Would like to be able to reset a PR here but there doesn't seem to be enough info
   # to determine what PR the push belonged to without querying Github's API.
-  def process(:push, %{"before" => old_sha, "after" => new_sha} = params) do
+  def process(:push, %{"before" => old_sha, "after" => new_sha}) do
     Logger.debug "EventProcessor received push event"
     ShaMapper.update(old_sha, new_sha)
   end
 
   # A user has made a comment on the PR itself (not related to any code).
-  def process(:issue_comment, %{"issue" => %{"number" => pr}}= params) do
+  def process(:issue_comment, %{"issue" => %{"number" => pr}}) do
     Logger.debug "EventProcessor received issue_comment event"
 
     %PR{number: pr}
@@ -51,7 +51,7 @@ defmodule SlackCoder.Github.EventProcessor do
 
   # A pull request has been opened or reopened. Need to start the watcher synchronously, then send it data
   # to update it to the most recent PR information.
-  def process(:pull_request, %{"action" => opened, "number" => number, "pull_request" => pull_request} = params) when opened in ["opened", "reopened"] do
+  def process(:pull_request, %{"action" => opened, "number" => number, "pull_request" => pull_request}) when opened in ["opened", "reopened"] do
     Logger.debug "EventProcessor received #{opened} event"
 
     # login = params["pull_request"]["user"]["login"]
@@ -97,14 +97,14 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   # Build has changed status for a CI system
-  def process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha} = params) when ci_system in ["continuous-integration/travis-ci/pr", "semaphoreci"] do
+  def process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha}) when ci_system in ["continuous-integration/travis-ci/pr", "semaphoreci"] do
     Logger.debug "EventProcessor received build status event of state #{state}"
     ShaMapper.find(sha)
     |> PullRequest.status(:build, sha, url, state)
   end
 
   # Build has change status for an Analysis system
-  def process(:status, %{"context" => "codeclimate", "state" => state, "target_url" => url, "sha" => sha} = params) do
+  def process(:status, %{"context" => "codeclimate", "state" => state, "target_url" => url, "sha" => sha}) do
     Logger.debug "EventProcessor received analysis status event of state #{state}"
 
     ShaMapper.find(sha)
@@ -116,7 +116,7 @@ defmodule SlackCoder.Github.EventProcessor do
     # Ignore
   end
 
-  def process(unknown_event, params) do
+  def process(unknown_event, _params) do
     Logger.info "EventProcessor received unknown event #{inspect unknown_event} with params"
   end
 
