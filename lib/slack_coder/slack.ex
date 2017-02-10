@@ -70,7 +70,7 @@ defmodule SlackCoder.Slack do
         Task.start fn ->
           Logger.info "Sending message (#{s_user[:name]}): #{message}"
           %Message{}
-          |> Message.changeset(%{slack: user, user: s_user[:name], message: message |> String.strip})
+          |> Message.changeset(%{slack: to_string(user), user: s_user[:name], message: message |> String.strip})
           |> Repo.insert!
         end
 
