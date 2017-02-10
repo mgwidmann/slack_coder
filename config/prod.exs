@@ -6,8 +6,11 @@ config :slack_coder, SlackCoder.Endpoint,
   url: [host: "slack-coder.herokuapp.com", port: 80],
   cache_static_manifest: "priv/static/manifest.json"
 
-# Do not print debug messages in production
-config :logger, level: :info
+config :logger,
+  # Do not print debug messages in production
+  level: :info,
+  compile_time_purge_level: :info,
+  truncate: :infinity
 
 config :slack_coder, SlackCoder.Repo,
   adapter: Ecto.Adapters.Postgres,

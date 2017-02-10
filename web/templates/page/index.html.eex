@@ -5,7 +5,7 @@
     </span>
     <span class="pull-right">
       <select class="form-control user-select" name="user" id="view_user">
-        <%= for {label, value} <- users_list do %>
+        <%= for {label, value} <- users_list() do %>
           <option value="<%= value %>" <%= if @user == value || (@user == nil && @current_user.github == value), do: ~s(selected) %>><%= label %></option>
         <% end %>
       </select>

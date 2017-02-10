@@ -33,8 +33,8 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
 
   def handle_call(_, _, state), do: {:reply, :ignored, state}
 
-  def handle_cast(:stale_check, {pr, callouts}) do
-    pr |> PR.reg_changeset() |> PRService.save # Sends notification when it is time
+  def handle_info(:stale_check, {pr, callouts}) do
+    {:ok, pr} = pr |> PR.reg_changeset() |> PRService.save # Sends notification when it is time
     {:noreply, {pr, callouts}}
   end
 

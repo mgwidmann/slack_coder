@@ -13,8 +13,17 @@ defmodule SlackCoder do
       supervisor(SlackCoder.Endpoint, []),
       # Start Users supervisor before slack client
       supervisor(SlackCoder.Users.Supervisor, []),
-      # Define workers and child supervisors to be supervised
-      worker(SlackCoder.Slack, [Application.get_env(:slack_coder, :slack_api_token), []]),
+    ]
+
+    children = children ++ if Application.get_env(:slack_coder, :slack_api_token) do
+      [ # Define workers and child supervisors to be supervised
+        worker(SlackCoder.Slack, [Application.get_env(:slack_coder, :slack_api_token), []])
+      ]
+    else
+      []
+    end
+
+    children = children ++ [
       supervisor(SlackCoder.Github.Supervisor, [])
     ]
 
