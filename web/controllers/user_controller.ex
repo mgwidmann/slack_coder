@@ -36,9 +36,11 @@ defmodule SlackCoder.UserController do
   end
 
   def update(conn, %{"id" => id, "user" => user_params}) do
-    user = Repo.get!(User, id)
-
-    case UserService.save(user, User.changeset(user, user_params)) do
+    User
+    |> Repo.get!(id)
+    |> User.changeset(user_params)
+    |> UserService.save()
+    |> case do
       {:ok, user} ->
         conn
         |> put_session(:current_user, user)
