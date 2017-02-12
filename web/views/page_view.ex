@@ -9,9 +9,8 @@ defmodule SlackCoder.PageView do
   def status_class(:conflict), do: :highlight
   def status_class(_), do: :info
 
-  def staleness(pr) do
-    timestamp = Timex.Date.diff(pr.latest_comment, SlackCoder.Github.TimeHelper.now, :timestamp)
-    Timex.Format.Time.Formatters.Humanized.format(timestamp)
+  def staleness(%PR{latest_comment: comment}) do
+    SlackCoder.Github.TimeHelper.duration_diff(comment)
   end
 
   def github(nil, _user), do: nil

@@ -31,7 +31,7 @@ defmodule SlackCoder.AuthController do
   end
 
   def callback(%{assigns: %{ueberauth_auth: %Ueberauth.Auth{extra:
-      %Ueberauth.Auth.Extra{raw_info: %{token: %{access_token: token}, user: raw_user}}}}} = conn, _params) do
+      %Ueberauth.Auth.Extra{raw_info: %{token: %{access_token: _token}, user: raw_user}}}}} = conn, _params) do
     case raw_user |> UserService.find_or_create_user() do
       {:ok, db_user} ->
         conn

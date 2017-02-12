@@ -67,10 +67,10 @@ defmodule SlackCoder.Slack do
       message = message_for(s_user, message)
       slack_user = Routing.route_message(slack, s_user)
       if slack_user do
-        Task.start fn ->
+        Task.Supervisor.start_child SlackCoder.TaskSupervisor, fn ->
           Logger.info "Sending message (#{s_user[:name]}): #{message}"
           %Message{}
-          |> Message.changeset(%{slack: user, user: s_user[:name], message: message |> String.strip})
+          |> Message.changeset(%{slack: to_string(user), user: s_user[:name], message: message |> String.strip})
           |> Repo.insert!
         end
 

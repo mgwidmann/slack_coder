@@ -55,7 +55,7 @@ defmodule SlackCoder.Web do
       use Phoenix.HTML
 
       import SlackCoder.ApplicationHelper
-      alias SlackCoder.Models.User
+      alias SlackCoder.Models.{User, PR}
 
       import SlackCoder.Router.Helpers
       import StubAlias

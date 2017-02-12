@@ -23,7 +23,6 @@ defmodule SlackCoder.Users.Help do
     settings(settings_list, config)
   end
   @announcement ["announce", "announcement"]
-  @announcement_regex
   def handle_message({[announce | _message], original_message}, config, %User{admin: true} = user) when announce in @announcement do
     full_message = """
                    *Announcement*

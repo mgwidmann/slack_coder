@@ -23,7 +23,7 @@ defmodule SlackCoder.Github.ShaMapper do
   end
 
   def handle_info({:DOWN, _ref, :process, pid, :normal}, sha_to_pid) do
-    {sha, ^pid} = sha_to_pid |> Enum.find(&match?({sha, ^pid}, &1))
+    {sha, ^pid} = sha_to_pid |> Enum.find(&match?({_sha, ^pid}, &1))
     {:noreply, Map.delete(sha_to_pid, sha)}
   end
   # Ignore any other messages
