@@ -62,33 +62,30 @@ defmodule SlackCoder.Slack do
   end
 
   def handle_info({user, message}, slack, state) do
-    try do
-      s_user = user(slack, if(Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker), else: user))
-      message = message_for(s_user, message)
-      slack_user = Routing.route_message(slack, s_user)
-      if slack_user do
-        Task.Supervisor.start_child SlackCoder.TaskSupervisor, fn ->
-          Logger.info "Sending message (#{s_user[:name]}): #{message}"
-          %Message{}
-          |> Message.changeset(%{slack: to_string(user), user: s_user[:name], message: message |> String.strip})
-          |> Repo.insert!
-        end
+    s_user = user(slack, if(Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker), else: user))
+    Task.Supervisor.start_child SlackCoder.TaskSupervisor, __MODULE__, :record_message, [s_user[:name], user, message]
 
-        message
-        |> String.strip
-        |> send_message(slack_user.id, slack)
-      else
-        Logger.error "Unable to send message to #{inspect user}"
-      end
-    rescue
-      e ->
-        Logger.error "Error sending messge to: #{user}\n#{inspect e}"
+    message = message_for(s_user, message)
+    slack_user = Routing.route_message(slack, s_user)
+    if slack_user do
+      message
+      |> String.strip
+      |> send_message(slack_user.id, slack)
+    else
+      Logger.error "Unable to send message to #{inspect user}"
     end
     {:ok, state}
   end
   def handle_info(message, _slack, state) do
     Logger.warn "Got unhandled message: #{inspect message}"
     {:ok, state}
+  end
+
+  def record_message(name, user, message) do
+    Logger.info "Sending message (#{name}): #{message}"
+    %Message{}
+    |> Message.changeset(%{slack: to_string(user), user: name, message: message |> String.strip})
+    |> Repo.insert!
   end
 
   @doc false
