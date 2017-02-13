@@ -63,6 +63,7 @@ defmodule SlackCoder.Slack do
 
   def handle_info({user, message}, slack, state) do
     s_user = user(slack, if(Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker), else: user))
+    unless s_user, do: Logger.error("Slack User (#{inspect user}) not found!")
     Task.Supervisor.start_child SlackCoder.TaskSupervisor, __MODULE__, :record_message, [s_user[:name], user, message]
 
     message = message_for(s_user, message)
@@ -72,7 +73,7 @@ defmodule SlackCoder.Slack do
       |> String.strip
       |> send_message(slack_user.id, slack)
     else
-      Logger.error "Unable to send message to #{inspect user}"
+      Logger.error "Unable to send message to #{inspect user}! Slack data: #{inspect s_user}"
     end
     {:ok, state}
   end
@@ -81,6 +82,7 @@ defmodule SlackCoder.Slack do
     {:ok, state}
   end
 
+  @doc false
   def record_message(name, user, message) do
     Logger.info "Sending message (#{name}): #{message}"
     %Message{}

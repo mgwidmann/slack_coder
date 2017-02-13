@@ -9,6 +9,7 @@ defmodule SlackCoder.Slack.Helper do
     end
   end
 
+  def im(_slack, nil), do: nil
   def im(slack, user) when is_map(user), do: im(slack, user.id)
   def im(slack, user) when is_binary(user) do
     slack[:ims]

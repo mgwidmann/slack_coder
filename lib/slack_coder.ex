@@ -9,6 +9,7 @@ defmodule SlackCoder do
     children = [
       # Start the Ecto repository
       worker(SlackCoder.Repo, []),
+      supervisor(Task.Supervisor, [[name: SlackCoder.TaskSupervisor]]),
       # Start the endpoint when the application starts
       supervisor(SlackCoder.Endpoint, []),
       # Start Users supervisor before slack client
@@ -24,8 +25,7 @@ defmodule SlackCoder do
     end
 
     children = children ++ [
-      supervisor(SlackCoder.Github.Supervisor, []),
-      supervisor(Task.Supervisor, [[name: SlackCoder.TaskSupervisor]])
+      supervisor(SlackCoder.Github.Supervisor, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

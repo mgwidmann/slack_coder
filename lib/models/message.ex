@@ -15,6 +15,5 @@ defmodule SlackCoder.Models.Message do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:slack, :user, :message])
-    |> validate_required([:slack, :user, :message])
   end
 end
