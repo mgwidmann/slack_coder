@@ -116,7 +116,7 @@ defmodule SlackCoder.Slack do
   end
 
   @doc false
-  def handle_connect(slack, state) do
+  def handle_connect(slack, _state) do
     try do
       Process.register(self, :slack)
       channel = Routing.channel(slack)
@@ -125,7 +125,7 @@ defmodule SlackCoder.Slack do
       e ->
         Logger.error "Unable to connect to slack!\n#{inspect e}"
     end
-    {:ok, state}
+    {:ok, %{}}
   end
 
   @doc false
