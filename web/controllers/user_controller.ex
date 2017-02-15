@@ -2,6 +2,12 @@ defmodule SlackCoder.UserController do
   use SlackCoder.Web, :controller
 
   plug :scrub_params, "user" when action in [:create, :update]
+  @page_size 25
+
+  def index(conn, params) do
+    users = User |> Repo.paginate(params |> Map.put("page_size", @page_size))
+    render(conn, "index.html", users: users)
+  end
 
   def new(conn, _params) do
     user = conn.assigns.current_user
@@ -43,7 +49,7 @@ defmodule SlackCoder.UserController do
       {:ok, user} ->
         SlackCoder.Users.Supervisor.start_user(user)
         conn
-        |> put_session(:current_user, user)
+        |> put_session(:current_user, conn.assigns[:current_user] || user)
         |> redirect(to: "/")
       {:error, changeset} ->
         render(conn, "user.html", user: user, changeset: changeset)
@@ -51,8 +57,8 @@ defmodule SlackCoder.UserController do
   end
 
   def messages(conn, params) do
-    messages = Message |> Repo.paginate(params |> Map.put("page_size", 50))
-    avatars = from(u in User, select: %{u.slack => u.avatar_url}) |> Repo.all |> Enum.reduce(%{}, &Map.merge/2) |> IO.inspect
+    messages = Message |> Repo.paginate(params |> Map.put("page_size", @page_size))
+    avatars = from(u in User, select: %{u.slack => u.avatar_url}) |> Repo.all |> Enum.reduce(%{}, &Map.merge/2)
     render(conn, "messages.html", messages: messages, avatars: avatars)
   end
 

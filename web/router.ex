@@ -30,7 +30,7 @@ defmodule SlackCoder.Router do
 
     scope "/" do
       pipe_through :restricted
-      resources "/users", UserController, only: [:new, :create, :edit, :update]
+      resources "/users", UserController, only: [:index, :new, :create, :edit, :update]
 
       scope "/admin" do
         pipe_through :admin

@@ -38,11 +38,20 @@
             |
             <%= link "Logout", to: auth_path(@conn, :delete), method: :delete %>
           </div>
+          <div class="col-md-3 col-sm-4 col-xs-12 text-right">
+            <%= link to: user_path(@conn, :index) do %>
+              <i class="glyphicon glyphicon-user"></i> Users
+            <% end %>
+          </div>
         <% end %>
-        <div class="pull-right">
+        <div class="col-md-3 col-sm-4 col-xs-12 text-right">
           <a href="/beaker/">
             <i class="glyphicon glyphicon-time"></i> Application Metrics
           </a>
+          |
+          <%= link to: "/errors" do %>
+            <i class="glyphicon glyphicon-remove"></i> Errors
+          <% end %>
         </div>
       </div>
     </div>
