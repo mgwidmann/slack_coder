@@ -58,7 +58,7 @@ defmodule SlackCoder.UserController do
   end
 
   def messages(conn, params) do
-    messages = Message |> Repo.paginate(params |> Map.put("page_size", @page_size))
+    messages = from(m in Message, order_by: {:desc, m.inserted_at})|> Repo.paginate(params |> Map.put("page_size", @page_size))
     avatars = from(u in User, select: %{u.slack => u.avatar_url}) |> Repo.all |> Enum.reduce(%{}, &Map.merge/2)
     render(conn, "messages.html", messages: messages, avatars: avatars)
   end
