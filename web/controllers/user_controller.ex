@@ -1,5 +1,6 @@
 defmodule SlackCoder.UserController do
   use SlackCoder.Web, :controller
+  alias SlackCoder.Services.UserService
 
   plug :scrub_params, "user" when action in [:create, :update]
   @page_size 25
@@ -42,12 +43,12 @@ defmodule SlackCoder.UserController do
   end
 
   def update(conn, %{"id" => id, "user" => user_params}) do
-    user = Repo.get!(User, id)
-    changeset = User.changeset(user, user_params)
-
-    case Repo.update(changeset) do
+    user = User |> Repo.get!(id)
+    user
+    |> User.changeset(user_params)
+    |> UserService.save()
+    |> case do
       {:ok, user} ->
-        SlackCoder.Users.Supervisor.start_user(user)
         conn
         |> put_session(:current_user, conn.assigns[:current_user] || user)
         |> redirect(to: "/")
