@@ -62,24 +62,38 @@ defmodule SlackCoder.Slack do
   end
 
   def handle_info({user, message}, slack, state) do
-    s_user = user(slack, if(Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker), else: user))
-    unless s_user, do: Logger.error("Slack User (#{inspect user}) not found!")
-    Task.Supervisor.start_child SlackCoder.TaskSupervisor, __MODULE__, :record_message, [s_user[:name], user, message]
+    {:ok, slack
+          |> user(if(Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker), else: user))
+          |> send_message_to_slack_user(user, message, slack)
+          |> case do
+              :ok -> state
+              {:update, user} -> Map.merge(state, %{users: [user | Map.get(state, :users, [])]})
+            end
+          }
+  end
+  def handle_info(message, _slack, state) do
+    Logger.warn "Got unhandled message: #{inspect message}"
+    {:ok, state}
+  end
 
-    message = message_for(s_user, message)
-    slack_user = Routing.route_message(slack, s_user)
+  defp send_message_to_slack_user(nil, user, message, slack) do
+    caretaker = user(slack, Application.get_env(:slack_coder, :caretaker))
+    send_message("I can't find a user named @#{user}, can you tell me what their slack name is?", caretaker.id, slack)
+    {:update, user}
+  end
+  defp send_message_to_slack_user(slack_user, user, message, slack) do
+    Task.Supervisor.start_child SlackCoder.TaskSupervisor, __MODULE__, :record_message, [slack_user[:name], user, message]
+
+    message = message_for(slack_user, message)
+    slack_user = Routing.route_message(slack, slack_user)
     if slack_user do
       message
       |> String.strip
       |> send_message(slack_user.id, slack)
     else
-      Logger.error "Unable to send message to #{inspect user}! Slack data: #{inspect s_user}"
+      Logger.error "Unable to send message to #{inspect user}! Slack data: #{inspect slack_user}"
     end
-    {:ok, state}
-  end
-  def handle_info(message, _slack, state) do
-    Logger.warn "Got unhandled message: #{inspect message}"
-    {:ok, state}
+    :ok
   end
 
   @doc false
@@ -116,6 +130,28 @@ defmodule SlackCoder.Slack do
 
   @doc false
   def handle_message(%{text: message, type: "message", user: user_id, channel: channel} = payload, slack, state) do
+    caretaker = user(slack, Application.get_env(:slack_coder, :caretaker))
+    new_state = resolve_user_update(state, message)
+    unless user_id == caretaker.id || state != new_state do
+      user_help(user_id, channel, message, payload, slack)
+    end
+    {:ok, state || %{}}
+  end
+  def handle_message(_message, _slack, state) do
+    {:ok, state}
+  end
+
+  defp resolve_user_update(%{users: [github | remaining]} = state, slack) do
+    user_pid = github |> Users.user()
+    if user_pid do
+      User.update(user_pid, %{slack: slack})
+    end
+    Map.put(state, :users, remaining)
+  end
+  defp resolve_user_update(%{users: []} = state, _message), do: state
+  defp resolve_user_update(state, _message), do: state
+
+  defp user_help(user_id, channel, message, payload, slack) do
     if should_respond_to_message?(user_id, channel, slack) && payload[:subtype] == nil do
       slack_name = slack[:users][user_id][:name]
       user_pid = Users.user(slack_name)
@@ -130,10 +166,6 @@ defmodule SlackCoder.Slack do
         Logger.warn "User #{inspect slack_name || user_id} sent us a message but it was ignored because the user_pid could not be found."
       end
     end
-    {:ok, state}
-  end
-  def handle_message(_message, _slack, state) do
-    {:ok, state}
   end
 
   defp should_respond_to_message?(user_id, channel, slack) do

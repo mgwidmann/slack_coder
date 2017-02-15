@@ -7,7 +7,7 @@ defmodule SlackCoder.Services.UserService do
     %{github: github} = simplified_user = %{name: raw_user["name"], github: raw_user["login"], avatar_url: raw_user["avatar_url"], html_url: raw_user["html_url"], config: %{}}
     db_user = from(u in User, where: u.github == ^github) |> Repo.one
 
-    simplified_user = if db_user.slack == nil, do: Map.merge(simplified_user, %{slack: raw_user["login"]}), else: simplified_user
+    simplified_user = if db_user == nil || match?(%User{slack: nil}, db_user), do: Map.merge(simplified_user, %{slack: raw_user["login"]}), else: simplified_user
 
     user = simplified_user |> update_user(db_user)
     SlackCoder.Users.Supervisor.start_user(user)
