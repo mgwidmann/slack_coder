@@ -14,9 +14,13 @@ defmodule SlackCoder.Services.UserService do
 
   def save(%Ecto.Changeset{data: user} = changeset) do
     pre_save(changeset.changes, user)
-    user = Repo.update!(changeset)
-    SlackCoder.Users.Supervisor.start_user(user)
-    user
+    case Repo.insert_or_update(changeset) do
+      {:ok, user} ->
+        SlackCoder.Users.Supervisor.start_user(user)
+        {:ok, user}
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 
   defp update_user(user, db_user) do

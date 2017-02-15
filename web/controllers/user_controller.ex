@@ -1,5 +1,6 @@
 defmodule SlackCoder.UserController do
   use SlackCoder.Web, :controller
+  alias SlackCoder.Services.UserService
 
   plug :scrub_params, "user" when action in [:create, :update]
 
@@ -36,8 +37,8 @@ defmodule SlackCoder.UserController do
   end
 
   def update(conn, %{"id" => id, "user" => user_params}) do
-    User
-    |> Repo.get!(id)
+    user = User |> Repo.get!(id)
+    user
     |> User.changeset(user_params)
     |> UserService.save()
     |> case do
