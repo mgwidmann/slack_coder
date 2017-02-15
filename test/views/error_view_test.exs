@@ -10,11 +10,11 @@ defmodule SlackCoder.ErrorViewTest do
     end
 
     test "render 500.html" do
-      assert render_to_string(SlackCoder.ErrorView, "500.html", []) =~ ~r/500 That&#39;s broken/
+      assert render_to_string(SlackCoder.ErrorView, "500.html", []) =~ ~r/500 That's broken/
     end
 
     test "render any other" do
-      assert render_to_string(SlackCoder.ErrorView, "505.html", []) =~ ~r/500 That&#39;s broken/
+      assert render_to_string(SlackCoder.ErrorView, "505.html", []) =~ ~r/500 That's broken/
     end
   end
 end
