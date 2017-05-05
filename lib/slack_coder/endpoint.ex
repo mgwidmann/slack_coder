@@ -5,6 +5,7 @@ defmodule SlackCoder.Endpoint do
 
   socket "/socket", SlackCoder.UserSocket
   socket "/errors/socket", Flames.UserSocket
+  socket "/wobserver", Wobserver.Web.PhoenixSocket
 
   # Serve at "/" the static files from "priv/static" directory.
   #
