@@ -9,7 +9,7 @@ defmodule SlackCoder.Mixfile do
      compilers: [:phoenix] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps]
+     deps: deps()]
   end
 
   # Configuration for the OTP application
@@ -49,19 +49,17 @@ defmodule SlackCoder.Mixfile do
       {:timex_ecto, "~> 3.0"},
       {:slack, "~> 0.10.0"},
       {:websocket_client, git: "https://github.com/mgwidmann/websocket_client.git", override: true, branch: "fix_error_logging"},
-      # {:websocket_client, git: "https://github.com/jeremyong/websocket_client.git"},
       {:tentacat, "~> 0.6"},
       {:httpoison, "~> 0.10"},
       {:exjsx, "~> 3.2", override: true},
       {:ecto, "~> 2.0", override: true},
       {:ueberauth_github, "~> 0.4"},
-      {:stub_alias, github: "mgwidmann/stub_alias"},
+      {:stub_alias, "~> 0.1.2"},
       {:scrivener_html, "~> 1.5"},
       {:scrivener_ecto, "~> 1.0"},
 
       # Monitoring
-      # {:flames, "~> 0.2"},
-      {:flames, github: "mgwidmann/flames", branch: "insert_errors"},
+      {:flames, "~> 0.2"},
       {:wobserver, "~> 0.1"},
 
       # Dev only

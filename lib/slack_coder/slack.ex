@@ -76,7 +76,7 @@ defmodule SlackCoder.Slack do
     {:ok, state}
   end
 
-  defp send_message_to_slack_user(nil, user, message, slack) do
+  defp send_message_to_slack_user(nil, user, _message, slack) do
     caretaker = user(slack, Application.get_env(:slack_coder, :caretaker))
     send_message("I can't find a user named @#{user}, can you tell me what their slack name is?", caretaker.id, slack)
     {:update, user}
@@ -118,7 +118,7 @@ defmodule SlackCoder.Slack do
   @doc false
   def handle_connect(slack, _state) do
     try do
-      Process.register(self, :slack)
+      Process.register(self(), :slack)
       channel = Routing.channel(slack)
       if channel, do: send_message(@online_message, channel.id, slack)
     rescue
