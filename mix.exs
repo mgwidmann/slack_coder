@@ -16,7 +16,7 @@ defmodule SlackCoder.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :beaker, :flames,
+    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :flames, :wobserver,
                    :phoenix_ecto, :slack, :httpoison, :postgrex, :tzdata, :ueberauth_github,
                    :scrivener, :scrivener_html, :scrivener_ecto],
      mod: mod(Mix.env)]
@@ -47,23 +47,22 @@ defmodule SlackCoder.Mixfile do
       {:phoenix_html, "~> 2.6"},
       {:cowboy, "~> 1.0"},
       {:timex_ecto, "~> 3.0"},
-      # {:slack, "~> 0.2.0"},
-      {:slack, git: "https://github.com/mgwidmann/Elixir-Slack", branch: "im_list_updated"},
-      # {:slack, path: "../Elixir-Slack"},
+      {:slack, "~> 0.10.0"},
       {:websocket_client, git: "https://github.com/mgwidmann/websocket_client.git", override: true, branch: "fix_error_logging"},
       # {:websocket_client, git: "https://github.com/jeremyong/websocket_client.git"},
-      # {:tentacat, "~> 0.5.0"},
-      {:tentacat, "~> 0.5.3"},
-      {:httpoison, "~> 0.8"},
+      {:tentacat, "~> 0.6"},
+      {:httpoison, "~> 0.10"},
       {:exjsx, "~> 3.2", override: true},
       {:ecto, "~> 2.0", override: true},
       {:ueberauth_github, "~> 0.4"},
-      {:beaker, github: "hahuang65/beaker"},
-      # {:flames, "~> 0.2"},
-      {:flames, github: "mgwidmann/flames", branch: "insert_errors"},
       {:stub_alias, github: "mgwidmann/stub_alias"},
       {:scrivener_html, "~> 1.5"},
       {:scrivener_ecto, "~> 1.0"},
+
+      # Monitoring
+      # {:flames, "~> 0.2"},
+      {:flames, github: "mgwidmann/flames", branch: "insert_errors"},
+      {:wobserver, "~> 0.1"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev}
