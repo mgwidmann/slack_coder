@@ -20,7 +20,7 @@ defmodule SlackCoder.Github.ShaMapperTest do
 
     test "updates the state with the new SHA and PID" do
       s = self()
-      assert {:reply, :ok, %{@sha => ^s}} = ShaMapper.handle_call({:register, @sha}, {s, make_ref}, %{})
+      assert {:reply, :ok, %{@sha => ^s}} = ShaMapper.handle_call({:register, @sha}, {s, make_ref()}, %{})
     end
   end
 

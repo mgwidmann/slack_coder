@@ -8,7 +8,7 @@ defmodule SlackCoder.AuthController do
   based on the chosen strategy.
   """
   def index(conn, %{"provider" => "github"}) do
-    redirect conn, external: authorize_url!
+    redirect conn, external: authorize_url!()
   end
 
   def delete(conn, _params) do

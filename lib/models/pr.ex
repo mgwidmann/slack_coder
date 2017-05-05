@@ -30,7 +30,7 @@ defmodule SlackCoder.Models.PR do
 
     belongs_to :user, SlackCoder.Models.User
 
-    timestamps
+    timestamps()
   end
 
   @required_fields ~w(owner repo branch github_user title number html_url opened_at)a
