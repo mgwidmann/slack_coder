@@ -45,7 +45,7 @@
           </div>
         <% end %>
         <div class="col-md-3 col-sm-4 col-xs-12 text-right">
-          <a href="/beaker/">
+          <a href="/wobserver">
             <i class="glyphicon glyphicon-time"></i> Application Metrics
           </a>
           |
