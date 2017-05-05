@@ -49,7 +49,6 @@ defmodule SlackCoder.Router do
     post "/github/event", GithubController, :event
   end
 
-  forward "/beaker", Beaker.Web
   forward "/errors", Flames.Web
   forward "/wobserver", Wobserver.Web.Router
 

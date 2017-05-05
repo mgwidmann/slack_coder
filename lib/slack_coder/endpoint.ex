@@ -1,8 +1,6 @@
 defmodule SlackCoder.Endpoint do
   use Phoenix.Endpoint, otp_app: :slack_coder
 
-  plug Beaker.Integrations.Phoenix
-
   socket "/socket", SlackCoder.UserSocket
   socket "/errors/socket", Flames.UserSocket
   socket "/wobserver", Wobserver.Web.PhoenixSocket

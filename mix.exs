@@ -16,7 +16,7 @@ defmodule SlackCoder.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :beaker, :flames, :wobserver,
+    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :flames, :wobserver,
                    :phoenix_ecto, :slack, :httpoison, :postgrex, :tzdata, :ueberauth_github,
                    :scrivener, :scrivener_html, :scrivener_ecto],
      mod: mod(Mix.env)]
@@ -60,7 +60,6 @@ defmodule SlackCoder.Mixfile do
       {:scrivener_ecto, "~> 1.0"},
 
       # Monitoring
-      {:beaker, github: "hahuang65/beaker"},
       # {:flames, "~> 0.2"},
       {:flames, github: "mgwidmann/flames", branch: "insert_errors"},
       {:wobserver, "~> 0.1"},
