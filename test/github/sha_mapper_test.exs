@@ -6,13 +6,13 @@ defmodule SlackCoder.Github.ShaMapperTest do
 
   describe "registration" do
     test "receives registration requests" do
-      spawn(ShaMapper, :register, [self, @sha])
+      spawn(ShaMapper, :register, [self(), @sha])
       assert_receive {:"$gen_call", _from, {:register, @sha}}
     end
 
     test "monitors pids that register" do
       pid = spawn fn -> receive do _ -> nil end end # Wait until getting a message
-      ShaMapper.handle_call({:register, @sha}, {pid, make_ref}, %{})
+      ShaMapper.handle_call({:register, @sha}, {pid, make_ref()}, %{})
       send(pid, :bye) && Process.sleep(100)
       refute Process.alive?(pid)
       assert_receive {:DOWN, _, :process, _pid, :normal}

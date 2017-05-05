@@ -9,7 +9,7 @@ defmodule SlackCoder.Mixfile do
      compilers: [:phoenix] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps]
+     deps: deps()]
   end
 
   # Configuration for the OTP application
@@ -59,9 +59,8 @@ defmodule SlackCoder.Mixfile do
       {:ecto, "~> 2.0", override: true},
       {:ueberauth_github, "~> 0.4"},
       {:beaker, github: "hahuang65/beaker"},
-      # {:flames, "~> 0.2"},
-      {:flames, github: "mgwidmann/flames", branch: "insert_errors"},
-      {:stub_alias, github: "mgwidmann/stub_alias"},
+      {:flames, "~> 0.2"},
+      {:stub_alias, "~> 0.1.2"},
       {:scrivener_html, "~> 1.5"},
       {:scrivener_ecto, "~> 1.0"},
 

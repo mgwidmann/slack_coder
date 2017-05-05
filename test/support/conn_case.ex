@@ -33,6 +33,7 @@ defmodule SlackCoder.ConnCase do
 
       setup do
         :ok = Ecto.Adapters.SQL.Sandbox.checkout(SlackCoder.Repo)
+        {:ok, %{conn: build_conn()}}
       end
     end
   end
