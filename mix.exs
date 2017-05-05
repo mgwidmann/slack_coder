@@ -19,11 +19,8 @@ defmodule SlackCoder.Mixfile do
     [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :flames, :wobserver,
                    :phoenix_ecto, :slack, :httpoison, :postgrex, :tzdata, :ueberauth_github,
                    :scrivener, :scrivener_html, :scrivener_ecto],
-     mod: mod(Mix.env)]
+     mod: {SlackCoder, []}]
   end
-
-  defp mod(:test), do: {SlackCoderTest, []}
-  defp mod(_), do: {SlackCoder, []}
 
   # Specifies which paths to compile per environment
   defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
