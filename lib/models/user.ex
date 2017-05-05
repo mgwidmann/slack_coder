@@ -14,7 +14,7 @@ defmodule SlackCoder.Models.User do
 
     embeds_one :config, SlackCoder.Models.User.Config, on_replace: :update
 
-    timestamps
+    timestamps()
   end
 
   @required_fields ~w(slack github)a
