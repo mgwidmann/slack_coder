@@ -52,7 +52,7 @@ defmodule SlackCoder.UserController do
     |> case do
       {:ok, user} ->
         conn
-        |> put_session(:current_user, conn.assigns[:current_user] || user)
+        |> put_session(:current_user, user)
         |> redirect(to: "/")
       {:error, changeset} ->
         render(conn, "user.html", user: user, changeset: changeset)
