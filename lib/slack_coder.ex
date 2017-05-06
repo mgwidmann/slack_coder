@@ -18,7 +18,7 @@ defmodule SlackCoder do
 
     children = children ++ if Application.get_env(:slack_coder, :slack_api_token) do
       [ # Define workers and child supervisors to be supervised
-        worker(Slack.Bot, [SlackCoder.Slack, nil, Application.get_env(:slack_coder, :slack_api_token)])
+        worker(Slack.Bot, [SlackCoder.Slack, nil, Application.get_env(:slack_coder, :slack_api_token), %{client: Application.get_env(:slack, :websocket_client, :websocket_client)}])
       ]
     else
       []
