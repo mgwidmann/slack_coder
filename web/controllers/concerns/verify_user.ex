@@ -6,7 +6,7 @@ defmodule SlackCoder.VerifyUser do
   def init(opts), do: opts
 
   def call(conn, opts) do
-    if admin?(conn, opts) || conn.assigns[:current_user] && verify(conn.assigns.current_user, conn.params) do
+    if admin?(conn, opts) || conn.assigns[:current_user] do
       conn
     else
       Logger.warn "Attempt to access unauthorized page! user: #{inspect conn.assigns[:current_user]}"
@@ -18,18 +18,9 @@ defmodule SlackCoder.VerifyUser do
   end
 
   defp verify(%User{admin: true}, _params), do: true
-  defp verify(%User{id: id}, %{"id" => sid}) when is_binary(sid) do
-    case Integer.parse(sid) do
-      {^id, ""} -> true
-      _ -> false
-    end
-  end
-  defp verify(%User{id: nil}, params) do
-    params["id"] == nil
-  end
   defp verify(_, _), do: false
 
   defp admin?(conn, opts) do
-    opts[:admin] && conn.assigns[:current_user] && verify(conn.assigns.current_user, conn.params)
+    opts[:admin] && verify(conn.assigns.current_user, conn.params)
   end
 end
