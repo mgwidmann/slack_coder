@@ -12,7 +12,7 @@ defmodule SlackCoder.VerifyUser do
       Logger.warn "Attempt to access unauthorized page! user: #{inspect conn.assigns[:current_user]}"
       conn
       |> put_resp_content_type("text/html")
-      |> send_resp(404, SlackCoder.ErrorView.render("404.html"))
+      |> send_resp(404, Phoenix.HTML.safe_to_string(SlackCoder.ErrorView.render("404.html")))
       |> halt
     end
   end
