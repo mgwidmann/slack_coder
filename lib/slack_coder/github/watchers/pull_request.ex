@@ -91,15 +91,6 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
       github_user_avatar: raw_pr["user"]["avatar_url"],
       sha: raw_pr["head"]["sha"]
     }
-    |> mergeable_state(raw_pr)
-  end
-
-  # Wait for it to change again...
-  defp mergeable_state(changes, %{"mergeable_state" => "unknown"}) do
-    Map.drop(changes, [:mergeable])
-  end
-  defp mergeable_state(changes, _raw_pr) do
-    changes
   end
 
   def update(pr_pid, pr) when is_pid(pr_pid) do

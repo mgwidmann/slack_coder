@@ -82,11 +82,11 @@ defmodule SlackCoder.Github.EventProcessorTest do
       Ecto.Adapters.SQL.Sandbox.checkin(Repo)
     end
 
-    test "ignores unknown mergeable state changes but still broadcasts", %{pr: pr, pr_pid: pid} do
+    test "treats unknown mergeable state as a conflict", %{pr: pr, pr_pid: pid} do
       params = Map.put(@pr_merge_conflict, "number", pr.number) |> put_in(~w(pull_request number), pr.number) |> put_in(~w(pull_request mergeable_state), "unknown")
       EP.process(:pull_request, params)
       updated_pr = SlackCoder.Github.Watchers.PullRequest.fetch(pid)
-      assert updated_pr.mergeable
+      refute updated_pr.mergeable
       number = updated_pr.number
       user = updated_pr.github_user
       assert_broadcast("pr:update", %{pr: ^number, github: ^user, html: "<tr id=" <> _})
