@@ -33,6 +33,8 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
 
   def handle_info(:init, {pr, callouts}) do
+    # Required in order to give tests the chance to share the connection to this process... If this process executes the query first, test will fail
+    unquote(if(Mix.env == :test, do: quote(do: Process.sleep(10))))
     query = PR.by_number(pr.number)
     pr = case Repo.one(query) do
            nil -> pr
@@ -84,11 +86,20 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
       title: raw_pr["title"],
       number: raw_pr["number"],
       html_url: raw_pr["_links"]["html"]["href"],
-      mergeable: raw_pr["mergeable_state"] == "mergeable" && raw_pr["mergeable_state"] != "unknown",
+      mergeable: raw_pr["mergeable_state"] == "mergeable",
       github_user: raw_pr["user"]["login"],
       github_user_avatar: raw_pr["user"]["avatar_url"],
       sha: raw_pr["head"]["sha"]
     }
+    |> mergeable_state(raw_pr)
+  end
+
+  # Wait for it to change again...
+  defp mergeable_state(changes, %{"mergeable_state" => "unknown"}) do
+    Map.drop(changes, [:mergeable])
+  end
+  defp mergeable_state(changes, _raw_pr) do
+    changes
   end
 
   def update(pr_pid, pr) when is_pid(pr_pid) do

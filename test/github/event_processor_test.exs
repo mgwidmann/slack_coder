@@ -1,5 +1,5 @@
 defmodule SlackCoder.Github.EventProcessorTest do
-  use ExUnit.Case
+  use SlackCoder.ChannelCase
   alias SlackCoder.Github.EventProcessor, as: EP
   alias SlackCoder.Repo
 
@@ -33,14 +33,15 @@ defmodule SlackCoder.Github.EventProcessorTest do
     alias SlackCoder.Models.PR
 
     setup do
-      :ok = Ecto.Adapters.SQL.Sandbox.checkout(SlackCoder.Repo)
-      pr = Repo.insert! %PR{number: round(:rand.uniform() * 10_000), mergeable: true, sha: "before_sha", title: "t", owner: "o", repo: "r", branch: "b", opened_at: DateTime.utc_now, html_url: "u"}
+      :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
+      pr = Repo.insert! %PR{github_user: "github_user", number: round(:rand.uniform() * 10_000), mergeable: true, sha: "before_sha", title: "t", owner: "o", repo: "r", branch: "b", opened_at: DateTime.utc_now, html_url: "u"}
       pid = GithubSupervisor.start_watcher(pr)
       Ecto.Adapters.SQL.Sandbox.allow(Repo, self(), pid)
+      @endpoint.subscribe("prs:all")
       on_exit fn ->
         GithubSupervisor.stop_watcher(pr)
       end
-      {:ok, %{pr: pr}}
+      {:ok, %{pr: pr, pr_pid: pid}}
     end
 
     @pr_params %{
@@ -70,10 +71,26 @@ defmodule SlackCoder.Github.EventProcessorTest do
       "after" => "after_sha",
       "pull_request" => @pr_params
     }
-    test "recognizes merge conflicts", %{pr: pr} do
-      EP.process(:pull_request, Map.put(@pr_merge_conflict, "number", pr.number) |> put_in(~w(pull_request number), pr.number))
-      updated_pr = GithubSupervisor.find_watcher(pr) |> SlackCoder.Github.Watchers.PullRequest.fetch()
+    test "recognizes merge conflicts", %{pr: pr, pr_pid: pid} do
+      params = Map.put(@pr_merge_conflict, "number", pr.number) |> put_in(~w(pull_request number), pr.number)
+      EP.process(:pull_request, params)
+      updated_pr = SlackCoder.Github.Watchers.PullRequest.fetch(pid)
       refute updated_pr.mergeable
+      number = updated_pr.number
+      user = updated_pr.github_user
+      assert_broadcast("pr:update", %{pr: ^number, github: ^user, html: "<tr id=" <> _})
+      Ecto.Adapters.SQL.Sandbox.checkin(Repo)
+    end
+
+    test "ignores unknown mergeable state changes but still broadcasts", %{pr: pr, pr_pid: pid} do
+      params = Map.put(@pr_merge_conflict, "number", pr.number) |> put_in(~w(pull_request number), pr.number) |> put_in(~w(pull_request mergeable_state), "unknown")
+      EP.process(:pull_request, params)
+      updated_pr = SlackCoder.Github.Watchers.PullRequest.fetch(pid)
+      assert updated_pr.mergeable
+      number = updated_pr.number
+      user = updated_pr.github_user
+      assert_broadcast("pr:update", %{pr: ^number, github: ^user, html: "<tr id=" <> _})
+      Ecto.Adapters.SQL.Sandbox.checkin(Repo)
     end
 
     test "ignores other status changes" do

@@ -70,7 +70,9 @@ defmodule SlackCoder.Services.PRService do
   def unstale_notification(cs), do: cs # Latest comment not available, can't check unstale notification
 
   def conflict_notification(cs = %Ecto.Changeset{changes: %{mergeable: false}, data: %PR{mergeable: true}}) do
-    cs |> put_change(:notifications, [:conflict | cs.changes[:notifications] || cs.data.notifications])
+    cs
+    |> put_change(:build_status, "conflict")
+    |> put_change(:notifications, [:conflict | cs.changes[:notifications] || cs.data.notifications])
   end
   def conflict_notification(cs), do: cs
 
