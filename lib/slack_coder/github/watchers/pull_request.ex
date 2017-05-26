@@ -91,7 +91,13 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
       github_user_avatar: raw_pr["user"]["avatar_url"],
       sha: raw_pr["head"]["sha"]
     }
+    |> mergeable_unknown(raw_pr)
   end
+
+  defp mergeable_unknown(changes, %{"mergeable_state" => "unknown"}) do
+    Map.drop(changes, [:mergeable])
+  end
+  defp mergeable_unknown(changes, _raw_pr), do: changes
 
   def update(pr_pid, pr) when is_pid(pr_pid) do
     GenServer.cast(pr_pid, {:update, pr})
