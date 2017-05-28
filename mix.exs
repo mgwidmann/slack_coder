@@ -9,6 +9,7 @@ defmodule SlackCoder.Mixfile do
      compilers: [:phoenix] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     aliases: aliases(),
      deps: deps()]
   end
 
@@ -44,10 +45,12 @@ defmodule SlackCoder.Mixfile do
       {:phoenix_html, "~> 2.6"},
       {:cowboy, "~> 1.0"},
       {:timex_ecto, "~> 3.0"},
-      {:slack, "~> 0.11"},
+      # {:slack, "~> 0.11"},
+      {:slack, github: "mgwidmann/Elixir-Slack", branch: "stub_rtm"},
       {:websocket_client, "~> 1.2", override: true},
       {:tentacat, "~> 0.6"},
       {:httpoison, "~> 0.10"},
+      {:poison, "~> 3.1", override: true},
       {:ecto, "~> 2.0", override: true},
       {:ueberauth_github, "~> 0.4"},
       {:stub_alias, "~> 0.1.2"},
@@ -61,5 +64,17 @@ defmodule SlackCoder.Mixfile do
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev}
     ]
+  end
+
+  # Aliases are shortcut or tasks specific to the current project.
+  # For example, to create, migrate and run the seeds file at once:
+  #
+  #     $ mix ecto.setup
+  #
+  # See the documentation for `Mix` for more info on aliases.
+  defp aliases do
+    ["ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+     "ecto.reset": ["ecto.drop", "ecto.setup"],
+     "test": ["ecto.create --quiet", "ecto.migrate", "test"]]
   end
 end

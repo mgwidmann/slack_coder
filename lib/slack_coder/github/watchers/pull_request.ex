@@ -12,13 +12,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
 
   def init({%PR{} = pr, []}) do
-    query = PR.by_number(pr.number)
-    pr = case Repo.one(query) do
-           nil -> pr
-           existing_pr -> existing_pr
-         end
-    :timer.send_interval @stale_check_interval, :stale_check
-    SlackCoder.Github.ShaMapper.register(pr.sha)
+    send(self(), :init)
     {:ok, {pr, []}}
   end
 
@@ -35,6 +29,19 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
 
   def handle_info(:stale_check, {pr, callouts}) do
     {:ok, pr} = pr |> PR.reg_changeset() |> PRService.save # Sends notification when it is time
+    {:noreply, {pr, callouts}}
+  end
+
+  def handle_info(:init, {pr, callouts}) do
+    # Required in order to give tests the chance to share the connection to this process... If this process executes the query first, test will fail
+    unquote(if(Mix.env == :test, do: quote(do: Process.sleep(10))))
+    query = PR.by_number(pr.number)
+    pr = case Repo.one(query) do
+           nil -> pr
+           existing_pr -> existing_pr
+         end
+    :timer.send_interval @stale_check_interval, :stale_check
+    SlackCoder.Github.ShaMapper.register(pr.sha)
     {:noreply, {pr, callouts}}
   end
 
@@ -79,12 +86,18 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
       title: raw_pr["title"],
       number: raw_pr["number"],
       html_url: raw_pr["_links"]["html"]["href"],
-      mergeable: not raw_pr["mergeable_state"] in ["dirty"],
+      mergeable: raw_pr["mergeable_state"] == "mergeable",
       github_user: raw_pr["user"]["login"],
       github_user_avatar: raw_pr["user"]["avatar_url"],
       sha: raw_pr["head"]["sha"]
     }
+    |> mergeable_unknown(raw_pr)
   end
+
+  defp mergeable_unknown(changes, %{"mergeable_state" => "unknown"}) do
+    Map.drop(changes, [:mergeable])
+  end
+  defp mergeable_unknown(changes, _raw_pr), do: changes
 
   def update(pr_pid, pr) when is_pid(pr_pid) do
     GenServer.cast(pr_pid, {:update, pr})
