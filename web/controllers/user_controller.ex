@@ -3,6 +3,8 @@ defmodule SlackCoder.UserController do
   alias SlackCoder.Services.UserService
 
   plug :scrub_params, "user" when action in [:create, :update]
+  plug :allow_profile_edit when action in [:edit, :update]
+
   @page_size 25
 
   def index(conn, params) do
@@ -50,7 +52,7 @@ defmodule SlackCoder.UserController do
     |> case do
       {:ok, user} ->
         conn
-        |> put_session(:current_user, conn.assigns[:current_user] || user)
+        |> put_session(:current_user, user)
         |> redirect(to: "/")
       {:error, changeset} ->
         render(conn, "user.html", user: user, changeset: changeset)
@@ -80,6 +82,14 @@ defmodule SlackCoder.UserController do
   defp user_for_github(github) do
     github_user = Tentacat.Users.find github, SlackCoder.Github.client
     %User{github: github, name: github_user["name"], html_url: github_user["html_url"], avatar_url: github_user["avatar_url"]}
+  end
+
+  defp allow_profile_edit(conn, _opts) do
+    if conn.assigns.current_user.admin || conn.assigns.current_user.id == conn.params["id"] do
+      halt(conn)
+    else
+      conn
+    end
   end
 
 end
