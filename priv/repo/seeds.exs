@@ -11,7 +11,7 @@
 # and so on) as they will fail if something goes wrong.
 
 SlackCoder.Github.synchronize("weddingwire", "weddingwire-ng")
-SlackCoder.Github.synchronize("weddingwire", "componets")
+SlackCoder.Github.synchronize("weddingwire", "components")
 SlackCoder.Github.synchronize("weddingwire", "ww_constants")
 SlackCoder.Github.synchronize("weddingwire", "guilds")
 SlackCoder.Github.synchronize("weddingwire", "ww-contentful-cms")
