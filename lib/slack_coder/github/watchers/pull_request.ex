@@ -105,7 +105,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
   def update(_, _), do: nil
 
-  def update_sync(pr_pid, pr) when is_pid(pr_pid) do
+  def update_sync(pr_pid, pr) when is_pid(pr_pid) and is_map(pr) do
     GenServer.call(pr_pid, {:update, pr})
   end
   def update_sync(_, _), do: nil

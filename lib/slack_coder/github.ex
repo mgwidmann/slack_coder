@@ -23,13 +23,13 @@ defmodule SlackCoder.Github do
       |> Tentacat.Users.find(client())
       |> UserService.find_or_create_user()
 
-      EventProcessor.process_async(:pull_request, %{"action" => "opened", "number" => pr["number"], "pull_request" => pr})
+      EventProcessor.process(:pull_request, %{"action" => "opened", "number" => pr["number"], "pull_request" => pr})
     end)
     # Look for closed PRs
     prs = PullRequestSupervisor.pull_requests() |> Map.values() |> List.flatten()
     ((prs |> Enum.map(&(&1.number))) -- (raw_prs |> Enum.map(&(&1["number"])))) |> Enum.each(fn(pr_number)->
       pr = Tentacat.Pulls.find(owner, repository, pr_number, client())
-      EventProcessor.process_async(:pull_request, %{"action" => "closed", "number" => pr_number, "pull_request" => pr})
+      EventProcessor.process(:pull_request, %{"action" => "closed", "number" => pr_number, "pull_request" => pr})
     end)
   end
 end

@@ -17,7 +17,7 @@ defmodule SlackCoder.Repo.Migrations.AddFlamesErrorsTable do
 
       add :incidents, :json
 
-      timestamps
+      timestamps()
     end
 
     create index(:errors, [:hash])

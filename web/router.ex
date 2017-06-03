@@ -2,7 +2,6 @@ defmodule SlackCoder.Router do
   use SlackCoder.Web, :router
 
   pipeline :browser do
-    plug :redirect_to_nanobox
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
@@ -71,11 +70,5 @@ defmodule SlackCoder.Router do
   # `@current_user`.
   defp assign_current_user(conn, _) do
     assign(conn, :current_user, get_session(conn, :current_user))
-  end
-
-  defp redirect_to_nanobox(%{request_path: "/api/github/event"} = conn, _), do: conn
-  defp redirect_to_nanobox(conn, _) do
-    redirect(conn, external: "https://slack-coder.nanoapp.io#{conn.request_path}")
-    |> halt()
   end
 end

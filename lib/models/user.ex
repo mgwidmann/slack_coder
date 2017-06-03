@@ -8,7 +8,7 @@ defmodule SlackCoder.Models.User do
     field :html_url, :string
     field :name, :string
     field :monitors, StringList, default: []
-    field :muted, :boolean, default: false
+    field :muted, :boolean, default: true
 
     field :admin, :boolean, default: false
 
