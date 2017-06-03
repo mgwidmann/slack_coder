@@ -3,7 +3,7 @@ use Mix.Config
 config :slack_coder, SlackCoder.Endpoint,
   secret_key_base: System.get_env("SECRET_KEY_BASE"),
   http: [port: {:system, "PORT"}],
-  url: [host: "slack-coder.herokuapp.com", port: 80],
+  url: [host: "slack-coder.nanoapp.io", port: 80],
   cache_static_manifest: "priv/static/manifest.json"
 
 config :logger,
@@ -14,8 +14,10 @@ config :logger,
 
 config :slack_coder, SlackCoder.Repo,
   adapter: Ecto.Adapters.Postgres,
-  # url: "postgres://postgres:postgres@localhost/slack_coder",
-  url: System.get_env("DATABASE_URL"),
+  username: System.get_env("DATA_DB_USER"),
+  password: System.get_env("DATA_DB_PASS"),
+  hostname: System.get_env("DATA_DB_HOST"),
+  database: "gonano",
   size: 20
 
 config :slack_coder,

@@ -42,13 +42,14 @@ config :logger,
 # and calculating stacktraces is usually expensive.
 config :phoenix, :stacktrace_depth, 20
 
+database = if(System.get_env("DATA_DB_USER") == "nanobox", do: "gonano", else: "slack_coder_dev")
 # Configure your database
 config :slack_coder, SlackCoder.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "slack_coder_dev",
-  hostname: "localhost",
+  username: System.get_env("DATA_DB_USER") || "postgres",
+  password: System.get_env("DATA_DB_PASS") || "postgres",
+  hostname: System.get_env("DATA_DB_HOST") || "localhost",
+  database: database,
   pool_size: 10
 
 if File.exists? "config/dev.secret.exs" do

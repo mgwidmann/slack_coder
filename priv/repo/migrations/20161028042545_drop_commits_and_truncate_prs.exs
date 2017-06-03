@@ -11,11 +11,11 @@ defmodule SlackCoder.Repo.Migrations.DropCommitsAndTruncatePrs do
       add :number, :integer
       add :branch, :string
       add :fork, :boolean
-      add :latest_comment, :datetime
+      add :latest_comment, :utc_datetime
       add :latest_comment_url, :string
-      add :opened_at, :datetime
-      add :closed_at, :datetime
-      add :merged_at, :datetime
+      add :opened_at, :utc_datetime
+      add :closed_at, :utc_datetime
+      add :merged_at, :utc_datetime
       add :backoff, :integer
       add :html_url, :string
       add :mergeable, :boolean
@@ -28,7 +28,7 @@ defmodule SlackCoder.Repo.Migrations.DropCommitsAndTruncatePrs do
       add :analysis_url, :string
       add :user_id, :integer
       references :user
-      timestamps
+      timestamps()
     end
   end
 end
