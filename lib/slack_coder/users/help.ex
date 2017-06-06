@@ -32,6 +32,8 @@ defmodule SlackCoder.Users.Help do
       SlackCoder.Users.Supervisor.users
       |> Stream.reject(&(match?(^user, &1)))
       |> Enum.each(&(SlackCoder.Slack.send_to(&1.slack, full_message)))
+
+      SlackCoder.Slack.send_to(user.slack, "_The following was broadcast to all users_\n#{full_message}")
     end
     {config, full_message}
   end
@@ -45,15 +47,17 @@ defmodule SlackCoder.Users.Help do
     defp settings([unquote(config), unquote(self_or_monitors), value], config) do
       bool_value = SlackCoder.Models.Types.Boolean.value_to_boolean(value)
       config = Map.put(config, [unquote(config), unquote(self_or_monitors)]
-               |> List.flatten
-               |> Enum.join("_"), bool_value)
+                               |> List.flatten
+                               |> Enum.join("_")
+                               |> String.to_existing_atom(), bool_value)
       {config, settings_reply(unquote(config), unquote(self_or_monitors), bool_value)}
     end
     defp settings([unquote(self_or_monitors), unquote(config), value], config) do
       bool_value = SlackCoder.Models.Types.Boolean.value_to_boolean(value)
       config = Map.put(config, [unquote(config), unquote(self_or_monitors)]
-               |> List.flatten
-               |> Enum.join("_"), bool_value)
+                               |> List.flatten
+                               |> Enum.join("_")
+                               |> String.to_existing_atom(), bool_value)
       {config, settings_reply(unquote(config), unquote(self_or_monitors), bool_value)}
     end
   end

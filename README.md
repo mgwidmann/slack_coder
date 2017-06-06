@@ -5,9 +5,14 @@ SlackCoder
 
 ### Nanobox deployment
 
+You'll have to (install the nanobox CLI)[https://docs.nanobox.io/install/] tool first.
+
 1. Fork and clone this repo
 2. Run `nanobox dns add local slack-coder.dev` and follow instructions
-3. Run `nanobox run mix do ecto.create, ecto.migrate, run priv/repo/seeds.exs` to migrate your local database
+3. Run `nanobox evar add local MIX_ENV=dev`
+4. Run `nanobox run mix do ecto.create, ecto.migrate, run priv/repo/seeds.exs` to migrate your local database
+
+To start it up, run `nanobox run iex -S mix phoenix.server`
 
 ### Configuring
 

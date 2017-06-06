@@ -129,15 +129,16 @@ defmodule SlackCoder.Slack do
   end
 
   @doc false
-  def handle_message(%{text: message, type: "message", user: user_id, channel: channel} = payload, slack, state) do
-    caretaker = user(slack, Application.get_env(:slack_coder, :caretaker))
+  def handle_event(%{type: "message", text: message, user: user_id, channel: channel} = payload, slack, state) do
     new_state = resolve_user_update(state, message)
-    unless user_id == caretaker.id || state != new_state do
+    Logger.info "Processing payload: #{inspect payload}\n#{inspect new_state}"
+    unless state != new_state do
       user_help(user_id, channel, message, payload, slack)
     end
     {:ok, state || %{}}
   end
-  def handle_message(_message, _slack, state) do
+  def handle_event(payload, _slack, state) do
+    Logger.debug "Dropping payload: #{inspect payload}"
     {:ok, state}
   end
 
@@ -161,7 +162,7 @@ defmodule SlackCoder.Slack do
         send_to slack_name, """
         Sorry, but I can't chat until you've registered!
 
-        Please register at http://slack-coder.herokuapp.com
+        Please register at http://slack-coder.nanoapp.io
         """
         Logger.warn "User #{inspect slack_name || user_id} sent us a message but it was ignored because the user_pid could not be found."
       end

@@ -32,4 +32,9 @@ defmodule SlackCoder.Github do
       EventProcessor.process(:pull_request, %{"action" => "closed", "number" => pr_number, "pull_request" => pr})
     end)
   end
+
+  def synchronize_pull_request(owner, repository, number) do
+    pr = Tentacat.Pulls.find(owner, repository, to_string(number), client())
+    
+  end
 end
