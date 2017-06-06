@@ -53,6 +53,11 @@
             <i class="glyphicon glyphicon-remove"></i> Errors
           <% end %>
         </div>
+        <div class="col-md-3 col-sm-4 col-xs-12 text-right">
+          <%= link to: "https://github.com/mgwidmann/slack_coder/commit/#{git_commit()}" do %>
+            <i class="glyphicon glyphicon-tag"></i> Version
+          <% end %>
+        </div>
       </div>
     </div>
 
