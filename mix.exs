@@ -39,7 +39,7 @@ defmodule SlackCoder.Mixfile do
   defp deps do
     [
       # Prod dependencies
-      {:phoenix, "~> 1.2.0"},
+      {:phoenix, "~> 1.3.0-rc"},
       {:phoenix_ecto, "~> 3.0"},
       {:postgrex, "~> 0.11"},
       {:phoenix_html, "~> 2.6"},

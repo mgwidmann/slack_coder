@@ -41,6 +41,8 @@ defmodule SlackCoder.Web do
       import SlackCoder.Router.Helpers
       require Logger
       import StubAlias
+
+      action_fallback SlackCoder.Web.FallbackController
     end
   end
 

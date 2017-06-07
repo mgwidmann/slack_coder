@@ -1,12 +1,9 @@
 defmodule SlackCoder.ErrorView do
   use SlackCoder.Web, :view
+  require Logger
 
-  def render("404.html", _assigns) do
-    {:safe, File.read!("priv/static/404.html")}
-  end
-
-  def render("500.html", _assigns) do
-    {:safe, File.read!("priv/static/500.html")}
+  def render("401.json", _assigns) do
+    %{status: 401, message: "That resource is not authorized"}
   end
 
   def render("404.json", _assigns) do
@@ -19,7 +16,7 @@ defmodule SlackCoder.ErrorView do
 
   # In case no render clause matches or no
   # template is found, let's render it as 500
-  def template_not_found(_template, assigns) do
-    render "500", assigns
+  def template_not_found(template, assigns) do
+    render "500.html", assigns
   end
 end
