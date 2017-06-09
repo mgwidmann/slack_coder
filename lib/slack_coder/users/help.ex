@@ -38,7 +38,7 @@ defmodule SlackCoder.Users.Help do
     {config, full_message}
   end
   def handle_message(message, config, _admin) do
-    Logger.info "Received unhandled message: #{inspect message}"
+    Logger.info [IO.ANSI.green, IO.ANSI.bright, "[User] ", IO.ANSI.default_color, IO.ANSI.normal, "Received unhandled message: #{inspect message}"]
     {config, @unknown_message}
   end
 

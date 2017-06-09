@@ -48,7 +48,7 @@ defmodule SlackCoder.Users.User do
     {:noreply, new_user}
   end
   def handle_cast({:update, params}, user) do
-    {:noreply, Repo.update!(user, params)}
+    {:noreply, Repo.update!(User.changeset(user, params))}
   end
 
   def handle_call(:get, _from, user) do

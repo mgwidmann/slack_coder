@@ -39,7 +39,7 @@ defmodule SlackCoder.Users.Supervisor do
   def user(slack_or_github) do
     child = Supervisor.which_children(__MODULE__)
             |> Enum.find(fn {id, _, _, _}->
-              Regex.match?(~r/User-#{String.downcase(slack_or_github)}-.*/, id) || Regex.match?(~r/User-.*?-#{String.downcase(slack_or_github)}/, id)
+              Regex.match?(~r/^User-#{String.downcase(slack_or_github)}-.*$/, id) || Regex.match?(~r/^User-.*?-#{String.downcase(slack_or_github)}$/, id)
             end)
     case child do
       nil -> nil

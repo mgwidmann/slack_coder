@@ -61,13 +61,13 @@ defmodule SlackCoder.Slack do
     {:ok, state}
   end
 
-  def handle_info({user, message}, slack, state) do
+  def handle_info({user, message}, slack, %{caretaker_id: caretaker_id} = state) do
     {:ok, slack
           |> user(if(Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker), else: user))
-          |> send_message_to_slack_user(user, message, slack)
+          |> send_message_to_slack_user(user, message, caretaker_id, slack)
           |> case do
               :ok -> state
-              {:update, user} -> Map.merge(state, %{users: [user | Map.get(state, :users, [])]})
+              {:update, user} -> Map.put(state, :undeliverable, Enum.uniq([{user, message} | Map.get(state, :undeliverable, [])]))
             end
           }
   end
@@ -76,12 +76,11 @@ defmodule SlackCoder.Slack do
     {:ok, state}
   end
 
-  defp send_message_to_slack_user(nil, user, _message, slack) do
-    caretaker = user(slack, Application.get_env(:slack_coder, :caretaker))
-    send_message("I can't find a user named @#{user}, can you tell me what their slack name is?", caretaker.id, slack)
+  defp send_message_to_slack_user(nil, user, _message, caretaker_id, slack) do
+    send_message("I can't find a user named `@#{user}`, can you tell me what their slack name is?", im(slack, caretaker_id).id, slack)
     {:update, user}
   end
-  defp send_message_to_slack_user(slack_user, user, message, slack) do
+  defp send_message_to_slack_user(slack_user, user, message, _caretaker_id, slack) do
     Task.Supervisor.start_child SlackCoder.TaskSupervisor, __MODULE__, :record_message, [slack_user[:name], user, message]
 
     message = message_for(slack_user, message)
@@ -125,36 +124,54 @@ defmodule SlackCoder.Slack do
       e ->
         Logger.error "Unable to connect to slack!\n#{inspect e}"
     end
-    {:ok, %{}}
+    caretaker = user(slack, Application.get_env(:slack_coder, :caretaker))
+    {:ok, %{caretaker_id: caretaker.id, undeliverable: []}}
   end
 
   @doc false
+  # Caretaker says yes to confirm name
+  def handle_event(%{type: "message", text: yes, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{:user, username, {github, message} = undeliverable} | users]} = state) when yes in ["yes", "y", "YES", "Y"] do
+    resolve_user_update(github, username)
+    send_message("Confirmed!", im(slack, user_id).id, slack)
+    send_to(username, message)
+    {:ok, Map.put(state, :undeliverable, users)}
+  end
+  # Caretaker says no to confirm name
+  def handle_event(%{type: "message", text: no, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{:user, _username, {github, _message} = undeliverable} | users]} = state) when no in ["no", "n", "NO", "N"] do
+    send_message("Whops! So then who is #{github}?", im(slack, user_id).id, slack)
+    {:ok, Map.put(state, :undeliverable, [undeliverable | users])}
+  end
+  # Caretaker answers incorrectly
+  def handle_event(%{type: "message", text: _wrong_username, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{:user, username, {github_user, _message}} | _]} = state) do
+    send_message("I'm sorry, I'm not following... Just to confirm, the Github user `#{github_user}` is named `@#{username}` on slack? (yes/no)", im(slack, user_id).id, slack)
+    {:ok, state}
+  end
+  # Caretaker answers slack name
+  def handle_event(%{type: "message", text: username, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{github_user, _message} = undeliverable | users]} = state) do
+    send_message("Great! Just to confirm, the Github user `#{github_user}` is named `@#{username}` on slack? (yes/no)", im(slack, user_id).id, slack)
+    {:ok, Map.put(state, :undeliverable, [{:user, username, undeliverable} | users])}
+  end
+  # Any other incoming message
   def handle_event(%{type: "message", text: message, user: user_id, channel: channel} = payload, slack, state) do
-    new_state = resolve_user_update(state, message)
-    Logger.info "Processing payload: #{inspect payload}\n#{inspect new_state}"
-    unless state != new_state do
-      user_help(user_id, channel, message, payload, slack)
-    end
-    {:ok, state || %{}}
+    Logger.info [IO.ANSI.green, IO.ANSI.bright, "[Slack] ", IO.ANSI.cyan, IO.ANSI.normal, "Processing Event: #{inspect payload}"]
+    user_help(user_id, channel, message, payload, slack)
+    {:ok, state}
   end
   def handle_event(payload, _slack, state) do
     Logger.debug [IO.ANSI.green, IO.ANSI.bright, "[Slack] ", IO.ANSI.cyan, IO.ANSI.normal, "Ignoring Event: #{inspect payload}"]
     {:ok, state}
   end
 
-  defp resolve_user_update(%{users: [github | remaining]} = state, slack) do
+  defp resolve_user_update(github, slack) do
     user_pid = github |> Users.user()
     if user_pid do
       User.update(user_pid, %{slack: slack})
     end
-    Map.put(state, :users, remaining)
   end
-  defp resolve_user_update(%{users: []} = state, _message), do: state
-  defp resolve_user_update(state, _message), do: state
 
   defp user_help(user_id, channel, message, payload, slack) do
     if should_respond_to_message?(user_id, channel, slack) && payload[:subtype] == nil do
-      slack_name = slack[:users][user_id][:name]
+      slack_name = slack[:users][user_id][:name] |> IO.inspect
       user_pid = Users.user(slack_name)
       if user_pid do
         User.help(user_pid, message)
