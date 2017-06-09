@@ -138,7 +138,7 @@ defmodule SlackCoder.Slack do
     {:ok, state || %{}}
   end
   def handle_event(payload, _slack, state) do
-    Logger.debug "Dropping payload: #{inspect payload}"
+    Logger.debug [IO.ANSI.green, IO.ANSI.bright, "[Slack] ", IO.ANSI.cyan, IO.ANSI.normal, "Ignoring Event: #{inspect payload}"]
     {:ok, state}
   end
 
