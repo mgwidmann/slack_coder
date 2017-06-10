@@ -68,28 +68,28 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   def handle_cast(_, state), do: {:noreply, state}
 
   defp update_pr(raw_pr, old_pr) do
-    {:ok, new_pr} = old_pr |> PR.reg_changeset(extract_pr_data(raw_pr)) |> PRService.save
+    {:ok, new_pr} = old_pr |> PR.reg_changeset(extract_pr_data(raw_pr, old_pr)) |> PRService.save
     new_pr
   end
 
-  def extract_pr_data(raw_pr) do
+  def extract_pr_data(raw_pr, pr) do
     %{
-      owner: raw_pr["base"]["repo"]["owner"]["login"],
-      repo: raw_pr["base"]["repo"]["name"],
-      branch: raw_pr["head"]["ref"],
+      owner: raw_pr["base"]["repo"]["owner"]["login"] || pr.owner,
+      repo: raw_pr["base"]["repo"]["name"] || pr.repo,
+      branch: raw_pr["head"]["ref"] || pr.branch,
       fork: raw_pr["head"]["repo"]["owner"]["login"] != raw_pr["base"]["repo"]["owner"]["login"],
       latest_comment: nil,
       latest_comment_url: nil,
-      opened_at: date_for(raw_pr["created_at"]),
-      closed_at: date_for(raw_pr["closed_at"]),
-      merged_at: date_for(raw_pr["merged_at"]),
-      title: raw_pr["title"],
-      number: raw_pr["number"],
-      html_url: raw_pr["_links"]["html"]["href"],
+      opened_at: date_for(raw_pr["created_at"]) || pr.opened_at,
+      closed_at: date_for(raw_pr["closed_at"]) || pr.closed_at,
+      merged_at: date_for(raw_pr["merged_at"]) || pr.merged_at,
+      title: raw_pr["title"] || pr.title,
+      number: raw_pr["number"] || pr.number,
+      html_url: raw_pr["_links"]["html"]["href"] || pr.html_url,
       mergeable: raw_pr["mergeable_state"] == "mergeable",
-      github_user: raw_pr["user"]["login"],
-      github_user_avatar: raw_pr["user"]["avatar_url"],
-      sha: raw_pr["head"]["sha"]
+      github_user: raw_pr["user"]["login"] || pr.github_user,
+      github_user_avatar: raw_pr["user"]["avatar_url"] || pr.github_user_avatar,
+      sha: raw_pr["head"]["sha"] || pr.sha
     }
     |> mergeable_unknown(raw_pr)
   end

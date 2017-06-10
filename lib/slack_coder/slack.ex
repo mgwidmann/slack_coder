@@ -130,7 +130,7 @@ defmodule SlackCoder.Slack do
 
   @doc false
   # Caretaker says yes to confirm name
-  def handle_event(%{type: "message", text: yes, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{:user, username, {github, message} = undeliverable} | users]} = state) when yes in ["yes", "y", "YES", "Y"] do
+  def handle_event(%{type: "message", text: yes, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{:user, username, {github, message}} | users]} = state) when yes in ["yes", "y", "YES", "Y"] do
     resolve_user_update(github, username)
     send_message("Confirmed!", im(slack, user_id).id, slack)
     send_to(username, message)

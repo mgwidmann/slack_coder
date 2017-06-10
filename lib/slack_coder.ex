@@ -25,7 +25,8 @@ defmodule SlackCoder do
     end
 
     children = children ++ [
-      supervisor(SlackCoder.Github.Supervisor, [])
+      supervisor(SlackCoder.Github.Supervisor, []),
+      worker(SlackCoder.Github.Watchers.MergeConflict, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

@@ -2,6 +2,7 @@ defmodule SlackCoder.Github.EventProcessor do
   require Logger
   alias SlackCoder.Github.Watchers.PullRequest, as: PullRequest
   alias SlackCoder.Github.Watchers.Supervisor, as: Github
+  alias SlackCoder.Github.Watchers.MergeConflict
   alias SlackCoder.Models.PR
   alias SlackCoder.Github.ShaMapper
 
@@ -23,6 +24,10 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(:push, %{"before" => old_sha, "after" => new_sha}) do
     Logger.debug "EventProcessor received push event"
     ShaMapper.update(old_sha, new_sha)
+
+    ShaMapper.find(new_sha)
+    |> PullRequest.fetch()
+    |> MergeConflict.queue()
   end
 
   # A user has made a comment on the PR itself (not related to any code).
@@ -55,8 +60,13 @@ defmodule SlackCoder.Github.EventProcessor do
     Logger.debug "EventProcessor received #{opened} event"
 
     # login = params["pull_request"]["user"]["login"]
-    %PR{number: number, sha: pull_request["head"]["sha"]}
-    |> Github.start_watcher()
+    pid = %PR{number: number, sha: pull_request["head"]["sha"]}
+          |> Github.start_watcher()
+    pid
+    |> PullRequest.fetch()
+    |> MergeConflict.queue()
+
+    pid
     |> PullRequest.update(pull_request)
   end
 
@@ -78,8 +88,13 @@ defmodule SlackCoder.Github.EventProcessor do
 
     Logger.debug "EventProcessor received pull_request synchronize event"
 
-    %PR{number: pr}
-    |> Github.find_or_start_watcher()
+    pid = %PR{number: pr}
+          |> Github.find_or_start_watcher()
+    pid
+    |> PullRequest.fetch()
+    |> MergeConflict.queue()
+
+    pid
     |> PullRequest.update(params["pull_request"])
   end
 
