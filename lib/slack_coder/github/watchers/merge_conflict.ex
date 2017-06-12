@@ -103,7 +103,9 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
                   |> PullRequest.update_sync(%{"mergeable_state" => String.downcase(response["mergeable"])})
                 end
               end)
-            _ -> prs
+            error ->
+              Logger.error "Received unexpected response from Github: #{inspect error}"
+              prs
           end
 
     Process.send_after(self(), :check_conflicts, @one_minute)
