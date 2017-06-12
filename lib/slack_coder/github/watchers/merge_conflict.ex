@@ -2,6 +2,7 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
   use GenServer
   alias SlackCoder.Github.Watchers.PullRequest, as: PullRequest
   alias SlackCoder.Github.Watchers.Supervisor, as: Github
+  require Logger
 
   @moduledoc """
   Github's webhook API delivers a `mergeable_state` as "unknown" since no one has inquired about
