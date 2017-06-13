@@ -42,6 +42,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
          end
     :timer.send_interval @stale_check_interval, :stale_check
     SlackCoder.Github.ShaMapper.register(pr.sha)
+    SlackCoder.Github.Watchers.MergeConflict.queue(pr)
     {:noreply, {pr, callouts}}
   end
 
@@ -77,27 +78,30 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
       owner: raw_pr["base"]["repo"]["owner"]["login"] || pr.owner,
       repo: raw_pr["base"]["repo"]["name"] || pr.repo,
       branch: raw_pr["head"]["ref"] || pr.branch,
-      fork: raw_pr["head"]["repo"]["owner"]["login"] != raw_pr["base"]["repo"]["owner"]["login"],
-      latest_comment: nil,
-      latest_comment_url: nil,
       opened_at: date_for(raw_pr["created_at"]) || pr.opened_at,
       closed_at: date_for(raw_pr["closed_at"]) || pr.closed_at,
       merged_at: date_for(raw_pr["merged_at"]) || pr.merged_at,
       title: raw_pr["title"] || pr.title,
       number: raw_pr["number"] || pr.number,
       html_url: raw_pr["_links"]["html"]["href"] || pr.html_url,
-      mergeable: raw_pr["mergeable_state"] == "mergeable",
+      mergeable: raw_pr["mergeable_state"] != "dirty",
       github_user: raw_pr["user"]["login"] || pr.github_user,
       github_user_avatar: raw_pr["user"]["avatar_url"] || pr.github_user_avatar,
       sha: raw_pr["head"]["sha"] || pr.sha
     }
     |> mergeable_unknown(raw_pr)
+    |> fork_data(raw_pr)
   end
 
   defp mergeable_unknown(changes, %{"mergeable_state" => "unknown"}) do
     Map.drop(changes, [:mergeable])
   end
   defp mergeable_unknown(changes, _raw_pr), do: changes
+
+  defp fork_data(changes, %{"head" => %{"repo" => %{"owner" => %{"login" => head}}}, "base" => %{"repo" => %{"owner" => %{"login" => base}}}}) do
+    Map.put(changes, :fork, head != base)
+  end
+  defp fork_data(changes, _), do: changes
 
   def update(pr_pid, pr) when is_pid(pr_pid) do
     GenServer.cast(pr_pid, {:update, pr})

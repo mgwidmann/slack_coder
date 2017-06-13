@@ -85,6 +85,8 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
     }
   }
   """
+  @mergeable "MERGEABLE"
+  @conflicting "CONFLICTING"
   @unknown "UNKNOWN"
 
   def handle_info(:check_conflicts, %{prs: []} = state) do
@@ -92,26 +94,36 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
     {:noreply, state}
   end
   def handle_info(:check_conflicts, %{prs: prs} = state) do
-    prs = case SlackCoder.Github.query(@mergeable_query, variable_params(prs)) do
-            {:ok, response} ->
-              response_prs = Map.values(response["data"]) |> Enum.map(&(&1["pullRequest"])) |> Enum.filter(&(&1))
+    remaining_prs =
+      case SlackCoder.Github.query(@mergeable_query, variable_params(prs)) do
+        {:ok, response} ->
+          response_prs = Map.values(response["data"]) |> Enum.map(&(&1["pullRequest"])) |> Enum.filter(&(&1))
 
-              Enum.reject(prs, fn(pr) ->
-                response = Enum.find(response_prs, &(&1["number"] == pr.number && &1["repository"]["name"] == pr.repo && &1["repository"]["owner"]["login"] == pr.owner))
-                if response && response["mergeable"] != @unknown do
-                  pr
-                  |> Github.find_watcher()
-                  |> PullRequest.update_sync(%{"mergeable_state" => String.downcase(response["mergeable"])})
-                end
-              end)
-            error ->
-              Logger.error "Received unexpected response from Github: #{inspect error}"
-              prs
-          end
+          Enum.reject(prs, fn(pr) ->
+            response = Enum.find(response_prs, &(&1["number"] == pr.number && &1["repository"]["name"] == pr.repo && &1["repository"]["owner"]["login"] == pr.owner))
+            if response && response["mergeable"] != @unknown do
+              Logger.debug [IO.ANSI.green, IO.ANSI.bright, "[MergeConflict] ", IO.ANSI.normal, IO.ANSI.default_color, "Status of PR-", to_string(pr.number), " ", response["mergeable"]]
+              pr
+              |> Github.find_watcher()
+              |> PullRequest.update_sync(%{"mergeable_state" => response["mergeable"] |> convert_mergeable()})
+            end
+          end)
+        error ->
+          Logger.error "Received unexpected response from Github: #{inspect error}"
+          prs
+      end
 
-    Process.send_after(self(), :check_conflicts, @one_minute)
-    {:noreply, Map.put(state, :prs, prs)}
+    Process.send_after(self(), :check_conflicts, check_conflict_timeout(remaining_prs))
+    {:noreply, Map.put(state, :prs, remaining_prs)}
   end
+
+  # At least 5 items, continue immediately
+  defp check_conflict_timeout([_, _, _, _, _ | _]), do: 0
+  defp check_conflict_timeout(_), do: @one_minute
+
+  defp convert_mergeable(@mergeable), do: "mergeable"
+  defp convert_mergeable(@conflicting), do: "dirty"
+  defp convert_mergeable(@unknown), do: "unknown"
 
   defp variable_params(prs) do
     %{
