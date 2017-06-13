@@ -2,6 +2,7 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
   use GenServer
   alias SlackCoder.Github.Watchers.PullRequest, as: PullRequest
   alias SlackCoder.Github.Watchers.Supervisor, as: Github
+  alias SlackCoder.Models.PR
   require Logger
 
   @moduledoc """
@@ -149,7 +150,9 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
     {:reply, :ok, Map.put(state, :prs, Enum.uniq_by([pr | prs], &(Map.get(&1, :id))))}
   end
 
-  def queue(pr) when not is_nil(pr) do
+  def queue(%PR{} = pr) do
     GenServer.call(__MODULE__, {:add, pr})
   end
+
+  def queue(nil), do: nil
 end
