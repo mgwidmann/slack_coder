@@ -134,10 +134,10 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
   end
 
   def handle_call({:add, pr}, _, %{prs: prs} = state) do
-    {:reply, :ok, Map.put(state, :prs, Enum.uniq_by([pr | prs], &(&1.id)))}
+    {:reply, :ok, Map.put(state, :prs, Enum.uniq_by([pr | prs], &(Map.get(&1, :id))))}
   end
 
-  def queue(pr) do
+  def queue(pr) when not is_nil(pr) do
     GenServer.call(__MODULE__, {:add, pr})
   end
 end
