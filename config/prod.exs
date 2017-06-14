@@ -8,7 +8,7 @@ config :slack_coder, SlackCoder.Endpoint,
 
 config :logger,
   # Do not print debug messages in production
-  level: :debug,
+  level: :info,
   # compile_time_purge_level: :info,
   truncate: :infinity
 

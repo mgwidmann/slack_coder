@@ -3,6 +3,7 @@ defmodule SlackCoder.Github.Notification do
   import StubAlias
   stub_alias SlackCoder.Users.User
   stub_alias SlackCoder.Users.Supervisor, as: Users
+  alias SlackCoder.Travis.Build
 
   defstruct [:slack_user, :type, :called_out?, :message_for, :message]
 
@@ -11,7 +12,10 @@ defmodule SlackCoder.Github.Notification do
   def conflict(pr) do
     case user_for_pr(pr) |> slack_user_with_monitors do
       [message_for | slack_users] ->
-        message = ":heavy_multiplication_x: *MERGE CONFLICTS* *#{pr.title}* \n#{pr.html_url}"
+        message = """
+        :heavy_multiplication_x: *MERGE CONFLICTS* *#{pr.title}*
+        #{pr.html_url}
+        """
         notify(slack_users, :conflict, message_for, message, pr)
         pr
       _ -> pr
@@ -21,7 +25,21 @@ defmodule SlackCoder.Github.Notification do
   def failure(pr) do
     case user_for_pr(pr) |> slack_user_with_monitors do
       [message_for | slack_users] ->
-        message = ":facepalm: *FAILURE* *#{pr.title}* :-1:\n#{pr.build_url}\n#{pr.html_url}"
+        %{"build_id" => build_id} = Regex.named_captures(~r/(?<build_id>\d+)/, pr.build_url)
+        failed_jobs = SlackCoder.Travis.build_info(pr.owner, pr.repo, build_id)
+                      |> Enum.filter(&match?(%Build{result: :failure}, &1))
+                      |> Enum.map(fn build ->
+                        SlackCoder.Travis.job_log(build) |> to_string()
+                      end)
+        message = """
+        :facepalm: *FAILURE* *#{pr.title}* :-1:
+        #{pr.build_url}
+        #{pr.html_url}
+
+        ```
+        #{Enum.join(failed_jobs, "\n")}
+        ```
+        """
         notify(slack_users, :fail, message_for, message, pr)
         pr
       _ -> pr
@@ -31,7 +49,10 @@ defmodule SlackCoder.Github.Notification do
   def success(pr) do
     case user_for_pr(pr) |> slack_user_with_monitors do
       [message_for | slack_users] ->
-        message = ":bananadance: *SUCCESS* *#{pr.title}* :success:\n#{pr.html_url}"
+        message = """
+        :bananadance: *SUCCESS* *#{pr.title}* :success:
+        #{pr.html_url}
+        """
         notify(slack_users, :pass, message_for, message, pr)
         pr
       _ -> pr
@@ -69,7 +90,7 @@ defmodule SlackCoder.Github.Notification do
       [message_for | slack_users] ->
         stale_hours = Timex.diff(pr.latest_comment, now(), :hours)
         message = """
-        :hankey: *#{pr.title}*
+        :hankey: *STALE* *#{pr.title}*
         Stale for *#{stale_hours}* hours
         #{pr.html_url}
         """
@@ -82,7 +103,10 @@ defmodule SlackCoder.Github.Notification do
   def unstale(pr) do
     case user_for_pr(pr) |> slack_user_with_monitors do
       [message_for | slack_users] ->
-        message = ":email: *CHATTER* *#{pr.title}* :memo:\n#{pr.latest_comment_url || pr.html_url}"
+        message = """
+        :email: *CHATTER* *#{pr.title}* :memo:
+        #{pr.latest_comment_url || pr.html_url}
+        """
         notify(slack_users, :unstale, message_for, message, pr)
         pr
       _ -> pr
