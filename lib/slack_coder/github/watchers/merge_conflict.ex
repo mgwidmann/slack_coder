@@ -97,8 +97,8 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
   def handle_info(:check_conflicts, %{prs: prs} = state) do
     remaining_prs =
       case SlackCoder.Github.query(@mergeable_query, variable_params(prs)) do
-        {:ok, response} ->
-          response_prs = Map.values(response["data"]) |> Enum.map(&(&1["pullRequest"])) |> Enum.filter(&(&1))
+        {:ok, %{"data" => data}} ->
+          response_prs = Map.values(data) |> Enum.map(&(&1["pullRequest"])) |> Enum.filter(&(&1))
 
           Enum.reject(prs, fn(pr) ->
             response = Enum.find(response_prs, &(&1["number"] == pr.number && &1["repository"]["name"] == pr.repo && &1["repository"]["owner"]["login"] == pr.owner))
@@ -110,7 +110,7 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
             end
           end)
         error ->
-          Logger.error "Received unexpected response from Github: #{inspect error}"
+          Logger.warn "Received unexpected response from Github: #{inspect error}"
           prs
       end
 
