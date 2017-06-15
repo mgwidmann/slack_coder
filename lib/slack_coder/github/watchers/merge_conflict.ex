@@ -16,9 +16,9 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
     GenServer.start_link(__MODULE__, %{prs: []}, name: __MODULE__)
   end
 
-  @one_minute 60 * 1_000
+  @normal_wait_time 60 * 5 * 1_000
   def init(state) do
-    Process.send_after(self(), :check_conflicts, @one_minute)
+    Process.send_after(self(), :check_conflicts, @normal_wait_time)
     {:ok, state}
   end
 
@@ -91,13 +91,13 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
   @unknown "UNKNOWN"
 
   def handle_info(:check_conflicts, %{prs: []} = state) do
-    Process.send_after(self(), :check_conflicts, @one_minute)
+    Process.send_after(self(), :check_conflicts, @normal_wait_time)
     {:noreply, state}
   end
   def handle_info(:check_conflicts, %{prs: prs} = state) do
     remaining_prs =
       case SlackCoder.Github.query(@mergeable_query, variable_params(prs)) do
-        {:ok, %{"data" => data}} ->
+        {:ok, %{"data" => data}} when is_map(data) ->
           response_prs = Map.values(data) |> Enum.map(&(&1["pullRequest"])) |> Enum.filter(&(&1))
 
           Enum.reject(prs, fn(pr) ->
@@ -118,8 +118,9 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
     {:noreply, Map.put(state, :prs, remaining_prs)}
   end
 
-  # At least 5 items, continue immediately
-  defp check_conflict_timeout([_, _, _, _, _ | _]), do: 0
+  # At least 5 items, wait just a short period to prevent API rate limit
+  @busy_wait_time 60 * 1_000
+  defp check_conflict_timeout([_, _, _, _, _ | _]), do: @ten_seconds
   defp check_conflict_timeout(_), do: @one_minute
 
   defp convert_mergeable(@mergeable), do: "mergeable"
