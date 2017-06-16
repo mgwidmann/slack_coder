@@ -120,8 +120,8 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
 
   # At least 5 items, wait just a short period to prevent API rate limit
   @busy_wait_time 60 * 1_000
-  defp check_conflict_timeout([_, _, _, _, _ | _]), do: @ten_seconds
-  defp check_conflict_timeout(_), do: @one_minute
+  defp check_conflict_timeout([_, _, _, _, _ | _]), do: @busy_wait_time
+  defp check_conflict_timeout(_), do: @normal_wait_time
 
   defp convert_mergeable(@mergeable), do: "mergeable"
   defp convert_mergeable(@conflicting), do: "dirty"
