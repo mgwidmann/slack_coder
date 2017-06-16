@@ -21,6 +21,7 @@ defmodule SlackCoder.Services.UserService do
         SlackCoder.Users.Supervisor.start_user(user)
         {:ok, user}
       {:error, changeset} ->
+        SlackCoder.Users.Supervisor.start_user(user)
         {:error, changeset}
     end
   end

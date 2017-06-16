@@ -171,7 +171,7 @@ defmodule SlackCoder.Slack do
 
   defp user_help(user_id, channel, message, payload, slack) do
     if should_respond_to_message?(user_id, channel, slack) && payload[:subtype] == nil do
-      slack_name = slack[:users][user_id][:name] |> IO.inspect
+      slack_name = slack[:users][user_id][:name]
       user_pid = Users.user(slack_name)
       if user_pid do
         User.help(user_pid, message)

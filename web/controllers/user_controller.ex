@@ -85,7 +85,7 @@ defmodule SlackCoder.UserController do
   end
 
   defp allow_profile_edit(conn, _opts) do
-    if conn.assigns.current_user.admin || conn.assigns.current_user.id == conn.params["id"] do
+    if conn.assigns.current_user.admin || to_string(conn.assigns.current_user.id) == conn.params["id"] do
       conn
     else
       conn

@@ -14,7 +14,7 @@ defmodule SlackCoder.Users.User do
   end
 
   def init(user) do
-    Process.register(self(), String.to_atom(user.github))
+    Process.register self(), String.to_atom(user.github)
     {:ok, user}
   end
 
