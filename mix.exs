@@ -58,7 +58,7 @@ defmodule SlackCoder.Mixfile do
       {:scrivener_ecto, "~> 1.0"},
 
       # Monitoring
-      {:flames, "~> 0.2"},
+      {:flames, github: "mgwidmann/flames"},
       {:wobserver, "~> 0.1"},
 
       # Dev only
