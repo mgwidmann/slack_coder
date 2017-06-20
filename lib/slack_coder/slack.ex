@@ -84,11 +84,11 @@ defmodule SlackCoder.Slack do
     Task.Supervisor.start_child SlackCoder.TaskSupervisor, __MODULE__, :record_message, [slack_user[:name], user, message]
 
     message = message_for(slack_user, message)
-    slack_user = Routing.route_message(slack, slack_user)
-    if slack_user do
+    routed_slack_user = Routing.route_message(slack, slack_user)
+    if routed_slack_user do
       message
       |> String.strip
-      |> send_message(slack_user.id, slack)
+      |> send_message(routed_slack_user.id, slack)
     else
       Logger.error "Unable to send message to #{inspect user}! Slack data: #{inspect slack_user}"
     end
@@ -105,7 +105,6 @@ defmodule SlackCoder.Slack do
 
   @doc false
   def handle_close(reason, slack, _state) do
-    Logger.error inspect(reason)
     caretaker = user(slack, Application.get_env(:slack_coder, :caretaker))
     caretaker_im = Routing.route_message(slack, caretaker)
     if caretaker_im do
