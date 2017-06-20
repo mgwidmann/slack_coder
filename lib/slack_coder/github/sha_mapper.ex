@@ -38,6 +38,10 @@ defmodule SlackCoder.Github.ShaMapper do
     {:reply, Map.get(sha_to_pid, sha), sha_to_pid}
   end
 
+  def handle_call({:remove, sha}, _from, sha_to_pid) do
+    {:reply, :ok, Map.drop(sha_to_pid, [sha])}
+  end
+
   def handle_cast({:update, old_sha, new_sha}, sha_to_pid) do
     pid = sha_to_pid |> Map.get(old_sha)
     {:noreply, if(pid, do: sha_to_pid |> Map.delete(old_sha) |> Map.put(new_sha, pid), else: sha_to_pid)}
@@ -55,6 +59,10 @@ defmodule SlackCoder.Github.ShaMapper do
   """
   def update(sha_mapper \\ @registered_name, old_sha, new_sha) do
     GenServer.cast(sha_mapper, {:update, old_sha, new_sha})
+  end
+
+  def remove(sha_mapper \\ @registered_name, sha) do
+    GenServer.call(sha_mapper, {:remove, sha})
   end
 
   @doc """

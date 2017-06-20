@@ -31,7 +31,7 @@ deploy.config:
   # run brunch build
   extra_steps:
     - brunch build
-    - mix phoenix.digest
+    - mix phx.digest
 
   # just before the new process comes online,
   # let's migrate the database
@@ -41,7 +41,7 @@ deploy.config:
       - mix ecto.migrate --no-deps-check
 
 web.main:
-  start: node-start mix phoenix.server
+  start: node-start mix phx.server
 
 # add postgres as a data component
 data.db:

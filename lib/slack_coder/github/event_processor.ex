@@ -21,6 +21,11 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(event, parameters)
   # Would like to be able to reset a PR here but there doesn't seem to be enough info
   # to determine what PR the push belonged to without querying Github's API.
+
+  def process(:push, %{"before" => old_sha, "after" => "0000000000000000000000000000000000000000", "deleted" => true}) do
+    Logger.debug "EventProcessor received deleted push event."
+    ShaMapper.remove(old_sha)
+  end
   def process(:push, %{"before" => old_sha, "after" => new_sha}) do
     Logger.debug "EventProcessor received push event"
     ShaMapper.update(old_sha, new_sha)
