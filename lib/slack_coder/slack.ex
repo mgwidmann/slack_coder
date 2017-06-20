@@ -41,7 +41,14 @@ defmodule SlackCoder.Slack do
     String.to_atom(user) |> send_to(message)
   end
 
-  def send_to(user, message) when is_binary(message) do
+  def send_to(user, raw_message) when is_atom(user) and is_map(raw_message) do
+    send :slack, {user, if Mix.env == :dev do
+                          Map.put(raw_message, :attachments, Map.put(Enum.at(raw_message.attachments, 0), :text, "*DEV MESSAGE*"))
+                        else
+                          raw_message
+                        end}
+  end
+  def send_to(user, message) when is_atom(user) and is_binary(message) do
     send :slack, {user, message <> unquote(if Mix.env == :dev, do: "\n*DEV MESSAGE*", else: "")}
   end
 
@@ -81,21 +88,31 @@ defmodule SlackCoder.Slack do
     {:update, user}
   end
   defp send_message_to_slack_user(slack_user, user, message, _caretaker_id, slack) do
+    routed_slack_user = Routing.route_message(slack, slack_user)
+    message = message |> Map.merge(%{channel: routed_slack_user.id, type: "message"})
+
     Task.Supervisor.start_child SlackCoder.TaskSupervisor, __MODULE__, :record_message, [slack_user[:name], user, message]
 
-    message = message_for(slack_user, message)
-    routed_slack_user = Routing.route_message(slack, slack_user)
     if routed_slack_user do
       message
-      |> String.strip
-      |> send_message(routed_slack_user.id, slack)
+      |> deliver_message(routed_slack_user.id, slack)
     else
       Logger.error "Unable to send message to #{inspect user}! Slack data: #{inspect slack_user}"
     end
     :ok
   end
 
+  defp deliver_message(message, id, slack) when is_binary(message) do
+    message |> String.strip() |> send_message(id, slack)
+  end
+  defp deliver_message(message, _id, slack) when is_map(message) do
+    send_raw(message |> Poison.encode!(), slack)
+  end
+
   @doc false
+  def record_message(name, user, message) when is_map(message) do
+    record_message(name, user, Poison.encode!(message))
+  end
   def record_message(name, user, message) do
     Logger.info "Sending message (#{name}): #{message}"
     %Message{}
