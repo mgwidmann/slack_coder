@@ -1,5 +1,5 @@
 alias SlackCoder.Repo
-import Ecto.Query
+import_if_available Ecto.Query
 alias SlackCoder.Models.PR
 alias SlackCoder.Models.Commit
 alias SlackCoder.Github.Supervisor, as: Github
