@@ -14,6 +14,8 @@ defmodule SlackCoder.Travis do
     |> case do
       %HTTPoison.Response{status_code: 200, body: body} ->
         body
+        |> Job.filter_log()
+        |> Job.new()
       # Cannot use follow_redirect: true, cause need to drop authorization header
       %HTTPoison.Response{status_code: 307, headers: headers} ->
         {"Location", redirect} = Enum.find(headers, &(match?({"Location", _}, &1)))
