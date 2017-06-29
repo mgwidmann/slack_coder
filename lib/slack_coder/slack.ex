@@ -83,16 +83,32 @@ defmodule SlackCoder.Slack do
   defp send_message_to_slack_user(slack_user, user, message, _caretaker_id, slack) do
     Task.Supervisor.start_child SlackCoder.TaskSupervisor, __MODULE__, :record_message, [slack_user[:name], user, message]
 
-    message = message_for(slack_user, message)
-    routed_slack_user = Routing.route_message(slack, slack_user)
-    if routed_slack_user do
-      message
-      |> String.strip
-      |> send_message(routed_slack_user.id, slack)
-    else
-      Logger.error "Unable to send message to #{inspect user}! Slack data: #{inspect slack_user}"
-    end
+    "@" <> user
+    |> Slack.Lookups.lookup_direct_message_id(slack)
+    |> deliver_message(user, slack_user, message, slack)
+
     :ok
+  end
+
+  defp deliver_message(nil, user, slack_user, message, slack) do
+    "@" <> user
+    |> Slack.Lookups.lookup_user_id(slack)
+    |> case do
+      nil ->
+        Logger.error "Unable to send message to #{inspect user}! Slack data: #{inspect slack_user}"
+      user ->
+        case Slack.Web.Im.open(user) do
+          %{"ok" => true, "channel" => %{"id" => dm}} when is_binary(dm) ->
+            deliver_message(dm, user, slack_user, message, slack)
+          error ->
+            Logger.warn("Unable to open direct message to #{inspect user}! API Response: #{inspect error}")
+        end
+    end
+  end
+  defp deliver_message(dm, _user, _slack_user, message, slack) do
+    message
+    |> String.strip
+    |> send_message(dm, slack)
   end
 
   @doc false
