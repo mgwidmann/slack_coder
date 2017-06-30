@@ -19,6 +19,10 @@ defmodule SlackCoder.Github do
   defp extract_response({:ok, %HTTPoison.Response{status_code: 200, body: body}}, _query) do
     Poison.decode(body)
   end
+  defp extract_response({:error, %HTTPoison.Error{reason: :timeout} = error}, _query) do
+    # Ignore
+    error
+  end
   defp extract_response({:error, %HTTPoison.Error{} = error}, query) do
     Logger.warn([
       IO.ANSI.green, IO.ANSI.bright, "[SlackCoder.Github] ",

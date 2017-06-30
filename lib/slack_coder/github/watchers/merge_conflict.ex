@@ -109,6 +109,9 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
               |> PullRequest.update_sync(%{"mergeable_state" => response["mergeable"] |> convert_mergeable()})
             end
           end)
+        %HTTPoison.Error{reason: :timeout} ->
+          # Ignore (Rate limiting)
+          prs
         error ->
           Logger.warn "Received unexpected response from Github: #{inspect error}"
           prs

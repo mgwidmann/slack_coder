@@ -37,8 +37,7 @@ defmodule SlackCoder.Slack do
   def send_to(user, message) when is_binary(message), do: send_to(user, %{text: message})
   def send_to(user, raw_message) when is_map(raw_message) do
     send :slack, {user, if Mix.env == :dev do
-                          # Map.put(raw_message, :text, (raw_message[:text] || "") <> "\n*DEV MESSAGE*")
-                          raw_message
+                          Map.put(raw_message, :text, (raw_message[:text] || "") <> "\n*DEV MESSAGE*")
                         else
                           raw_message
                         end}
