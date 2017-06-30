@@ -12,6 +12,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
 
   def init({%PR{} = pr, []}) do
+    Process.register(self(), :"pr-#{pr.number}") # Will create memory leak for each pr
     send(self(), :init)
     {:ok, {pr, []}}
   end
