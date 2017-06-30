@@ -58,7 +58,9 @@ else
   config :slack_coder,
     slack_api_token: nil,
     personal: true,
-    caretaker: :matt
+    caretaker: :matt,
+    travis_token: nil,
+    circle_ci_token: nil
 
   config :slack_coder, :github,
     pat: "a-github-token-that-wont-work",

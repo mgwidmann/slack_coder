@@ -25,7 +25,9 @@ config :slack_coder,
   personal: true,
   timezone: "America/New_York",
   pr_backoff_start: 4,
-  caretaker: :matt
+  caretaker: :matt,
+  travis_token: System.get_env("TRAVIS_API_TOKEN"),
+  circle_ci_token: System.get_env("CIRCLE_CI_API_TOKEN")
 
 config :slack,
   api_token: System.get_env("SLACK_API_TOKEN")
