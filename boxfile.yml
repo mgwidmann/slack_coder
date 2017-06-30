@@ -1,6 +1,9 @@
 run.config:
   # elixir runtime
   engine: elixir
+  engine.config:
+    runtime: elixir-1.4
+    erlang_runtime: erlang-20.0
 
   # we need nodejs in development
   # ensure inotify exists for hot-code reloading

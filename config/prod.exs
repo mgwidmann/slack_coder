@@ -27,6 +27,9 @@ config :slack_coder,
   pr_backoff_start: 4,
   caretaker: :matt
 
+config :slack,
+  api_token: System.get_env("SLACK_API_TOKEN")
+
 config :slack_coder, :github,
   pat: System.get_env("GITHUB_PAT"),
   user: System.get_env("GITHUB_USER")

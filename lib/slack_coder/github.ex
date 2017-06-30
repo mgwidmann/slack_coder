@@ -1,7 +1,6 @@
 defmodule SlackCoder.Github do
   require Logger
   alias SlackCoder.Github.EventProcessor
-  alias SlackCoder.Github.Watchers.Supervisor, as: PullRequestSupervisor
   alias SlackCoder.Services.UserService
 
   def client do

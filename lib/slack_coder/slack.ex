@@ -6,6 +6,7 @@ defmodule SlackCoder.Slack do
   stub_alias SlackCoder.Users.Supervisor, as: Users
   stub_alias SlackCoder.Users.User
   alias SlackCoder.Models.Message
+  alias SlackCoder.Models.User, as: UserModel
   alias SlackCoder.Repo
   require Logger
   @online_message """
@@ -24,32 +25,23 @@ defmodule SlackCoder.Slack do
   that they may deliver messages to `:slack` through the RTM service.
   """
   def send_to(user, message)
-  def send_to(user, notification = %SlackCoder.Github.Notification{}) when is_binary(user) do
-    String.to_atom(user) |> send_to(notification)
-  end
-
+  def send_to(user, message) when is_atom(user), do: user |> to_string() |> send_to(message)
   def send_to(user, notification = %SlackCoder.Github.Notification{}) do
-    user_pid = Users.user(user)
+    user_pid = user |> String.to_atom() |> Users.user()
     if user_pid do
       User.notification user_pid, notification
     else
       Logger.error "Attempt to deliver message to #{inspect user}, but pid cannot be found. Notification: #{inspect notification}"
     end
   end
-
-  def send_to(user, message) when is_binary(user) and is_binary(message) do
-    String.to_atom(user) |> send_to(message)
-  end
-
-  def send_to(user, raw_message) when is_atom(user) and is_map(raw_message) do
+  def send_to(user, message) when is_binary(message), do: send_to(user, %{text: message})
+  def send_to(user, raw_message) when is_map(raw_message) do
     send :slack, {user, if Mix.env == :dev do
-                          Map.put(raw_message, :attachments, Map.put(Enum.at(raw_message.attachments, 0), :text, "*DEV MESSAGE*"))
+                          # Map.put(raw_message, :text, (raw_message[:text] || "") <> "\n*DEV MESSAGE*")
+                          raw_message
                         else
                           raw_message
                         end}
-  end
-  def send_to(user, message) when is_atom(user) and is_binary(message) do
-    send :slack, {user, message <> unquote(if Mix.env == :dev, do: "\n*DEV MESSAGE*", else: "")}
   end
 
   @doc """
@@ -69,8 +61,9 @@ defmodule SlackCoder.Slack do
   end
 
   def handle_info({user, message}, slack, %{caretaker_id: caretaker_id} = state) do
-    {:ok, slack
-          |> user(if(Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker), else: user))
+    user = if(Mix.env == :dev, do: Application.get_env(:slack_coder, :caretaker) |> to_string(), else: user)
+    {:ok, "@" <> user
+          |> Slack.Lookups.lookup_user_id(slack)
           |> send_message_to_slack_user(user, message, caretaker_id, slack)
           |> case do
               :ok -> state
@@ -79,7 +72,7 @@ defmodule SlackCoder.Slack do
           }
   end
   def handle_info(message, _slack, state) do
-    Logger.warn "Got unhandled message: #{inspect message}"
+    Logger.warn "Got unhandled (handle_info) message: #{inspect message}"
     {:ok, state}
   end
 
@@ -87,36 +80,62 @@ defmodule SlackCoder.Slack do
     send_message("I can't find a user named `@#{user}`, can you tell me what their slack name is?", im(slack, caretaker_id).id, slack)
     {:update, user}
   end
-  defp send_message_to_slack_user(slack_user, user, message, _caretaker_id, slack) do
-    routed_slack_user = Routing.route_message(slack, slack_user)
-    message = message |> Map.merge(%{channel: routed_slack_user.id, type: "message"})
+  # Convert all messages to map style so that send_raw is always used
+  defp send_message_to_slack_user(slack_user_id, user, message, caretaker_id, slack) when is_binary(message) do
+    send_message_to_slack_user(slack_user_id, user, %{text: message}, caretaker_id, slack)
+  end
+  defp send_message_to_slack_user(slack_user_id, user, message, _caretaker_id, slack) when is_map(message) do
+    message = message |> Map.merge(%{channel: Slack.Lookups.lookup_direct_message_id(slack_user_id, slack), type: "message"})
 
-    Task.Supervisor.start_child SlackCoder.TaskSupervisor, __MODULE__, :record_message, [slack_user[:name], user, message]
+    Task.Supervisor.start_child SlackCoder.TaskSupervisor, __MODULE__, :record_message, [user, message]
 
-    if routed_slack_user do
-      message
-      |> deliver_message(routed_slack_user.id, slack)
-    else
-      Logger.error "Unable to send message to #{inspect user}! Slack data: #{inspect slack_user}"
-    end
+    deliver_message(user, message, slack)
+
     :ok
   end
 
-  defp deliver_message(message, id, slack) when is_binary(message) do
-    message |> String.strip() |> send_message(id, slack)
+  defp deliver_message(user, %{channel: nil} = message, slack) do
+    "@" <> user
+    |> Slack.Lookups.lookup_user_id(slack)
+    |> case do
+      nil ->
+        Logger.error "Unable to send message to #{inspect user}!"
+      user ->
+        case Slack.Web.Im.open(user) do
+          %{"ok" => true, "channel" => %{"id" => dm}} when is_binary(dm) ->
+            deliver_message(user, Map.put(message, :dm, dm), slack)
+          error ->
+            Logger.warn("Unable to open direct message to #{inspect user}! API Response: #{inspect error}")
+        end
+    end
   end
-  defp deliver_message(message, _id, slack) when is_map(message) do
-    send_raw(message |> Poison.encode!(), slack)
+  defp deliver_message(_user, %{attachments: attachments, channel: channel} = message, _slack) do
+    Task.start fn ->
+      payload = %{attachments: Poison.encode!(attachments),
+                  username: "zombie-bot",
+                  icon_url: "https://ca.slack-edge.com/T02UFCF23-U0B5HU9U0-e6e946e40c02-72"}
+      Slack.Web.Chat.post_message channel, message[:text], payload
+    end
+  end
+  defp deliver_message(_user, message, slack) when is_map(message) do
+    message
+    |> Poison.encode!()
+    |> send_raw(slack)
   end
 
   @doc false
-  def record_message(name, user, message) when is_map(message) do
-    record_message(name, user, Poison.encode!(message))
+  def record_message(user, message) when is_map(message) do
+    record_message(user, Poison.encode!(message))
   end
-  def record_message(name, user, message) do
-    Logger.info "Sending message (#{name}): #{message}"
+  def record_message(user, message) do
+    import Ecto.Query
+
+    github = UserModel.by_slack(user) |> select([u], u.github) |> Repo.one
+
+    Logger.info "Sending message (#{user}): #{message}"
+
     %Message{}
-    |> Message.changeset(%{slack: to_string(user), user: name, message: message |> String.strip})
+    |> Message.changeset(%{slack: to_string(user), user: github, message: message |> String.strip})
     |> Repo.insert!
   end
 
@@ -144,6 +163,7 @@ defmodule SlackCoder.Slack do
     {:ok, %{caretaker_id: caretaker.id, undeliverable: []}}
   end
 
+  # TODO: Would like to extract this to a separate module and/or process
   @doc false
   # Caretaker says yes to confirm name
   def handle_event(%{type: "message", text: yes, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{:user, username, {github, message}} | users]} = state) when yes in ["yes", "y", "YES", "Y"] do
