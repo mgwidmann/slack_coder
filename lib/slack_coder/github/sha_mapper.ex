@@ -36,7 +36,7 @@ defmodule SlackCoder.Github.ShaMapper do
 
   def handle_call({:find, sha}, _from, sha_to_pid) do
     pid = Map.get(sha_to_pid, sha)
-    pid = if Process.alive?(pid) do
+    pid = if pid && Process.alive?(pid) do
             pid
           else
             Task.start fn -> remove(sha) end

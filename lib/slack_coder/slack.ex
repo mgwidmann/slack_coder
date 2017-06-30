@@ -7,6 +7,7 @@ defmodule SlackCoder.Slack do
   stub_alias SlackCoder.Users.User
   alias SlackCoder.Models.Message
   alias SlackCoder.Models.User, as: UserModel
+  alias SlackCoder.Services.UserService
   alias SlackCoder.Repo
   require Logger
   @online_message """
@@ -198,10 +199,11 @@ defmodule SlackCoder.Slack do
   end
 
   defp resolve_user_update(github, slack) do
-    user_pid = github |> Users.user()
-    if user_pid do
-      User.update(user_pid, %{slack: slack})
-    end
+    github
+    |> UserModel.by_github()
+    |> Repo.one()
+    |> UserModel.changeset(%{slack: slack})
+    |> UserService.save()
   end
 
   defp user_help(user_id, channel, message, payload, slack) do
