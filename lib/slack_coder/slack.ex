@@ -79,10 +79,6 @@ defmodule SlackCoder.Slack do
     send_message("I can't find a user named `@#{user}`, can you tell me what their slack name is?", im(slack, caretaker_id).id, slack)
     {:update, user}
   end
-  # Convert all messages to map style so that send_raw is always used
-  defp send_message_to_slack_user(slack_user_id, user, message, caretaker_id, slack) when is_binary(message) do
-    send_message_to_slack_user(slack_user_id, user, %{text: message}, caretaker_id, slack)
-  end
   defp send_message_to_slack_user(slack_user_id, user, message, _caretaker_id, slack) when is_map(message) do
     message = message |> Map.merge(%{channel: Slack.Lookups.lookup_direct_message_id(slack_user_id, slack), type: "message"})
 
@@ -93,6 +89,7 @@ defmodule SlackCoder.Slack do
     :ok
   end
 
+  @new_message_timeout 1_000
   defp deliver_message(user, %{channel: nil} = message, slack) do
     "@" <> user
     |> Slack.Lookups.lookup_user_id(slack)
@@ -102,7 +99,10 @@ defmodule SlackCoder.Slack do
       user ->
         case Slack.Web.Im.open(user) do
           %{"ok" => true, "channel" => %{"id" => dm}} when is_binary(dm) ->
-            deliver_message(user, Map.put(message, :dm, dm), slack)
+            Task.start fn ->
+              Process.sleep(@new_message_timeout)
+              send_to(user, message) # Need slack data to update
+            end
           error ->
             Logger.warn("Unable to open direct message to #{inspect user}! API Response: #{inspect error}")
         end
