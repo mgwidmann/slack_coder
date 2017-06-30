@@ -84,7 +84,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
       title: raw_pr["title"] || pr.title,
       number: raw_pr["number"] || pr.number,
       html_url: raw_pr["_links"]["html"]["href"] || pr.html_url,
-      mergeable: raw_pr["mergeable_state"] != "dirty",
+      mergeable: not raw_pr["mergeable_state"] in ["dirty", "conflicting"],
       github_user: raw_pr["user"]["login"] || pr.github_user,
       github_user_avatar: raw_pr["user"]["avatar_url"] || pr.github_user_avatar,
       sha: raw_pr["head"]["sha"] || pr.sha
