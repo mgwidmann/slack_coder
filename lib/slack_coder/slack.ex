@@ -143,6 +143,7 @@ defmodule SlackCoder.Slack do
     {:ok, %{caretaker_id: caretaker.id, undeliverable: []}}
   end
 
+  # TODO: Would like to extract this to a separate module and/or process
   @doc false
   # Caretaker says yes to confirm name
   def handle_event(%{type: "message", text: yes, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{:user, username, {github, message}} | users]} = state) when yes in ["yes", "y", "YES", "Y"] do
