@@ -121,7 +121,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
   def unstale(_), do: nil
 
-  def status(pr_pid, type, sha, url, state) when is_pid(pr_pid) do
+  def status(pr_pid, type, sha, url, state) when is_pid(pr_pid) and type in [:build, :analysis] do
     GenServer.cast(pr_pid, {type, sha, url, state})
   end
   def status(_, _, _, _, _), do: nil
