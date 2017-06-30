@@ -47,6 +47,7 @@ defmodule SlackCoder.AuthController do
   defp authorize_url!, do: SlackCoder.OAuth.Github.authorize_url!
 
   defp after_login(conn, user) do
+    SlackCoder.Slack.send_to(user.slack, "Signed in successfully!")
     conn
     |> put_flash(:info, "Successfully authenticated.")
     |> put_session(:current_user, user)

@@ -11,7 +11,11 @@ defmodule SlackCoder.Services.UserService do
 
     user = simplified_user |> update_user(db_user)
     SlackCoder.Users.Supervisor.start_user(user)
-    if db_user, do: {:ok, user}, else: {:new, user}
+    if db_user do
+      {:ok, user}
+    else
+      {:new, user}
+    end
   end
 
   def save(%Ecto.Changeset{data: user} = changeset) do
