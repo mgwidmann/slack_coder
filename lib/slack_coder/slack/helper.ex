@@ -16,13 +16,4 @@ defmodule SlackCoder.Slack.Helper do
     |> Map.values
     |> Enum.find(&(&1.user == user))
   end
-
-  def message_for(user, message) do
-    if Application.get_env(:slack_coder, :personal) do
-      message
-    else
-      "<@#{user.id}> #{message}"
-    end
-  end
-
 end
