@@ -11,8 +11,8 @@
 //
 // If you no longer want to use a dependency, remember
 // to also remove its path from "config.paths.watched".
-import "deps/phoenix_html/web/static/js/phoenix_html"
-
+import "deps/phoenix_html/web/static/js/phoenix_html";
+require("bootstrap");
 // Import local files
 //
 // Local files can be imported directly using relative
@@ -23,3 +23,17 @@ import socket from "./socket"
 $('#view_user').on('change', function() {
   document.location.href = `/?user=${$(this).val()}`;
 });
+
+$(document).on('click', '.refresh-pr', function(){
+  var owner = $(this).data('owner');
+  var repo = $(this).data('repo');
+  var pr = $(this).data('pr');
+  $.ajax({
+    method: 'GET',
+    url: `/api/pull_requests/${owner}/${repo}/${pr}/refresh`
+  })
+});
+
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})

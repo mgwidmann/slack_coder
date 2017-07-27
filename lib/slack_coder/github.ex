@@ -2,6 +2,7 @@ defmodule SlackCoder.Github do
   require Logger
   alias SlackCoder.Github.EventProcessor
   alias SlackCoder.Services.UserService
+  import SlackCoder.Github.TimeHelper
 
   def client do
     Tentacat.Client.new(%{
@@ -45,13 +46,112 @@ defmodule SlackCoder.Github do
       |> Tentacat.Users.find(client())
       |> UserService.find_or_create_user()
 
-      pr = Tentacat.Pulls.find(owner, repository, pr["number"], client())
-      EventProcessor.process(:pull_request, %{"action" => "opened", "number" => pr["number"], "pull_request" => pr})
+      synchronize_pull_request(owner, repository, pr["number"])
     end)
   end
 
+  @pull_request_query """
+  query ($owner: String!, $name: String!, $number: Int!) {
+    repository(owner: $owner, name: $name) {
+      owner {
+        login
+        avatarUrl
+      }
+      name
+      pullRequest(number: $number) {
+        createdAt
+        mergedAt
+        closed
+        headRepositoryOwner {
+          login
+          avatarUrl
+        }
+        mergeable
+        url
+        number
+        title
+  			headRefName
+      	commits(last: 1) {
+          nodes {
+            commit {
+              oid
+              status {
+                contexts {
+                  targetUrl
+                  context
+                  state
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  """
+  def synchronize_pull_request(owner, repository, number) when is_binary(number) do
+    {number, _} = Integer.parse(number)
+    synchronize_pull_request(owner, repository, number)
+  end
   def synchronize_pull_request(owner, repository, number) do
-    pr = Tentacat.Pulls.find(owner, repository, to_string(number), client())
-    EventProcessor.process(:pull_request, %{"action" => "opened", "number" => pr["number"], "pull_request" => pr})
+    query(@pull_request_query, %{owner: owner, name: repository, number: number})
+    |> pr_response()
+  end
+
+  defp pr_response({:ok, %{"data" => %{
+    "repository" => %{
+      "owner" => %{
+        "login" => owner,
+        "avatarUrl" => owner_avatar_url
+      },
+      "name" => repository,
+      "pullRequest" => %{
+        "createdAt" => created_at,
+        "mergedAt" => merged_at,
+        "closed" => closed?,
+        "headRepositoryOwner" => repo_owner,
+        "mergeable" => mergeable_state,
+        "url" => html_url,
+        "number" => number,
+        "title" => title,
+        "headRefName" => branch,
+        "commits" => %{
+            "nodes" => [
+              %{
+                "commit" => %{
+                  "oid" => sha,
+                  "status" => %{
+                    "contexts" => statuses
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }}) do
+    {user, user_avatar_url} = {repo_owner["login"] || owner, repo_owner["avatarUrl"] || owner_avatar_url}
+    pr = %{
+      owner: owner,
+      repo: repository,
+      branch: branch,
+      opened_at: date_for(created_at),
+      closed_at: if(closed?, do: Timex.now, else: nil),
+      merged_at: date_for(merged_at),
+      title: title,
+      number: number,
+      html_url: html_url,
+      mergeable: not String.downcase(mergeable_state) in ["dirty", "conflicting"],
+      github_user: user,
+      github_user_avatar: user_avatar_url,
+      sha: sha
+    }
+    EventProcessor.process(:pull_request, %{"action" => "opened", "number" => number, "pull_request" => pr})
+
+    statuses
+    |> Enum.each(fn %{"state" => state, "context" => context, "targetUrl" => target_url} ->
+      EventProcessor.process(:status, %{"sha" => sha, "state" => String.downcase(state), "context" => context, "target_url" => target_url})
+    end)
   end
 end

@@ -75,6 +75,7 @@ $(document).ready(()=> {
         $('#team-pull-requests').append(resp.html)
       }
     }
+    $('[data-toggle="tooltip"]').tooltip()
   })
   channel.on("pr:remove", resp => {
     $(`#pr-${resp.pr}`).remove()

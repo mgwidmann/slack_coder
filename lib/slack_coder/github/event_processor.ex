@@ -117,7 +117,7 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   # Build has changed status for a CI system
-  def process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha}) when ci_system in ["ci/circleci", "continuous-integration/travis-ci/pr", "semaphoreci"] do
+  def process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha}) when ci_system in ["default", "ci/circleci", "continuous-integration/travis-ci/pr", "semaphoreci"] do
     Logger.debug "EventProcessor received build status event of state #{state}"
     ShaMapper.find(sha)
     |> PullRequest.status(:build, sha, url, state)
@@ -136,8 +136,8 @@ defmodule SlackCoder.Github.EventProcessor do
     # Ignore
   end
 
-  def process(unknown_event, _params) do
-    Logger.info "EventProcessor received unknown event #{inspect unknown_event} with params"
+  def process(unknown_event, params) do
+    Logger.info "EventProcessor received unknown event #{inspect unknown_event} with params #{inspect params}"
   end
 
   def pr_number(%{"comment" => %{"pull_request_url" => url}}) do

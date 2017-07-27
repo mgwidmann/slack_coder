@@ -74,6 +74,10 @@ defmodule SlackCoder.Services.PRService do
     |> put_change(:build_status, "conflict")
     |> put_change(:notifications, [:conflict | cs.changes[:notifications] || cs.data.notifications])
   end
+  def conflict_notification(cs = %Ecto.Changeset{data: %PR{mergeable: false}}) do
+    cs
+    |> put_change(:build_status, "conflict")
+  end
   def conflict_notification(cs), do: cs
 
   def successful_notification(cs = %Ecto.Changeset{changes: %{build_status: "success"}, data: %PR{build_status: status}}) when status in ["pending", "failure"] do

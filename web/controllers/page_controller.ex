@@ -6,4 +6,10 @@ defmodule SlackCoder.PageController do
     conn = assign conn, :user, params["user"]
     render conn, "index.html"
   end
+
+  def synchronize(conn, %{"owner" => owner, "repo" => repo, "pr" => pr}) do
+    SlackCoder.Github.synchronize_pull_request(owner, repo, pr)
+    conn
+    |> send_resp(:ok, "")
+  end
 end

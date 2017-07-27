@@ -46,6 +46,8 @@ defmodule SlackCoder.Router do
   scope "/api", SlackCoder do
     pipe_through :api
 
+    get "/pull_requests/:owner/:repo/:pr/refresh", PageController, :synchronize
+
     post "/github/event", GithubController, :event
   end
 

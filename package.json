@@ -4,6 +4,9 @@
     "build": "node_modules/brunch/bin/brunch build"
   },
   "dependencies": {
+    "bootstrap": "^3.3.7"
+  },
+  "devDependencies": {
     "babel-brunch": "^6.0.6",
     "brunch": "^2.10.3",
     "clean-css-brunch": "^2.0.0",

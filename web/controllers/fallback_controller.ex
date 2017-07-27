@@ -13,4 +13,10 @@ defmodule SlackCoder.Web.FallbackController do
     |> render(SlackCoder.ErrorView, :"401")
   end
 
+  def call(conn, _) do
+    conn
+    |> put_status(:internal_server_error)
+    |> render(SlackCoder.ErrorView, :"500")
+  end
+
 end

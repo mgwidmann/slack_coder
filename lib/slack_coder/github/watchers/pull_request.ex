@@ -74,6 +74,11 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     new_pr
   end
 
+  # When coming in with atom keys, data matches perfectly
+  def extract_pr_data(%{owner: _owner} = attrs, _pr) do
+    attrs
+  end
+
   def extract_pr_data(raw_pr, pr) do
     %{
       owner: raw_pr["base"]["repo"]["owner"]["login"] || pr.owner,
