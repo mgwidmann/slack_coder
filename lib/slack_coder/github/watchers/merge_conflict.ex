@@ -127,7 +127,7 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
   defp check_conflict_timeout(_), do: @normal_wait_time
 
   defp convert_mergeable(@mergeable), do: "mergeable"
-  defp convert_mergeable(@conflicting), do: "dirty"
+  defp convert_mergeable(@conflicting), do: "conflicting"
   defp convert_mergeable(@unknown), do: "unknown"
 
   defp variable_params(prs) do
