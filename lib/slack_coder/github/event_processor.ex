@@ -64,8 +64,8 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(:pull_request, %{"action" => opened, "number" => number, "pull_request" => pull_request}) when opened in ["opened", "reopened"] do
     Logger.debug "EventProcessor received #{opened} event"
 
-    owner = raw_pr["base"]["repo"]["owner"]["login"]
-    repo = raw_pr["base"]["repo"]["name"]
+    owner = pull_request["base"]["repo"]["owner"]["login"]
+    repo = pull_request["base"]["repo"]["name"]
     pid = %PR{owner: owner, repo: repo, number: number, sha: pull_request["head"]["sha"]}
           |> Github.start_watcher()
     pid
@@ -82,7 +82,10 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(:pull_request, %{"action" => "closed", "number" => number} = params) do
     Logger.debug "EventProcessor received closed event"
 
-    %PR{number: number}
+    owner = params["pull_request"]["base"]["repo"]["owner"]["login"]
+    repo = params["pull_request"]["base"]["repo"]["name"]
+
+    %PR{owner: owner, repo: repo, number: number}
     |> Github.find_watcher()
     |> PullRequest.update_sync(params["pull_request"])
     |> Github.stop_watcher()
@@ -94,7 +97,9 @@ defmodule SlackCoder.Github.EventProcessor do
 
     Logger.debug "EventProcessor received pull_request synchronize event"
 
-    pid = %PR{number: pr}
+    owner = params["pull_request"]["base"]["repo"]["owner"]["login"]
+    repo = params["pull_request"]["base"]["repo"]["name"]
+    pid = %PR{owner: owner, repo: repo, number: pr}
           |> Github.find_or_start_watcher()
     pid
     |> PullRequest.fetch()
