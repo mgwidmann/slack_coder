@@ -11,7 +11,7 @@ defmodule SlackCoder.Services.PRService do
 
   def save(changeset) do
     changeset
-    |> open_notification()
+    |> put_change(:opened, opened?(changeset))
     |> stale_notification()
     |> unstale_notification()
     |> closed_notification()
@@ -19,6 +19,7 @@ defmodule SlackCoder.Services.PRService do
     |> conflict_notification()
     |> successful_notification()
     |> failure_notification()
+    |> open_notification()
     |> Repo.insert_or_update()
     |> case do
       {:ok, pr} ->
@@ -30,7 +31,7 @@ defmodule SlackCoder.Services.PRService do
   end
 
 
-  def open_notification(cs = %Ecto.Changeset{data: %PR{id: id}}) when is_nil(id) do
+  def open_notification(cs = %Ecto.Changeset{changes: %{opened: true}, data: %PR{opened: false}}) do
     cs |> put_change(:notifications, [:open | cs.changes[:notifications] || cs.data.notifications])
   end
   def open_notification(cs), do: cs
@@ -96,6 +97,11 @@ defmodule SlackCoder.Services.PRService do
     cs |> put_change(:notifications, [:failure | cs.changes[:notifications] || cs.data.notifications])
   end
   def failure_notification(cs), do: cs
+
+  def opened?(%Ecto.Changeset{changes: %{closed_at: closed, merged_at: merged}}) when not is_nil(closed) or not is_nil(merged) do
+    false
+  end
+  def opened?(_cs), do: true
 
   def next_backoff(backoff, greater_than) do
     next_exponent = trunc(:math.log2(backoff) + 1)

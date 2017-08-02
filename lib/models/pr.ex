@@ -10,6 +10,7 @@ defmodule SlackCoder.Models.PR do
     field :latest_comment, Timex.Ecto.DateTime
     field :latest_comment_url, :string
     field :notifications, SlackCoder.Models.Types.StringList, virtual: true, default: []
+    field :opened, :boolean, default: false
     field :opened_at, Timex.Ecto.DateTime
     field :closed_at, Timex.Ecto.DateTime
     field :merged_at, Timex.Ecto.DateTime
