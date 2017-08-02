@@ -64,8 +64,9 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(:pull_request, %{"action" => opened, "number" => number, "pull_request" => pull_request}) when opened in ["opened", "reopened"] do
     Logger.debug "EventProcessor received #{opened} event"
 
-    # login = params["pull_request"]["user"]["login"]
-    pid = %PR{number: number, sha: pull_request["head"]["sha"]}
+    owner = raw_pr["base"]["repo"]["owner"]["login"]
+    repo = raw_pr["base"]["repo"]["name"]
+    pid = %PR{owner: owner, repo: repo, number: number, sha: pull_request["head"]["sha"]}
           |> Github.start_watcher()
     pid
     |> PullRequest.fetch()
