@@ -30,7 +30,7 @@ defmodule SlackCoder.Users.User do
   end
   # Don't send unknown messages
   def handle_cast(notification = %Notification{}, user) do
-    Logger.warn "User #{user.name}(#{user.slack}) received unhandled message: #{inspect notification}"
+    Logger.warn "User #{user.name} (#{user.slack}) received unhandled message: #{inspect notification}"
     {:noreply, user}
   end
 

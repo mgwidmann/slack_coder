@@ -117,7 +117,7 @@ defmodule SlackCoder.Github.Notification do
                       }
                     ]
                   }
-        notify(slack_users, :closed, message_for, message, pr)
+        notify(slack_users, :close, message_for, message, pr)
         pr
       _ -> pr
     end
