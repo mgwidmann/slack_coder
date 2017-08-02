@@ -70,7 +70,7 @@ defmodule SlackCoder.Models.PR do
   end
 
   def by_number(query \\ __MODULE__, owner, repo, number) do
-    from pr in query, where: pr.owner = ^owner and pr.repo = ^repo and pr.number == ^number
+    from pr in query, where: pr.owner == ^owner and pr.repo == ^repo and pr.number == ^number
   end
 
 end

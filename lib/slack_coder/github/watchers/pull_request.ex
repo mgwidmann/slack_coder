@@ -36,7 +36,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   def handle_info(:init, {pr, callouts}) do
     # Required in order to give tests the chance to share the connection to this process... If this process executes the query first, test will fail
     unquote(if(Mix.env == :test, do: quote(do: Process.sleep(10))))
-    query = PR.by_number(pr.number)
+    query = PR.by_number(pr.owner, pr.repo, pr.number)
     pr = case Repo.one(query) do
            nil ->
              # Create the PR
