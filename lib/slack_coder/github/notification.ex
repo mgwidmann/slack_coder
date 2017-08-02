@@ -15,9 +15,9 @@ defmodule SlackCoder.Github.Notification do
         message = %{
                     attachments: [
                       %{
-                        author_name: ":heavy_multiplication_x: MERGE CONFLICTS",
+                        author_name: "✖︎ MERGE CONFLICTS",
                         color: "#999999",
-                        fallback: "MERGE CONFLICTS #{pr.title}",
+                        fallback: "✖︎ MERGE CONFLICTS #{pr.title}",
                         title: pr.title,
                         title_link: pr.html_url
                       }
@@ -41,9 +41,9 @@ defmodule SlackCoder.Github.Notification do
         message = %{
                     attachments: [
                       %{
-                        author_name: ":-1: FAILURE",
+                        author_name: "👎 FAILURE",
                         color: "#FF0000",
-                        fallback: "FAILURE #{pr.title}",
+                        fallback: "👎 FAILURE #{pr.title}",
                         title: pr.title,
                         title_link: pr.html_url,
                         text: """
@@ -69,8 +69,8 @@ defmodule SlackCoder.Github.Notification do
         message = %{
                     attachments: [
                       %{
-                        fallback: "SUCCESS #{pr.title}",
-                        author_name: ":tada: SUCCESS",
+                        fallback: "🎉 SUCCESS #{pr.title}",
+                        author_name: "🎉 SUCCESS",
                         color: "#77DD33",
                         title: pr.title,
                         title_link: pr.html_url
@@ -89,8 +89,8 @@ defmodule SlackCoder.Github.Notification do
         message = %{
                     attachments: [
                       %{
-                        fallback: "MERGED #{pr.title}",
-                        author_name: ":smiling_imp: MERGED",
+                        fallback: "😈 MERGED #{pr.title}",
+                        author_name: "😈 MERGED",
                         color: "#9a009a",
                         title: pr.title,
                         title_link: pr.html_url
@@ -109,8 +109,8 @@ defmodule SlackCoder.Github.Notification do
         message = %{
                     attachments: [
                       %{
-                        fallback: "CLOSED #{pr.title}",
-                        author_name: ":rage: CLOSED",
+                        fallback: "😡 CLOSED #{pr.title}",
+                        author_name: "😡 CLOSED",
                         color: "#FF4500",
                         title: pr.title,
                         title_link: pr.html_url
@@ -130,8 +130,8 @@ defmodule SlackCoder.Github.Notification do
         message = %{
                     attachments: [
                       %{
-                        fallback: "STALE #{pr.title}",
-                        author_name: ":hankey: STALE",
+                        fallback: "💩 STALE #{pr.title}",
+                        author_name: "💩 STALE",
                         color: "#DDDDDD",
                         title: pr.title,
                         title_link: pr.html_url,
@@ -152,8 +152,8 @@ defmodule SlackCoder.Github.Notification do
         message = %{
                     attachments: [
                       %{
-                        fallback: "ACTIVE #{pr.title}",
-                        author_name: ":email: ACTIVE",
+                        fallback: "✉️ ACTIVE #{pr.title}",
+                        author_name: "✉️ ACTIVE",
                         color: "#000000",
                         title: pr.title,
                         title_link: pr.html_url
@@ -172,7 +172,7 @@ defmodule SlackCoder.Github.Notification do
         message = %{
                     attachments: [
                       %{
-                        fallback: "OPENED #{pr.title}",
+                        fallback: "👀 OPENED #{pr.title}",
                         author_name: "👀 OPENED",
                         color: "#0000FF",
                         title: pr.title,
