@@ -69,8 +69,8 @@ defmodule SlackCoder.Models.PR do
     from pr in query, where: is_nil(pr.closed_at) and is_nil(pr.merged_at)
   end
 
-  def by_number(query \\ __MODULE__, number) do
-    from pr in query, where: pr.number == ^number
+  def by_number(query \\ __MODULE__, owner, repo, number) do
+    from pr in query, where: pr.owner = ^owner and pr.repo = ^repo and pr.number == ^number
   end
 
 end
