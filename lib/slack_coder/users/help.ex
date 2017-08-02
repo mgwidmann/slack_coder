@@ -2,7 +2,7 @@ defmodule SlackCoder.Users.Help do
   require Logger
   alias SlackCoder.Models.User
 
-  @message_types [:stale, :unstale, :fail, :pass, :close, :merge, :conflict]
+  @message_types [:open, :stale, :unstale, :fail, :pass, :close, :merge, :conflict]
   @message_classes [:self, :monitors, :callouts]
   @zipped_message_types for config <- @message_types, type <- @message_classes, do: [config, type]
   @help_text """
@@ -75,6 +75,7 @@ defmodule SlackCoder.Users.Help do
   def message_classes(), do: @message_classes
   def message_types(), do: @message_types
 
+  defp config_for_reply("open"), do: "Open PR notifications"
   defp config_for_reply("unstale"), do: "Unstale PR notifications"
   defp config_for_reply("stale"), do: "Stale PR notifications"
   defp config_for_reply("fail"), do: "Build failure notifications"

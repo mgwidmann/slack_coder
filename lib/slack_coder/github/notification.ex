@@ -117,7 +117,7 @@ defmodule SlackCoder.Github.Notification do
                       }
                     ]
                   }
-        notify(slack_users, :merge, message_for, message, pr)
+        notify(slack_users, :closed, message_for, message, pr)
         pr
       _ -> pr
     end
@@ -161,6 +161,26 @@ defmodule SlackCoder.Github.Notification do
                     ]
                   }
         notify(slack_users, :unstale, message_for, message, pr)
+        pr
+      _ -> pr
+    end
+  end
+
+  def open(pr) do
+    case user_for_pr(pr) |> slack_user_with_monitors do
+      [message_for | slack_users] ->
+        message = %{
+                    attachments: [
+                      %{
+                        fallback: "OPENED #{pr.title}",
+                        author_name: "👀 OPENED",
+                        color: "#0000FF",
+                        title: pr.title,
+                        title_link: pr.html_url
+                      }
+                    ]
+                  }
+        notify(slack_users, :open, message_for, message, pr)
         pr
       _ -> pr
     end

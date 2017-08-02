@@ -38,8 +38,12 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     unquote(if(Mix.env == :test, do: quote(do: Process.sleep(10))))
     query = PR.by_number(pr.number)
     pr = case Repo.one(query) do
-           nil -> pr
-           existing_pr -> existing_pr
+           nil ->
+             # Create the PR
+             {:ok, pr} = pr |> PR.reg_changeset() |> PRService.save()
+             pr
+           existing_pr ->
+             existing_pr
          end
     :timer.send_interval @stale_check_interval, :stale_check
     SlackCoder.Github.ShaMapper.register(pr.sha)

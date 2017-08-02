@@ -11,6 +11,7 @@ defmodule SlackCoder.Services.PRService do
 
   def save(changeset) do
     changeset
+    |> open_notification()
     |> stale_notification()
     |> unstale_notification()
     |> closed_notification()
@@ -27,6 +28,12 @@ defmodule SlackCoder.Services.PRService do
         errored_changeset
     end
   end
+
+
+  def open_notification(cs = %Ecto.Changeset{data: %PR{id: id}}) when is_nil(id) do
+    cs |> put_change(:notifications, [:open | cs.changes[:notifications] || cs.data.notifications])
+  end
+  def open_notification(cs), do: cs
 
   def merged_notification(cs = %Ecto.Changeset{changes: %{merged_at: time}}) when not is_nil(time) do
     cs |> put_change(:notifications, [:merged | cs.changes[:notifications] || cs.data.notifications])
@@ -101,7 +108,7 @@ defmodule SlackCoder.Services.PRService do
   end
 
   def notifications(pr = %PR{notifications: []}), do: pr
-  for type <- [:stale, :unstale, :merged, :closed, :conflict, :success, :failure] do
+  for type <- [:open, :stale, :unstale, :merged, :closed, :conflict, :success, :failure] do
     def notifications(pr = %PR{notifications: [unquote(type) | notifications]}) do
       %PR{ Notification.unquote(type)(pr) | notifications: notifications} |> notifications
     end
