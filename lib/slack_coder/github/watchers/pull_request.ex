@@ -39,8 +39,6 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     query = PR.by_number(pr.owner, pr.repo, pr.number)
     pr = case Repo.one(query) do
            nil ->
-             # Create the PR
-             {:ok, pr} = pr |> PR.reg_changeset() |> PRService.save()
              pr
            existing_pr ->
              existing_pr
