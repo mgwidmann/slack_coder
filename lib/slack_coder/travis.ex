@@ -1,6 +1,7 @@
 defmodule SlackCoder.Travis do
   alias SlackCoder.Travis.Build
   alias SlackCoder.Travis.Job
+  require Logger
 
   def build_info(owner, repo, build) do
     "/repos/#{owner}/#{repo}/builds/#{build}"
@@ -23,6 +24,13 @@ defmodule SlackCoder.Travis do
         |> Map.fetch!(:body)
         |> Job.filter_log()
         |> Job.new()
+      %HTTPoison.Response{status_code: code} = response ->
+        Logger.error """
+        #{__MODULE__} job log fetch failed with HTTP status code: #{code}
+
+        #{inspect response}
+        """
+        Job.new([])
     end
   end
 

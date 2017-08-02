@@ -48,9 +48,7 @@ defmodule SlackCoder.Github.Notification do
                         title_link: pr.html_url,
                         text: """
                         <#{pr.build_url}|Travis Build>
-                        ```
-                        #{Enum.join(failed_jobs, "\n")}
-                        ```
+                        #{failed_job_output(failed_jobs)}
                         """,
                         mrkdwn_in: ["text"],
                         footer: "#{Enum.sum(Enum.map(failed_jobs, &(Enum.count(&1.rspec))))} rspec, #{Enum.sum(Enum.map(failed_jobs, &(Enum.count(&1.cucumber))))} cucumber"
@@ -61,6 +59,15 @@ defmodule SlackCoder.Github.Notification do
         pr
       _ -> pr
     end
+  end
+
+  defp failed_job_output([]), do: ""
+  defp failed_job_output(failed_jobs) do
+    """
+    ```
+    #{Enum.join(failed_jobs, "\n")}
+    ```
+    """
   end
 
   def success(pr) do
