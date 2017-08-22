@@ -66,10 +66,12 @@ defmodule SlackCoder.Github.Watchers.Supervisor do
     end)
     |> Stream.filter(&(&1)) # Remove nils
     |> Enum.reduce(%{}, fn
-      pr, prs ->
-        user = pr.github_user |> String.downcase() |> String.to_atom
+      %{github_user: github_user} = pr, prs when not is_nil(github_user) -> # Only take PRs where there is a github user
+        user = github_user |> String.downcase() |> String.to_atom
         list = prs[user] || []
         Map.put(prs, user, [pr | list])
+      _, prs ->
+        prs
     end)
   end
 

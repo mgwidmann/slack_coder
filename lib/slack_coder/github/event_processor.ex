@@ -113,6 +113,10 @@ defmodule SlackCoder.Github.EventProcessor do
     |> PullRequest.update(params["pull_request"])
   end
 
+  # TODO: Implement `review_requested`
+  @unprocessed ~w(unlabeled labeled assigned unassigned review_requested)
+  def process(:pull_request, %{"action" => action}) when action in @unprocessed, do: true
+
   def process(:pull_request, %{"action" => other} = _params) do
     Logger.warn "Ignoring :pull_request event: #{other}"
     false
@@ -144,6 +148,10 @@ defmodule SlackCoder.Github.EventProcessor do
 
   # Nothing to do for pings, already responded with a 200 so just exit
   def process(:ping, _params) do
+    # Ignore
+  end
+
+  def process(:project_card, _params) do
     # Ignore
   end
 
