@@ -1,5 +1,6 @@
 defmodule SlackCoder.Github.EventProcessorTest do
   use SlackCoder.ChannelCase
+  import ExUnit.CaptureLog
   alias SlackCoder.Github.EventProcessor, as: EP
   alias SlackCoder.Repo
 
@@ -23,9 +24,6 @@ defmodule SlackCoder.Github.EventProcessorTest do
   end
 
   describe "issues" do
-  end
-
-  describe "push" do
   end
 
   describe "pull_request" do
@@ -94,7 +92,9 @@ defmodule SlackCoder.Github.EventProcessorTest do
     end
 
     test "ignores other status changes" do
-      refute EP.process(:pull_request, %{"action" => "unknown"})
+      assert capture_log(fn ->
+        refute EP.process(:pull_request, %{"action" => "unknown"})
+      end)
     end
   end
 

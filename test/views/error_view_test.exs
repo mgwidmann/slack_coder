@@ -1,5 +1,6 @@
 defmodule SlackCoder.ErrorViewTest do
   use SlackCoder.ConnCase, async: true
+  import ExUnit.CaptureLog
 
   # Bring render/3 and render_to_string/3 for testing custom views
   import Phoenix.View
@@ -14,7 +15,9 @@ defmodule SlackCoder.ErrorViewTest do
     end
 
     test "render any other" do
-      assert render_to_string(SlackCoder.ErrorView, "505.html", []) =~ ~r/500 That's broken/
+      assert capture_log(fn ->
+        assert render_to_string(SlackCoder.ErrorView, "505.html", []) =~ ~r/500 That's broken/
+      end)
     end
   end
 end

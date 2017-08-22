@@ -111,6 +111,7 @@ defmodule SlackCoder.Github.EventProcessor do
 
   def process(:pull_request, %{"action" => other} = _params) do
     Logger.warn "Ignoring :pull_request event: #{other}"
+    false
   end
 
   # A comment was added to a pull request
