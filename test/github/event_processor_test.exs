@@ -63,6 +63,10 @@ defmodule SlackCoder.Github.EventProcessorTest do
       assert EP.process(:pull_request, %{"action" => "synchronize", "number" => pr.number, "before" => "before_sha", "after" => "after_sha"})
     end
 
+    test "title is changed", %{pr: pr} do
+      assert EP.process(:pull_request, Map.merge(Fixtures.PRs.title_changed(), %{"number" => pr.number}))
+    end
+
     @pr_merge_conflict %{
       "action" => "synchronize",
       "before" => "before_sha",

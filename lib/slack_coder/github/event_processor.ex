@@ -92,11 +92,15 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   # When a pull request information is changed, this is called in order to update it asynchronously.
-  def process(:pull_request, %{"action" => action, "number" => pr, "before" => old_sha, "after" => new_sha} = params) when action in ["edited", "synchronize"] do
+  @synchronize ~w(edited synchronize)
+  def process(:pull_request, %{"action" => action, "before" => old_sha, "after" => new_sha} = params) when action in @synchronize do
     ShaMapper.update(old_sha, new_sha)
 
     Logger.debug "EventProcessor received pull_request synchronize event"
+    process(:pull_request, params |> Map.drop(~w(before after)))
+  end
 
+  def process(:pull_request, %{"action" => action, "number" => pr} = params) when action in @synchronize do
     owner = params["pull_request"]["base"]["repo"]["owner"]["login"]
     repo = params["pull_request"]["base"]["repo"]["name"]
     pid = %PR{owner: owner, repo: repo, number: pr}
