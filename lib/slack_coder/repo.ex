@@ -7,4 +7,9 @@ defmodule SlackCoder.Repo do
     import Ecto.Query
     one(from q in queryable, select: count(q.id))
   end
+
+  def last(queryable) do
+    import Ecto.Query
+    one(from q in queryable, order_by: q.id, limit: 1)
+  end
 end

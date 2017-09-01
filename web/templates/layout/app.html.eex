@@ -69,7 +69,7 @@
         <%= render @view_module, @view_template, assigns %>
       <% else %>
         <div class="center sign-in">
-          <a class="btn btn-default btn-xxl" href="<%= auth_path @conn, :index, "github" %>">
+          <a id="signin" class="btn btn-default btn-xxl" href="<%= auth_path @conn, :request, ueberauth_strategy() %>">
             <i class="fa fa-github"></i>
             Sign in with GitHub
             <i class="fa fa-angle-right"></i>

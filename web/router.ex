@@ -57,7 +57,7 @@ defmodule SlackCoder.Router do
   scope "/auth", SlackCoder do
     pipe_through :browser
 
-    get "/:provider", AuthController, :index
+    get "/:provider", AuthController, :request
     get "/:provider/callback", AuthController, :callback
     delete "/logout", AuthController, :delete
   end

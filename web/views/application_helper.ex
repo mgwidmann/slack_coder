@@ -21,4 +21,9 @@ defmodule SlackCoder.ApplicationHelper do
 
   @git_commit System.cmd("git", ["rev-parse", "HEAD"]) |> elem(0)
   def git_commit(), do: @git_commit
+
+  def ueberauth_strategy do
+    [{provider, _}] = Application.get_env(:ueberauth, Ueberauth)[:providers]
+    provider
+  end
 end

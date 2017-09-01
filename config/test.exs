@@ -43,11 +43,16 @@ config :slack_coder,
     days: [1,2,3,4,5,6,7]
   ]
 
-# We don't run a server during test. If one is required,
-# you can enable the server option below.
 config :slack_coder, SlackCoder.Endpoint,
-  http: [port: 4001],
-  server: false
+  http: [port: 4010],
+  server: true
+
+config :slack_coder, :sql_sandbox, true
+
+config :ueberauth, Ueberauth,
+  providers: [
+    identity: {Ueberauth.Strategy.Identity, []}
+  ]
 
 # Print only warnings and errors during test
 config :logger, level: :warn

@@ -48,7 +48,7 @@ defmodule SlackCoder.Mixfile do
       {:slack, github: "BlakeWilliams/Elixir-Slack"},
       {:websocket_client, "~> 1.2", override: true},
       {:tentacat, "~> 0.6"},
-      {:httpoison, "~> 0.10"},
+      {:httpoison, "~> 0.12"},
       {:poison, "~> 3.1", override: true},
       {:ecto, "~> 2.0", override: true},
       {:ueberauth_github, "~> 0.4"},
@@ -61,7 +61,10 @@ defmodule SlackCoder.Mixfile do
       {:wobserver, "~> 0.1"},
 
       # Dev only
-      {:phoenix_live_reload, "~> 1.0", only: :dev}
+      {:phoenix_live_reload, "~> 1.0", only: :dev},
+      {:cabbage, "~> 0.3.0", only: :test},
+      {:wallaby, "~> 0.19.0", only: :test},
+      {:ueberauth_identity, "~> 0.2", only: :dev}
     ]
   end
 

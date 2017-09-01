@@ -39,8 +39,11 @@ config :flames,
   endpoint: SlackCoder.Endpoint
 
 config :ueberauth, Ueberauth,
+  # providers: [
+  #   github: {Ueberauth.Strategy.Github, [default_scope: "user,public_repo"]}
+  # ]
   providers: [
-    github: {Ueberauth.Strategy.Github, [default_scope: "user,public_repo"]}
+    identity: {Ueberauth.Strategy.Identity, []}
   ]
 
 config :scrivener_html,

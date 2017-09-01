@@ -7,9 +7,17 @@ defmodule SlackCoder.AuthController do
   This action is reached via `/auth/:provider` and redirects to the OAuth2 provider
   based on the chosen strategy.
   """
-  def index(conn, %{"provider" => "github"}) do
+  def request(conn, %{"provider" => "github"}) do
     redirect conn, external: authorize_url!()
   end
+
+  # if Mix.env == :test do
+    def request(conn, %{"provider" => "identity"}) do
+      Logger.debug "Redirecting to identity callback"
+      conn
+      |> redirect(to: auth_path(conn, :callback, "identity"))
+    end
+  # end
 
   def delete(conn, _params) do
     conn
@@ -31,7 +39,9 @@ defmodule SlackCoder.AuthController do
   end
 
   def callback(%{assigns: %{ueberauth_auth: %Ueberauth.Auth{extra:
-      %Ueberauth.Auth.Extra{raw_info: %{token: %{access_token: _token}, user: raw_user}}}}} = conn, _params) do
+      %Ueberauth.Auth.Extra{raw_info: raw_info}}}} = conn, _params) do
+    token = token(raw_info)
+    raw_user = user(raw_info)
     case raw_user |> UserService.find_or_create_user() do
       {:ok, db_user} ->
         conn
@@ -52,5 +62,11 @@ defmodule SlackCoder.AuthController do
     |> put_flash(:info, "Successfully authenticated.")
     |> put_session(:current_user, user)
   end
+
+  defp token(%{token: %{access_token: token}}), do: token
+  defp token(_), do: nil
+
+  defp user(%{user: raw_user}), do: raw_user
+  defp user(_), do: %{}
 
 end
