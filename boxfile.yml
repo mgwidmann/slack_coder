@@ -24,7 +24,7 @@ run.config:
 
   # run npm install
   extra_steps:
-    - npm install
+    - yarn install
 
   extra_packages:
     - python-2
@@ -33,7 +33,7 @@ run.config:
 deploy.config:
   # run brunch build
   extra_steps:
-    - brunch build
+    - yarn build
     - mix phx.digest
 
   # just before the new process comes online,

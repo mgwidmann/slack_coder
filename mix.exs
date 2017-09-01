@@ -55,6 +55,9 @@ defmodule SlackCoder.Mixfile do
       {:stub_alias, "~> 0.1.2"},
       {:scrivener_html, "~> 1.5"},
       {:scrivener_ecto, "~> 1.0"},
+      {:absinthe, "~> 1.2"},
+      {:absinthe_plug, "~> 1.2"},
+      {:absinthe_ecto, github: "absinthe-graphql/absinthe_ecto"},
 
       # Monitoring
       {:flames, github: "mgwidmann/flames"},
