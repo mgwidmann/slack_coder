@@ -1,11 +1,15 @@
 defmodule SlackCoder.Travis.Job do
   use HTTPoison.Base
-  defstruct [:seed, :rspec, :cucumber]
+  defstruct [:rspec_seed, :rspec, :cucumber_seed, :cucumber]
 
   def new(results) do
+    seed = find_seed(results)
+    rspec_seed = Enum.at(seed, 0) # Safe indexing in case theres nothing here
+    cucumber_seed = Enum.at(seed, 1)
     %__MODULE__{
-      seed: find_seed(results),
+      rspec_seed: rspec_seed,
       rspec: find_rspec_failures(results),
+      cucumber_seed: cucumber_seed,
       cucumber: find_cucumber_failures(results)
     }
   end
@@ -26,25 +30,28 @@ defmodule SlackCoder.Travis.Job do
   @seed_regex ~r/Randomized with seed (?<seed>\d+)/
   defp find_seed(results) do
     results
-    |> Enum.find(&match?("Randomized with seed" <> _, &1))
-    |> case do
-      s when is_binary(s) -> Regex.named_captures(@seed_regex, s)["seed"]
-      _ -> nil
-    end
+    |> Stream.filter(&match?("Randomized with seed" <> _, &1))
+    |> Stream.map(fn seed ->
+      case seed do
+        s when is_binary(s) -> Regex.named_captures(@seed_regex, s)["seed"]
+        _ -> nil
+      end
+    end)
+    |> Enum.to_list()
   end
 
   defp find_rspec_failures(results) do
     results
-    |> Stream.map(&Regex.named_captures(~r/rspec (?<file>.+)/, &1))
+    |> Stream.map(&Regex.named_captures(~r/rspec (?<file>.+):(?<line>.+)/, &1))
     |> Stream.filter(&(&1))
-    |> Enum.map(&(Map.fetch!(&1, "file")))
+    |> Enum.map(&({Map.fetch!(&1, "file"), Map.fetch!(&1, "line")}))
   end
 
   defp find_cucumber_failures(results) do
     results
-    |> Stream.map(&Regex.named_captures(~r/cucumber (?<file>.+)/, &1))
+    |> Stream.map(&Regex.named_captures(~r/cucumber (?<file>.+):(?<line>.+)/, &1))
     |> Stream.filter(&(&1))
-    |> Enum.map(&(Map.fetch!(&1, "file")))
+    |> Enum.map(&({Map.fetch!(&1, "file"), Map.fetch!(&1, "line")}))
   end
 
   def filter_log(body) do
@@ -64,18 +71,17 @@ defmodule SlackCoder.Travis.Job do
 
   defp remove_comments(text), do: String.replace(text, ~r/ #.*$/, "")
 
-
   defimpl String.Chars do
-    def to_string(%SlackCoder.Travis.Job{seed: seed, rspec: rspec, cucumber: cucumber}) do
+    def to_string(%SlackCoder.Travis.Job{rspec_seed: rspec_seed, rspec: rspec, cucumber_seed: cucumber_seed, cucumber: cucumber}) do
       if rspec != [] do
         """
-        bundle exec rspec #{Enum.join(rspec, " ")} --seed #{seed}
+        bundle exec rspec #{rspec |> Enum.map(&(Tuple.to_list(&1) |> Enum.join(":"))) |> Enum.join(" ")} --seed #{rspec_seed}
         """
       else
         ""
       end <> (if cucumber != [] do
         """
-        bundle exec cucumber #{Enum.join(cucumber, " ")} --seed #{seed}
+        bundle exec cucumber #{cucumber |> Enum.map(&(Tuple.to_list(&1) |> Enum.join(":"))) |> Enum.join(" ")} --order random:#{cucumber_seed}
         """
       else
         ""

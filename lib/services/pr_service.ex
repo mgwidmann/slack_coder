@@ -12,6 +12,7 @@ defmodule SlackCoder.Services.PRService do
   def save(changeset) do
     changeset
     |> put_change(:opened, opened?(changeset))
+    |> random_failure()
     |> stale_notification()
     |> unstale_notification()
     |> closed_notification()
@@ -113,6 +114,15 @@ defmodule SlackCoder.Services.PRService do
     end
   end
 
+  def random_failure(%Ecto.Changeset{changes: %{build_status: "success"} = changes, data: %PR{build_status: "failure", sha: sha} = pr} = cs) do
+    case changes do
+      %{sha: new_sha} when sha != new_sha -> cs # Acceptable case, sha is changed
+      _ -> # Sha not changed but status did change
+        save_random_failure(pr)
+    end
+  end
+  def random_failure(cs), do: cs
+
   def notifications(pr = %PR{notifications: []}), do: pr
   for type <- [:open, :stale, :unstale, :merged, :closed, :conflict, :success, :failure] do
     def notifications(pr = %PR{notifications: [unquote(type) | notifications]}) do
@@ -128,5 +138,9 @@ defmodule SlackCoder.Services.PRService do
     html = PageView.render("pull_request.html", pr: pr)
     Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
     pr
+  end
+
+  def save_random_failure(pr) do
+    Task.start SlackCoder.Services.RandomFailureService, :save_random_failure, [pr]
   end
 end
