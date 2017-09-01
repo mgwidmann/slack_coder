@@ -135,7 +135,7 @@ defmodule SlackCoder.Slack do
     Logger.info "Sending message (#{user}): #{message}"
 
     %Message{}
-    |> Message.changeset(%{slack: to_string(user), user: github, message: message |> String.strip})
+    |> Message.changeset(%{slack: to_string(user), user: github, message: message |> String.trim})
     |> Repo.insert!
   end
 
