@@ -1,4 +1,4 @@
-defmodule SlackCoder.Schemas.Scalars do
+defmodule SlackCoder.GraphQL.Schemas.Scalars do
   use Absinthe.Schema.Notation
 
   @desc """

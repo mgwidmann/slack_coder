@@ -35,7 +35,7 @@ defmodule SlackCoder.Router do
       scope "/admin" do
         pipe_through :admin
 
-        forward "/graphiql", Absinthe.Plug.GraphiQL, schema: SlackCoder.Schemas.MainSchema
+        forward "/graphiql", Absinthe.Plug.GraphiQL, schema: SlackCoder.GraphQL.Schemas.MainSchema
 
         scope "/", SlackCoder do
           get "/users/external/:github", UserController, :external
@@ -50,7 +50,7 @@ defmodule SlackCoder.Router do
   scope "/api" do
     pipe_through :api
 
-    forward "/graphql", Absinthe.Plug, schema: SlackCoder.Schemas.MainSchema
+    forward "/graphql", Absinthe.Plug, schema: SlackCoder.GraphQL.Schemas.MainSchema
 
     get "/pull_requests/:owner/:repo/:pr/refresh", PageController, :synchronize
 

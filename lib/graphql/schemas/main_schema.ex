@@ -1,9 +1,10 @@
-defmodule SlackCoder.Schemas.MainSchema do
+defmodule SlackCoder.GraphQL.Schemas.MainSchema do
   @moduledoc """
   """
   use Absinthe.Schema
   alias SlackCoder.{Repo, Models.User}
-  import_types SlackCoder.Schemas.PR
+  import_types SlackCoder.GraphQL.Schemas.PR
+  import_types SlackCoder.GraphQL.InputObjects.User
 
   @desc "Only used for querying, never returned."
   enum :pull_request_type do
@@ -49,6 +50,16 @@ defmodule SlackCoder.Schemas.MainSchema do
       resolve fn _, _, _ ->
         {:ok, Repo.all(User)}
       end
+    end
+  end
+
+  mutation do
+    @desc "Changes information on a particular user."
+    field :user_update, type: :user do
+      arg :id, non_null(:id)
+      arg :user, :user_input
+
+      resolve &SlackCoder.GraphQL.Resolvers.UserResolver.update/3
     end
   end
 

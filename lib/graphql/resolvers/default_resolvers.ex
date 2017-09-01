@@ -1,4 +1,4 @@
-defmodule SlackCoder.Resolvers.DefaultResolvers do
+defmodule SlackCoder.GraphQL.Resolvers.DefaultResolvers do
   defmacro as(field) when is_atom(field) do
     quote do
       fn
