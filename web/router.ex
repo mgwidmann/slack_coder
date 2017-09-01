@@ -52,9 +52,9 @@ defmodule SlackCoder.Router do
 
     forward "/graphql", Absinthe.Plug, schema: SlackCoder.GraphQL.Schemas.MainSchema
 
-    get "/pull_requests/:owner/:repo/:pr/refresh", PageController, :synchronize
+    get "/pull_requests/:owner/:repo/:pr/refresh", SlackCoder.PageController, :synchronize
 
-    post "/github/event", GithubController, :event
+    post "/github/event", SlackCoder.GithubController, :event
   end
 
   forward "/errors", Flames.Web
