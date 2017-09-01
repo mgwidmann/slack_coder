@@ -4,7 +4,7 @@ defmodule SlackCoder.Schemas.User do
   use Absinthe.Schema.Notation
   use Absinthe.Ecto, repo: SlackCoder.Repo
   import SlackCoder.Resolvers.DefaultResolvers
-  alias SlackCoder.Github.Notification, as: N
+  # alias SlackCoder.Github.Notification, as: N
 
   import_types SlackCoder.Schemas.Scalars
 
@@ -24,8 +24,6 @@ defmodule SlackCoder.Schemas.User do
     field :name, :string
     @desc "The github names of whom this user wants to monitor."
     field :github_monitors, list_of(:string), resolve: as(:monitors)
-    @desc "The slack names of whom this user wants to monitor."
-    field :slack_monitors, list_of(:string)
     @desc "This user has opted to not receive any notifications from the slack bot."
     field :muted, :boolean
 
