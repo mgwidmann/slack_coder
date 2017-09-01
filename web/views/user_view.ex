@@ -20,6 +20,7 @@ defmodule SlackCoder.UserView do
     |> Enum.chunk(2, 2, [nil])
   end
 
+  def label_for("open" <> _), do: "Open PRs"
   def label_for("close" <> _), do: "Closed PRs"
   def label_for("conflict" <> _), do: "Merge Conflicts"
   def label_for("fail" <> _), do: "Failed Builds"

@@ -23,7 +23,7 @@ defmodule SlackCoder.Github.ShaMapper do
   end
 
   def handle_info({:DOWN, _ref, :process, pid, :normal}, sha_to_pid) do
-    {sha, ^pid} = sha_to_pid |> Enum.find(&match?({sha, ^pid}, &1))
+    {sha, ^pid} = sha_to_pid |> Enum.find(&match?({_sha, ^pid}, &1))
     {:noreply, Map.delete(sha_to_pid, sha)}
   end
   # Ignore any other messages
@@ -35,7 +35,18 @@ defmodule SlackCoder.Github.ShaMapper do
   end
 
   def handle_call({:find, sha}, _from, sha_to_pid) do
-    {:reply, Map.get(sha_to_pid, sha), sha_to_pid}
+    pid = Map.get(sha_to_pid, sha)
+    pid = if pid && Process.alive?(pid) do
+            pid
+          else
+            Task.start fn -> remove(sha) end
+            nil
+          end
+    {:reply, pid, sha_to_pid}
+  end
+
+  def handle_call({:remove, sha}, _from, sha_to_pid) do
+    {:reply, :ok, Map.drop(sha_to_pid, [sha])}
   end
 
   def handle_cast({:update, old_sha, new_sha}, sha_to_pid) do
@@ -55,6 +66,10 @@ defmodule SlackCoder.Github.ShaMapper do
   """
   def update(sha_mapper \\ @registered_name, old_sha, new_sha) do
     GenServer.cast(sha_mapper, {:update, old_sha, new_sha})
+  end
+
+  def remove(sha_mapper \\ @registered_name, sha) do
+    GenServer.call(sha_mapper, {:remove, sha})
   end
 
   @doc """

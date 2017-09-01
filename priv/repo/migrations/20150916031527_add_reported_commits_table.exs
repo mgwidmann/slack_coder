@@ -7,7 +7,7 @@ defmodule SlackCoder.Repo.Migrations.AddReportedCommitsTable do
       add :sha, :string
       add :status_id, :integer
 
-      timestamps
+      timestamps()
     end
     create index(:reported_commits, [:status_id], unique: true)
   end

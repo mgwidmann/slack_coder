@@ -1,10 +1,9 @@
 defmodule SlackCoder.Endpoint do
   use Phoenix.Endpoint, otp_app: :slack_coder
 
-  plug Beaker.Integrations.Phoenix
-
   socket "/socket", SlackCoder.UserSocket
   socket "/errors/socket", Flames.UserSocket
+  socket "/wobserver", Wobserver.Web.PhoenixSocket
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -12,7 +11,7 @@ defmodule SlackCoder.Endpoint do
   # when deploying your static files in production.
   plug Plug.Static,
     at: "/", from: :slack_coder, gzip: false,
-    only: ~w(css fonts images js 404.html 500.html favicon.png robots.txt)
+    only: ~w(css fonts images js favicon.png robots.txt)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

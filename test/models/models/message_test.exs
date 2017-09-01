@@ -11,6 +11,8 @@ defmodule SlackCoder.Models.MessageTest do
     assert changeset.valid?
   end
 
+  # Removed validation since we just want to capture whatever was available at the time to help debug
+  @tag :pending
   test "changeset with invalid attributes" do
     changeset = Message.changeset(%Message{}, @invalid_attrs)
     refute changeset.valid?

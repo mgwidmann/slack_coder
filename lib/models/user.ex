@@ -8,13 +8,13 @@ defmodule SlackCoder.Models.User do
     field :html_url, :string
     field :name, :string
     field :monitors, StringList, default: []
-    field :muted, :boolean, default: false
+    field :muted, :boolean, default: true
 
     field :admin, :boolean, default: false
 
     embeds_one :config, SlackCoder.Models.User.Config, on_replace: :update
 
-    timestamps
+    timestamps()
   end
 
   @required_fields ~w(slack github)a

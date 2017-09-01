@@ -28,13 +28,18 @@ defmodule SlackCoder.Users.Supervisor do
     end
   end
 
+  def stop_user(user) do
+    Supervisor.terminate_child(__MODULE__, "User-#{String.downcase(user.slack)}-#{String.downcase(user.github)}")
+    Supervisor.delete_child(__MODULE__, "User-#{String.downcase(user.slack)}-#{String.downcase(user.github)}")
+  end
+
   defp user_spec(user), do: worker(User, [user], id: "User-#{String.downcase(user.slack)}-#{String.downcase(user.github)}")
 
   def user(slack_or_github) when is_atom(slack_or_github), do: to_string(slack_or_github) |> user
   def user(slack_or_github) do
     child = Supervisor.which_children(__MODULE__)
             |> Enum.find(fn {id, _, _, _}->
-              Regex.match?(~r/User-#{String.downcase(slack_or_github)}-.*/, id) || Regex.match?(~r/User-.*?-#{String.downcase(slack_or_github)}/, id)
+              Regex.match?(~r/^User-#{String.downcase(slack_or_github)}-.*$/, id) || Regex.match?(~r/^User-.*?-#{String.downcase(slack_or_github)}$/, id)
             end)
     case child do
       nil -> nil

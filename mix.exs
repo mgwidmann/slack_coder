@@ -9,21 +9,19 @@ defmodule SlackCoder.Mixfile do
      compilers: [:phoenix] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps]
+     aliases: aliases(),
+     deps: deps()]
   end
 
   # Configuration for the OTP application
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :beaker, :flames,
+    [applications: [:phoenix, :phoenix_html, :cowboy, :logger, :flames, :wobserver,
                    :phoenix_ecto, :slack, :httpoison, :postgrex, :tzdata, :ueberauth_github,
                    :scrivener, :scrivener_html, :scrivener_ecto],
-     mod: mod(Mix.env)]
+     mod: {SlackCoder, []}]
   end
-
-  defp mod(:test), do: {SlackCoderTest, []}
-  defp mod(_), do: {SlackCoder, []}
 
   # Specifies which paths to compile per environment
   defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
@@ -41,34 +39,44 @@ defmodule SlackCoder.Mixfile do
   defp deps do
     [
       # Prod dependencies
-      {:phoenix, "~> 1.2.0"},
+      {:phoenix, "~> 1.3.0-rc"},
       {:phoenix_ecto, "~> 3.0"},
       {:postgrex, "~> 0.11"},
       {:phoenix_html, "~> 2.6"},
       {:cowboy, "~> 1.0"},
       {:timex_ecto, "~> 3.0"},
-      # {:slack, "~> 0.2.0"},
-      {:slack, git: "https://github.com/mgwidmann/Elixir-Slack", branch: "im_list_updated"},
-      # {:slack, path: "../Elixir-Slack"},
-      {:websocket_client, git: "https://github.com/mgwidmann/websocket_client.git", override: true, branch: "fix_error_logging"},
-      # {:websocket_client, git: "https://github.com/jeremyong/websocket_client.git"},
-      # {:tentacat, "~> 0.5.0"},
-      {:tentacat, "~> 0.5.3"},
-      {:httpoison, "~> 0.8"},
-      {:exjsx, "~> 3.2", override: true},
+      {:slack, github: "BlakeWilliams/Elixir-Slack"},
+      {:websocket_client, "~> 1.2", override: true},
+      {:tentacat, "~> 0.6"},
+      {:httpoison, "~> 0.10"},
+      {:poison, "~> 3.1", override: true},
       {:ecto, "~> 2.0", override: true},
       {:ueberauth_github, "~> 0.4"},
-      {:beaker, github: "hahuang65/beaker"},
-      {:flames, "~> 0.2"},
-      {:stub_alias, github: "mgwidmann/stub_alias"},
+      {:stub_alias, "~> 0.1.2"},
       {:scrivener_html, "~> 1.5"},
       {:scrivener_ecto, "~> 1.0"},
       {:absinthe, "~> 1.2"},
       {:absinthe_plug, "~> 1.2"},
       {:absinthe_ecto, github: "absinthe-graphql/absinthe_ecto"},
 
+      # Monitoring
+      {:flames, github: "mgwidmann/flames"},
+      {:wobserver, "~> 0.1"},
+
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev}
     ]
+  end
+
+  # Aliases are shortcut or tasks specific to the current project.
+  # For example, to create, migrate and run the seeds file at once:
+  #
+  #     $ mix ecto.setup
+  #
+  # See the documentation for `Mix` for more info on aliases.
+  defp aliases do
+    ["ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+     "ecto.reset": ["ecto.drop", "ecto.setup"],
+     "test": ["ecto.create --quiet", "ecto.migrate", "test"]]
   end
 end

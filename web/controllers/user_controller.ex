@@ -1,7 +1,16 @@
 defmodule SlackCoder.UserController do
   use SlackCoder.Web, :controller
+  alias SlackCoder.Services.UserService
 
   plug :scrub_params, "user" when action in [:create, :update]
+  plug :allow_profile_edit when action in [:edit, :update]
+
+  @page_size 25
+
+  def index(conn, params) do
+    users = User |> Repo.paginate(params |> Map.put("page_size", @page_size))
+    render(conn, "index.html", users: users)
+  end
 
   def new(conn, _params) do
     user = conn.assigns.current_user
@@ -36,12 +45,12 @@ defmodule SlackCoder.UserController do
   end
 
   def update(conn, %{"id" => id, "user" => user_params}) do
-    user = Repo.get!(User, id)
-    changeset = User.changeset(user, user_params)
-
-    case Repo.update(changeset) do
+    user = User |> Repo.get!(id)
+    user
+    |> User.changeset(user_params)
+    |> UserService.save()
+    |> case do
       {:ok, user} ->
-        SlackCoder.Users.Supervisor.start_user(user)
         conn
         |> put_session(:current_user, user)
         |> redirect(to: "/")
@@ -51,8 +60,8 @@ defmodule SlackCoder.UserController do
   end
 
   def messages(conn, params) do
-    messages = Message |> Repo.paginate(params |> Map.put("page_size", 50))
-    avatars = from(u in User, select: %{u.slack => u.avatar_url}) |> Repo.all |> Enum.reduce(%{}, &Map.merge/2) |> IO.inspect
+    messages = from(m in Message, order_by: {:desc, m.inserted_at})|> Repo.paginate(params |> Map.put("page_size", @page_size))
+    avatars = from(u in User, select: %{u.slack => u.avatar_url}) |> Repo.all |> Enum.reduce(%{}, &Map.merge/2)
     render(conn, "messages.html", messages: messages, avatars: avatars)
   end
 
@@ -73,6 +82,16 @@ defmodule SlackCoder.UserController do
   defp user_for_github(github) do
     github_user = Tentacat.Users.find github, SlackCoder.Github.client
     %User{github: github, name: github_user["name"], html_url: github_user["html_url"], avatar_url: github_user["avatar_url"]}
+  end
+
+  defp allow_profile_edit(conn, _opts) do
+    if conn.assigns.current_user.admin || to_string(conn.assigns.current_user.id) == conn.params["id"] do
+      conn
+    else
+      conn
+      |> render(SlackCoder.ErrorView, "401.html")
+      |> halt()
+    end
   end
 
 end

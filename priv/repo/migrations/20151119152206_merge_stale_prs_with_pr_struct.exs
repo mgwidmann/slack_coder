@@ -11,9 +11,9 @@ defmodule SlackCoder.Repo.Migrations.MergeStalePrsWithPrStruct do
       add :branch, :string
       add :github_user, :string
       # Stale PR checking
-      add :latest_comment, :datetime
+      add :latest_comment, :utc_datetime
       add :backoff, :integer, default: Application.get_env(:slack_coder, :pr_backoff_start, 1)
-      add :opened_at, :datetime
+      add :opened_at, :utc_datetime
       # Used in view
       add :title, :string
       add :number, :integer

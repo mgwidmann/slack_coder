@@ -1,0 +1,23 @@
+<tr id="user-<%= @user.id %>">
+  <td>
+    <img src="<%= @user.avatar_url %>" class="img-circle user-avatar" />
+  </td>
+  <td>
+    <%= @user.name %> (<%= @user.github %>)
+  </td>
+  <td>
+    <%= if @user.muted do %>
+      <span class="label label-danger">MUTED</span>
+    <% else %>
+      <span class="label label-success">UNMUTED</span>
+    <% end %>
+  </td>
+  <td>
+    <%= link "Pull Requests", to: page_path(@conn, :index, user: @user.github) %>
+  </td>
+  <%= if @conn.assigns.current_user.admin do %>
+    <td>
+      <%= link "Edit", to: user_path(@conn, :edit, @user) %>
+    </td>
+  <% end %>
+</tr>

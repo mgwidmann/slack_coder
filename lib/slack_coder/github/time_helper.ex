@@ -2,7 +2,7 @@ defmodule SlackCoder.Github.TimeHelper do
   use Timex
 
   def now do
-    to_local(DateTime.local)
+    to_local(Timex.local)
   end
 
   def to_local(date) do
@@ -19,7 +19,7 @@ defmodule SlackCoder.Github.TimeHelper do
   def greatest_date_for(date1, date2) do
     date1 = date_for(date1)
     date2 = date_for(date2)
-    case Timex.Date.compare(date1, date2) do
+    case Timex.compare(date1, date2) do
       -1 -> {:second, date2}
       0 -> {:first, date1} # Doesn't matter really
       1 -> {:first, date1}
@@ -30,5 +30,15 @@ defmodule SlackCoder.Github.TimeHelper do
   def date_for(string) do
      {:ok, date} = Timex.parse(string, "{ISO:Extended:Z}")
      date
+  end
+
+  def duration_diff(nil), do: "Unknown Duration"
+  def duration_diff(datetime) do
+    datetime
+    |> Timex.to_unix()
+    |> Duration.from_seconds()
+    |> Duration.diff(Duration.now, :seconds)
+    |> Duration.from_seconds()
+    |> Timex.format_duration(:humanized)
   end
 end

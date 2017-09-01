@@ -7,7 +7,7 @@ defmodule SlackCoder.Repo.Migrations.CreateUser do
       add :github, :string
       add :config, :map
 
-      timestamps
+      timestamps()
     end
     create index :users, [:slack], unique: true
   end

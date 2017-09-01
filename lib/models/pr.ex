@@ -10,6 +10,7 @@ defmodule SlackCoder.Models.PR do
     field :latest_comment, Timex.Ecto.DateTime
     field :latest_comment_url, :string
     field :notifications, SlackCoder.Models.Types.StringList, virtual: true, default: []
+    field :opened, :boolean, default: false
     field :opened_at, Timex.Ecto.DateTime
     field :closed_at, Timex.Ecto.DateTime
     field :merged_at, Timex.Ecto.DateTime
@@ -30,7 +31,7 @@ defmodule SlackCoder.Models.PR do
 
     belongs_to :user, SlackCoder.Models.User
 
-    timestamps
+    timestamps()
   end
 
   @required_fields ~w(owner repo branch github_user title number html_url opened_at)a
@@ -68,8 +69,8 @@ defmodule SlackCoder.Models.PR do
     from pr in query, where: is_nil(pr.closed_at) and is_nil(pr.merged_at)
   end
 
-  def by_number(query \\ __MODULE__, number) do
-    from pr in query, where: pr.number == ^number
+  def by_number(query \\ __MODULE__, owner, repo, number) do
+    from pr in query, where: pr.owner == ^owner and pr.repo == ^repo and pr.number == ^number
   end
 
 end

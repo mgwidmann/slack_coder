@@ -9,6 +9,7 @@ defmodule SlackCoder do
     children = [
       # Start the Ecto repository
       worker(SlackCoder.Repo, []),
+      supervisor(Task.Supervisor, [[name: SlackCoder.TaskSupervisor]]),
       # Start the endpoint when the application starts
       supervisor(SlackCoder.Endpoint, []),
       # Start Users supervisor before slack client
@@ -17,13 +18,14 @@ defmodule SlackCoder do
 
     children = children ++ if Application.get_env(:slack_coder, :slack_api_token) do
       [ # Define workers and child supervisors to be supervised
-        worker(SlackCoder.Slack, [Application.get_env(:slack_coder, :slack_api_token), []])
+        worker(Slack.Bot, [SlackCoder.Slack, nil, Application.get_env(:slack_coder, :slack_api_token), %{client: Application.get_env(:slack, :websocket_client, :websocket_client)}])
       ]
     else
       []
     end
 
     children = children ++ [
+      worker(SlackCoder.Github.Watchers.MergeConflict, []),
       supervisor(SlackCoder.Github.Supervisor, [])
     ]
 

@@ -9,7 +9,7 @@ config :slack_coder, SlackCoder.Repo,
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :slack_coder,
-  slack_api_token: "a-token",
+  slack_api_token: System.get_env("SLACK_API_TOKEN"),
   github: [
     pat: "pat-123",
     user: "slack_coder",

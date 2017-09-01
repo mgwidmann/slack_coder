@@ -12,13 +12,8 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
 
   def init({%PR{} = pr, []}) do
-    query = PR.by_number(pr.number)
-    pr = case Repo.one(query) do
-           nil -> pr
-           existing_pr -> existing_pr
-         end
-    :timer.send_interval @stale_check_interval, :stale_check
-    SlackCoder.Github.ShaMapper.register(pr.sha)
+    Process.register(self(), :"pr-#{pr.number}") # Will create memory leak for each pr
+    send(self(), :init)
     {:ok, {pr, []}}
   end
 
@@ -35,6 +30,22 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
 
   def handle_info(:stale_check, {pr, callouts}) do
     {:ok, pr} = pr |> PR.reg_changeset() |> PRService.save # Sends notification when it is time
+    {:noreply, {pr, callouts}}
+  end
+
+  def handle_info(:init, {pr, callouts}) do
+    # Required in order to give tests the chance to share the connection to this process... If this process executes the query first, test will fail
+    unquote(if(Mix.env == :test, do: quote(do: Process.sleep(10))))
+    query = PR.by_number(pr.owner, pr.repo, pr.number)
+    pr = case Repo.one(query) do
+           nil ->
+             pr
+           existing_pr ->
+             existing_pr
+         end
+    :timer.send_interval @stale_check_interval, :stale_check
+    SlackCoder.Github.ShaMapper.register(pr.sha)
+    SlackCoder.Github.Watchers.MergeConflict.queue(pr)
     {:noreply, {pr, callouts}}
   end
 
@@ -61,30 +72,44 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   def handle_cast(_, state), do: {:noreply, state}
 
   defp update_pr(raw_pr, old_pr) do
-    {:ok, new_pr} = old_pr |> PR.reg_changeset(extract_pr_data(raw_pr)) |> PRService.save
+    {:ok, new_pr} = old_pr |> PR.reg_changeset(extract_pr_data(raw_pr, old_pr)) |> PRService.save
     new_pr
   end
 
-  def extract_pr_data(raw_pr) do
-    %{
-      owner: raw_pr["base"]["repo"]["owner"]["login"],
-      repo: raw_pr["base"]["repo"]["name"],
-      branch: raw_pr["head"]["ref"],
-      fork: raw_pr["head"]["repo"]["owner"]["login"] != raw_pr["base"]["repo"]["owner"]["login"],
-      latest_comment: nil,
-      latest_comment_url: nil,
-      opened_at: date_for(raw_pr["created_at"]),
-      closed_at: date_for(raw_pr["closed_at"]),
-      merged_at: date_for(raw_pr["merged_at"]),
-      title: raw_pr["title"],
-      number: raw_pr["number"],
-      html_url: raw_pr["_links"]["html"]["href"],
-      mergeable: not raw_pr["mergeable_state"] in ["dirty"],
-      github_user: raw_pr["user"]["login"],
-      github_user_avatar: raw_pr["user"]["avatar_url"],
-      sha: raw_pr["head"]["sha"]
-    }
+  # When coming in with atom keys, data matches perfectly
+  def extract_pr_data(%{owner: _owner} = attrs, _pr) do
+    attrs
   end
+
+  def extract_pr_data(raw_pr, pr) do
+    %{
+      owner: raw_pr["base"]["repo"]["owner"]["login"] || pr.owner,
+      repo: raw_pr["base"]["repo"]["name"] || pr.repo,
+      branch: raw_pr["head"]["ref"] || pr.branch,
+      opened_at: date_for(raw_pr["created_at"]) || pr.opened_at,
+      closed_at: date_for(raw_pr["closed_at"]) || pr.closed_at,
+      merged_at: date_for(raw_pr["merged_at"]) || pr.merged_at,
+      title: raw_pr["title"] || pr.title,
+      number: raw_pr["number"] || pr.number,
+      html_url: raw_pr["_links"]["html"]["href"] || pr.html_url,
+      mergeable: not raw_pr["mergeable_state"] in ["dirty", "conflicting"],
+      github_user: raw_pr["user"]["login"] || pr.github_user,
+      github_user_avatar: raw_pr["user"]["avatar_url"] || pr.github_user_avatar,
+      sha: raw_pr["head"]["sha"] || pr.sha
+    }
+    |> mergeable_unknown(raw_pr)
+    |> fork_data(raw_pr)
+  end
+
+  defp mergeable_unknown(changes, %{"mergeable_state" => "unknown"}) do
+    Map.drop(changes, [:mergeable])
+  end
+  defp mergeable_unknown(changes, _raw_pr), do: changes
+
+  defp fork_data(changes, %{"head" => %{"repo" => %{"owner" => %{"login" => head}}}, "base" => %{"repo" => %{"owner" => %{"login" => base}}}}) do
+    Map.put(changes, :fork, head != base)
+  end
+  defp fork_data(changes, _), do: changes
 
   def update(pr_pid, pr) when is_pid(pr_pid) do
     GenServer.cast(pr_pid, {:update, pr})
@@ -92,7 +117,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
   def update(_, _), do: nil
 
-  def update_sync(pr_pid, pr) when is_pid(pr_pid) do
+  def update_sync(pr_pid, pr) when is_pid(pr_pid) and is_map(pr) do
     GenServer.call(pr_pid, {:update, pr})
   end
   def update_sync(_, _), do: nil
@@ -103,7 +128,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
   def unstale(_), do: nil
 
-  def status(pr_pid, type, sha, url, state) when is_pid(pr_pid) do
+  def status(pr_pid, type, sha, url, state) when is_pid(pr_pid) and type in [:build, :analysis] do
     GenServer.cast(pr_pid, {type, sha, url, state})
   end
   def status(_, _, _, _, _), do: nil

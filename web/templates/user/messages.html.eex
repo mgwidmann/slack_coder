@@ -8,7 +8,7 @@
     <table class="table table-striped">
       <tbody id="messages">
         <%= for message <- @messages do %>
-          <%= render "message.html", message: message, avatar: Map.get(@avatars, message.user) %>
+          <%= render "message.html", message: message, avatar: Map.get(@avatars, message.slack) %>
         <% end %>
       </tbody>
     </table>

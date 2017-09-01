@@ -56,3 +56,7 @@ config :phoenix, :generators,
 config :slack_coder, ecto_repos: [SlackCoder.Repo]
 
 config :tzdata, :autoupdate, :disabled
+
+config :wobserver,
+  mode: :plug,
+  remote_url_prefix: "/wobserver"

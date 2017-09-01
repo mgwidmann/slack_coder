@@ -2,7 +2,7 @@ defmodule SlackCoder.Users.Help do
   require Logger
   alias SlackCoder.Models.User
 
-  @message_types [:stale, :unstale, :fail, :pass, :close, :merge, :conflict]
+  @message_types [:open, :stale, :unstale, :fail, :pass, :close, :merge, :conflict]
   @message_classes [:self, :monitors, :callouts]
   @zipped_message_types for config <- @message_types, type <- @message_classes, do: [config, type]
   @help_text """
@@ -23,7 +23,6 @@ defmodule SlackCoder.Users.Help do
     settings(settings_list, config)
   end
   @announcement ["announce", "announcement"]
-  @announcement_regex
   def handle_message({[announce | _message], original_message}, config, %User{admin: true} = user) when announce in @announcement do
     full_message = """
                    *Announcement*
@@ -33,11 +32,13 @@ defmodule SlackCoder.Users.Help do
       SlackCoder.Users.Supervisor.users
       |> Stream.reject(&(match?(^user, &1)))
       |> Enum.each(&(SlackCoder.Slack.send_to(&1.slack, full_message)))
+
+      SlackCoder.Slack.send_to(user.slack, "_The following was broadcast to all users_\n#{full_message}")
     end
     {config, full_message}
   end
   def handle_message(message, config, _admin) do
-    Logger.info "Received unhandled message: #{inspect message}"
+    Logger.info [IO.ANSI.green, IO.ANSI.bright, "[User] ", IO.ANSI.default_color, IO.ANSI.normal, "Received unhandled message: #{inspect message}"]
     {config, @unknown_message}
   end
 
@@ -46,15 +47,17 @@ defmodule SlackCoder.Users.Help do
     defp settings([unquote(config), unquote(self_or_monitors), value], config) do
       bool_value = SlackCoder.Models.Types.Boolean.value_to_boolean(value)
       config = Map.put(config, [unquote(config), unquote(self_or_monitors)]
-               |> List.flatten
-               |> Enum.join("_"), bool_value)
+                               |> List.flatten
+                               |> Enum.join("_")
+                               |> String.to_existing_atom(), bool_value)
       {config, settings_reply(unquote(config), unquote(self_or_monitors), bool_value)}
     end
     defp settings([unquote(self_or_monitors), unquote(config), value], config) do
       bool_value = SlackCoder.Models.Types.Boolean.value_to_boolean(value)
       config = Map.put(config, [unquote(config), unquote(self_or_monitors)]
-               |> List.flatten
-               |> Enum.join("_"), bool_value)
+                               |> List.flatten
+                               |> Enum.join("_")
+                               |> String.to_existing_atom(), bool_value)
       {config, settings_reply(unquote(config), unquote(self_or_monitors), bool_value)}
     end
   end
@@ -72,6 +75,7 @@ defmodule SlackCoder.Users.Help do
   def message_classes(), do: @message_classes
   def message_types(), do: @message_types
 
+  defp config_for_reply("open"), do: "Open PR notifications"
   defp config_for_reply("unstale"), do: "Unstale PR notifications"
   defp config_for_reply("stale"), do: "Stale PR notifications"
   defp config_for_reply("fail"), do: "Build failure notifications"

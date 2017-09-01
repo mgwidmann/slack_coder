@@ -5,7 +5,7 @@ defmodule SlackCoder.Stubs.Users.Supervisor do
   end
 
   def user(_slack_user) do
-    self
+    self()
   end
 
 end

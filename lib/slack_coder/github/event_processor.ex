@@ -2,6 +2,7 @@ defmodule SlackCoder.Github.EventProcessor do
   require Logger
   alias SlackCoder.Github.Watchers.PullRequest, as: PullRequest
   alias SlackCoder.Github.Watchers.Supervisor, as: Github
+  alias SlackCoder.Github.Watchers.MergeConflict
   alias SlackCoder.Models.PR
   alias SlackCoder.Github.ShaMapper
 
@@ -20,13 +21,22 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(event, parameters)
   # Would like to be able to reset a PR here but there doesn't seem to be enough info
   # to determine what PR the push belonged to without querying Github's API.
-  def process(:push, %{"before" => old_sha, "after" => new_sha} = params) do
+
+  def process(:push, %{"before" => old_sha, "after" => "0000000000000000000000000000000000000000", "deleted" => true}) do
+    Logger.debug "EventProcessor received deleted push event."
+    ShaMapper.remove(old_sha)
+  end
+  def process(:push, %{"before" => old_sha, "after" => new_sha}) do
     Logger.debug "EventProcessor received push event"
     ShaMapper.update(old_sha, new_sha)
+
+    ShaMapper.find(new_sha)
+    |> PullRequest.fetch()
+    |> MergeConflict.queue()
   end
 
   # A user has made a comment on the PR itself (not related to any code).
-  def process(:issue_comment, %{"issue" => %{"number" => pr}}= params) do
+  def process(:issue_comment, %{"issue" => %{"number" => pr}}) do
     Logger.debug "EventProcessor received issue_comment event"
 
     %PR{number: pr}
@@ -51,12 +61,18 @@ defmodule SlackCoder.Github.EventProcessor do
 
   # A pull request has been opened or reopened. Need to start the watcher synchronously, then send it data
   # to update it to the most recent PR information.
-  def process(:pull_request, %{"action" => opened, "number" => number, "pull_request" => pull_request} = params) when opened in ["opened", "reopened"] do
+  def process(:pull_request, %{"action" => opened, "number" => number, "pull_request" => pull_request}) when opened in ["opened", "reopened"] do
     Logger.debug "EventProcessor received #{opened} event"
 
-    # login = params["pull_request"]["user"]["login"]
-    %PR{number: number, sha: pull_request["head"]["sha"]}
-    |> Github.start_watcher()
+    owner = pull_request["base"]["repo"]["owner"]["login"]
+    repo = pull_request["base"]["repo"]["name"]
+    pid = %PR{owner: owner, repo: repo, number: number, sha: pull_request["head"]["sha"]}
+          |> Github.start_watcher()
+    pid
+    |> PullRequest.fetch()
+    |> MergeConflict.queue()
+
+    pid
     |> PullRequest.update(pull_request)
   end
 
@@ -66,25 +82,44 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(:pull_request, %{"action" => "closed", "number" => number} = params) do
     Logger.debug "EventProcessor received closed event"
 
-    %PR{number: number}
+    owner = params["pull_request"]["base"]["repo"]["owner"]["login"]
+    repo = params["pull_request"]["base"]["repo"]["name"]
+
+    %PR{owner: owner, repo: repo, number: number}
     |> Github.find_watcher()
     |> PullRequest.update_sync(params["pull_request"])
     |> Github.stop_watcher()
   end
 
   # When a pull request information is changed, this is called in order to update it asynchronously.
-  def process(:pull_request, %{"action" => "synchronize", "number" => pr, "before" => old_sha, "after" => new_sha} = params) do
+  @synchronize ~w(edited synchronize)
+  def process(:pull_request, %{"action" => action, "before" => old_sha, "after" => new_sha} = params) when action in @synchronize do
     ShaMapper.update(old_sha, new_sha)
 
     Logger.debug "EventProcessor received pull_request synchronize event"
+    process(:pull_request, params |> Map.drop(~w(before after)))
+  end
 
-    %PR{number: pr}
-    |> Github.find_or_start_watcher()
+  def process(:pull_request, %{"action" => action, "number" => pr} = params) when action in @synchronize do
+    owner = params["pull_request"]["base"]["repo"]["owner"]["login"]
+    repo = params["pull_request"]["base"]["repo"]["name"]
+    pid = %PR{owner: owner, repo: repo, number: pr}
+          |> Github.find_or_start_watcher()
+    pid
+    |> PullRequest.fetch()
+    |> MergeConflict.queue()
+
+    pid
     |> PullRequest.update(params["pull_request"])
   end
 
-  def process(:pull_request, %{"action" => _other} = _params) do
-    # Ignore
+  # TODO: Implement `review_requested`
+  @unprocessed ~w(unlabeled labeled assigned unassigned review_requested)
+  def process(:pull_request, %{"action" => action}) when action in @unprocessed, do: true
+
+  def process(:pull_request, %{"action" => other} = _params) do
+    Logger.warn "Ignoring :pull_request event: #{other}"
+    false
   end
 
   # A comment was added to a pull request
@@ -97,14 +132,14 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   # Build has changed status for a CI system
-  def process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha} = params) when ci_system in ["continuous-integration/travis-ci/pr", "semaphoreci"] do
+  def process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha}) when ci_system in ["default", "ci/circleci", "continuous-integration/travis-ci/pr", "semaphoreci"] do
     Logger.debug "EventProcessor received build status event of state #{state}"
     ShaMapper.find(sha)
     |> PullRequest.status(:build, sha, url, state)
   end
 
   # Build has change status for an Analysis system
-  def process(:status, %{"context" => "codeclimate", "state" => state, "target_url" => url, "sha" => sha} = params) do
+  def process(:status, %{"context" => "codeclimate", "state" => state, "target_url" => url, "sha" => sha}) do
     Logger.debug "EventProcessor received analysis status event of state #{state}"
 
     ShaMapper.find(sha)
@@ -116,8 +151,12 @@ defmodule SlackCoder.Github.EventProcessor do
     # Ignore
   end
 
+  def process(:project_card, _params) do
+    # Ignore
+  end
+
   def process(unknown_event, params) do
-    Logger.info "EventProcessor received unknown event #{inspect unknown_event} with params"
+    Logger.info "EventProcessor received unknown event #{inspect unknown_event} with params #{inspect params}"
   end
 
   def pr_number(%{"comment" => %{"pull_request_url" => url}}) do

@@ -2,7 +2,7 @@ defmodule SlackCoder.Stubs.Users.User do
   alias SlackCoder.Models.User
 
   def get(_pid) do
-    %User{}
+    %User{github: "github_user", slack: "slack_user"}
   end
 
   def update(_pid, user) do

@@ -4,12 +4,16 @@
     "build": "node_modules/brunch/bin/brunch build"
   },
   "dependencies": {
+    "bootstrap": "^3.3.7"
+  },
+  "devDependencies": {
     "babel-brunch": "^6.0.6",
     "brunch": "^2.10.3",
     "clean-css-brunch": "^2.0.0",
-    "sass-brunch": "^2.9.0",
     "css-brunch": "^2.6.1",
     "javascript-brunch": "2.0.0",
+    "node-sass": "^4.5.3",
+    "sass-brunch": "^2.10.4",
     "uglify-js-brunch": "2.0.1"
   }
 }

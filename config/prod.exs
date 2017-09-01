@@ -3,19 +3,21 @@ use Mix.Config
 config :slack_coder, SlackCoder.Endpoint,
   secret_key_base: System.get_env("SECRET_KEY_BASE"),
   http: [port: {:system, "PORT"}],
-  url: [host: "slack-coder.herokuapp.com", port: 80],
-  cache_static_manifest: "priv/static/manifest.json"
+  url: [host: "slack-coder.nanoapp.io", port: 80],
+  cache_static_manifest: "priv/static/cache_manifest.json"
 
 config :logger,
   # Do not print debug messages in production
   level: :info,
-  compile_time_purge_level: :info,
+  # compile_time_purge_level: :info,
   truncate: :infinity
 
 config :slack_coder, SlackCoder.Repo,
   adapter: Ecto.Adapters.Postgres,
-  # url: "postgres://postgres:postgres@localhost/slack_coder",
-  url: System.get_env("DATABASE_URL"),
+  username: System.get_env("DATA_DB_USER"),
+  password: System.get_env("DATA_DB_PASS"),
+  hostname: System.get_env("DATA_DB_HOST"),
+  database: "gonano",
   size: 20
 
 config :slack_coder,
@@ -23,7 +25,12 @@ config :slack_coder,
   personal: true,
   timezone: "America/New_York",
   pr_backoff_start: 4,
-  caretaker: :matt
+  caretaker: :matt,
+  travis_token: System.get_env("TRAVIS_API_TOKEN"),
+  circle_ci_token: System.get_env("CIRCLE_CI_API_TOKEN")
+
+config :slack,
+  api_token: System.get_env("SLACK_API_TOKEN")
 
 config :slack_coder, :github,
   pat: System.get_env("GITHUB_PAT"),

@@ -18,4 +18,7 @@ defmodule SlackCoder.ApplicationHelper do
       {"#{user.name} (#{user.github})", String.downcase(user.github)}
     end)
   end
+
+  @git_commit System.cmd("git", ["rev-parse", "HEAD"]) |> elem(0)
+  def git_commit(), do: @git_commit
 end

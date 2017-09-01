@@ -9,19 +9,11 @@ defmodule SlackCoder.Slack.Helper do
     end
   end
 
+  def im(_slack, nil), do: nil
   def im(slack, user) when is_map(user), do: im(slack, user.id)
   def im(slack, user) when is_binary(user) do
     slack[:ims]
     |> Map.values
     |> Enum.find(&(&1.user == user))
   end
-
-  def message_for(user, message) do
-    if Application.get_env(:slack_coder, :personal) do
-      message
-    else
-      "<@#{user.id}> #{message}"
-    end
-  end
-
 end

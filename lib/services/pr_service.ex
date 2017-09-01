@@ -11,6 +11,7 @@ defmodule SlackCoder.Services.PRService do
 
   def save(changeset) do
     changeset
+    |> put_change(:opened, opened?(changeset))
     |> stale_notification()
     |> unstale_notification()
     |> closed_notification()
@@ -18,6 +19,7 @@ defmodule SlackCoder.Services.PRService do
     |> conflict_notification()
     |> successful_notification()
     |> failure_notification()
+    |> open_notification()
     |> Repo.insert_or_update()
     |> case do
       {:ok, pr} ->
@@ -27,6 +29,12 @@ defmodule SlackCoder.Services.PRService do
         errored_changeset
     end
   end
+
+
+  def open_notification(cs = %Ecto.Changeset{changes: %{opened: true}, data: %PR{opened: false}}) do
+    cs |> put_change(:notifications, [:open | cs.changes[:notifications] || cs.data.notifications])
+  end
+  def open_notification(cs), do: cs
 
   def merged_notification(cs = %Ecto.Changeset{changes: %{merged_at: time}}) when not is_nil(time) do
     cs |> put_change(:notifications, [:merged | cs.changes[:notifications] || cs.data.notifications])
@@ -45,7 +53,7 @@ defmodule SlackCoder.Services.PRService do
   def closed_notification(cs), do: cs
 
   def stale_notification(cs = %Ecto.Changeset{changes: %{latest_comment: time}}) when not is_nil(time) do
-    hours = Date.diff(time, now, :hours)
+    hours = Timex.diff(time, now(), :hours)
     if hours >= cs.data.backoff && Notification.can_send_notifications? do
       backoff = next_backoff(cs.data.backoff, hours)
       cs
@@ -59,7 +67,7 @@ defmodule SlackCoder.Services.PRService do
 
   @backoff Application.get_env(:slack_coder, :pr_backoff_start, 1)
   def unstale_notification(cs = %Ecto.Changeset{changes: %{latest_comment: new_time}, data: %PR{latest_comment: old_time}}) when not (is_nil(new_time) or is_nil(old_time)) do
-    if Date.compare(new_time, old_time) != 0 && cs.data.backoff != @backoff do
+    if Timex.compare(new_time, old_time) != 0 && cs.data.backoff != @backoff do
       cs
       |> put_change(:backoff, @backoff)
       |> put_change(:notifications, [:unstale | cs.changes[:notifications] || cs.data.notifications])
@@ -69,8 +77,14 @@ defmodule SlackCoder.Services.PRService do
   end
   def unstale_notification(cs), do: cs # Latest comment not available, can't check unstale notification
 
-  def conflict_notification(cs = %Ecto.Changeset{changes: %{mergeable: false}, data: %PR{mergeable: true}}) do
-    cs |> put_change(:notifications, [:conflict | cs.changes[:notifications] || cs.data.notifications])
+  def conflict_notification(cs = %Ecto.Changeset{changes: %{mergeable: false}, data: %PR{mergeable: mergeable}}) when mergeable in [nil, true] do
+    cs
+    |> put_change(:build_status, "conflict")
+    |> put_change(:notifications, [:conflict | cs.changes[:notifications] || cs.data.notifications])
+  end
+  def conflict_notification(cs = %Ecto.Changeset{data: %PR{mergeable: false}}) do
+    cs
+    |> put_change(:build_status, "conflict")
   end
   def conflict_notification(cs), do: cs
 
@@ -84,6 +98,11 @@ defmodule SlackCoder.Services.PRService do
   end
   def failure_notification(cs), do: cs
 
+  def opened?(%Ecto.Changeset{changes: %{closed_at: closed, merged_at: merged}}) when not is_nil(closed) or not is_nil(merged) do
+    false
+  end
+  def opened?(_cs), do: true
+
   def next_backoff(backoff, greater_than) do
     next_exponent = trunc(:math.log2(backoff) + 1)
     next_notification = trunc(:math.pow(2, next_exponent))
@@ -95,7 +114,7 @@ defmodule SlackCoder.Services.PRService do
   end
 
   def notifications(pr = %PR{notifications: []}), do: pr
-  for type <- [:stale, :unstale, :merged, :closed, :conflict, :success, :failure] do
+  for type <- [:open, :stale, :unstale, :merged, :closed, :conflict, :success, :failure] do
     def notifications(pr = %PR{notifications: [unquote(type) | notifications]}) do
       %PR{ Notification.unquote(type)(pr) | notifications: notifications} |> notifications
     end

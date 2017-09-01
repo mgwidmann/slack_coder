@@ -8,7 +8,7 @@ defmodule SlackCoder.AuthController do
   based on the chosen strategy.
   """
   def index(conn, %{"provider" => "github"}) do
-    redirect conn, external: authorize_url!
+    redirect conn, external: authorize_url!()
   end
 
   def delete(conn, _params) do
@@ -31,7 +31,7 @@ defmodule SlackCoder.AuthController do
   end
 
   def callback(%{assigns: %{ueberauth_auth: %Ueberauth.Auth{extra:
-      %Ueberauth.Auth.Extra{raw_info: %{token: %{access_token: token}, user: raw_user}}}}} = conn, _params) do
+      %Ueberauth.Auth.Extra{raw_info: %{token: %{access_token: _token}, user: raw_user}}}}} = conn, _params) do
     case raw_user |> UserService.find_or_create_user() do
       {:ok, db_user} ->
         conn
@@ -47,6 +47,7 @@ defmodule SlackCoder.AuthController do
   defp authorize_url!, do: SlackCoder.OAuth.Github.authorize_url!
 
   defp after_login(conn, user) do
+    SlackCoder.Slack.send_to(user.slack, "Signed in successfully!")
     conn
     |> put_flash(:info, "Successfully authenticated.")
     |> put_session(:current_user, user)

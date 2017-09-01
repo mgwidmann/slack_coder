@@ -3,7 +3,7 @@
 
 // To use Phoenix channels, the first step is to import Socket
 // and connect at the socket path in "lib/my_app/endpoint.ex":
-import {Socket} from "deps/phoenix/web/static/js/phoenix"
+import {Socket} from "../../../deps/phoenix/assets/js/phoenix";
 
 let socket = new Socket("/socket")
 
@@ -75,6 +75,7 @@ $(document).ready(()=> {
         $('#team-pull-requests').append(resp.html)
       }
     }
+    $('[data-toggle="tooltip"]').tooltip()
   })
   channel.on("pr:remove", resp => {
     $(`#pr-${resp.pr}`).remove()

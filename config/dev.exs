@@ -8,7 +8,7 @@ use Mix.Config
 # with brunch.io to recompile .js and .css sources.
 config :slack_coder, SlackCoder.Endpoint,
   http: [port: 4000],
-  debug_errors: true,
+  debug_errors: false,
   code_reloader: true,
   cache_static_lookup: false,
   check_origin: false,
@@ -32,7 +32,7 @@ config :logger,
 # Do not include metadata nor timestamps in development logs
 config :logger, :console,
   format: "[$level] $message\n",
-  level: :debug
+  level: :info
 
 config :logger,
   truncate: :infinity
@@ -42,13 +42,14 @@ config :logger,
 # and calculating stacktraces is usually expensive.
 config :phoenix, :stacktrace_depth, 20
 
+database = if(System.get_env("DATA_DB_USER") == "nanobox", do: "gonano", else: "slack_coder_dev")
 # Configure your database
 config :slack_coder, SlackCoder.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "slack_coder_dev",
-  hostname: "localhost",
+  username: System.get_env("DATA_DB_USER") || "postgres",
+  password: System.get_env("DATA_DB_PASS") || "postgres",
+  hostname: System.get_env("DATA_DB_HOST") || "localhost",
+  database: database,
   pool_size: 10
 
 if File.exists? "config/dev.secret.exs" do
@@ -57,7 +58,9 @@ else
   config :slack_coder,
     slack_api_token: nil,
     personal: true,
-    caretaker: :matt
+    caretaker: :matt,
+    travis_token: nil,
+    circle_ci_token: nil
 
   config :slack_coder, :github,
     pat: "a-github-token-that-wont-work",

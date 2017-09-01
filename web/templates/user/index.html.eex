@@ -1,0 +1,19 @@
+<section class="panel panel-default">
+  <div class="panel-heading">
+    <span class="h3">
+      Users
+    </span>
+  </div>
+  <div class="panel-body">
+    <table class="table table-striped">
+      <tbody id="users">
+        <%= for user <- @users do %>
+          <%= render "user_row.html", conn: @conn, user: user %>
+        <% end %>
+      </tbody>
+    </table>
+    <div class="text-center">
+      <%= pagination_links(@conn, @users, path: &user_path/3, action: :index) %>
+    </div>
+  </div>
+</section>

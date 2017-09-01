@@ -14,6 +14,7 @@ defmodule SlackCoder.Users.User do
   end
 
   def init(user) do
+    Process.register self(), String.to_atom(user.github)
     {:ok, user}
   end
 
@@ -29,7 +30,7 @@ defmodule SlackCoder.Users.User do
   end
   # Don't send unknown messages
   def handle_cast(notification = %Notification{}, user) do
-    Logger.warn "User #{user.name}(#{user.slack}) received unhandled message: #{inspect notification}"
+    Logger.warn "User #{user.name} (#{user.slack}) received unhandled message: #{inspect notification}"
     {:noreply, user}
   end
 
@@ -43,8 +44,11 @@ defmodule SlackCoder.Users.User do
     end
     {:noreply, user}
   end
-  def handle_cast({:update, new_user}, _user) do
+  def handle_cast({:update, %User{} = new_user}, _user) do
     {:noreply, new_user}
+  end
+  def handle_cast({:update, params}, user) do
+    {:noreply, Repo.update!(User.changeset(user, params))}
   end
 
   def handle_call(:get, _from, user) do

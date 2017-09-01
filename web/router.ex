@@ -30,7 +30,7 @@ defmodule SlackCoder.Router do
 
     scope "/" do
       pipe_through :restricted
-      resources "/users", SlackCoder.UserController, only: [:new, :create, :edit, :update]
+      resources "/users", SlackCoder.UserController, only: [:index, :new, :create, :edit, :update]
 
       scope "/admin" do
         pipe_through :admin
@@ -52,13 +52,13 @@ defmodule SlackCoder.Router do
 
     forward "/graphql", Absinthe.Plug, schema: SlackCoder.Schemas.MainSchema
 
-    scope "/", SlackCoder do
-      post "/github/event", GithubController, :event
-    end
+    get "/pull_requests/:owner/:repo/:pr/refresh", PageController, :synchronize
+
+    post "/github/event", GithubController, :event
   end
 
-  forward "/beaker", Beaker.Web
   forward "/errors", Flames.Web
+  forward "/wobserver", Wobserver.Web.Router
 
   scope "/auth", SlackCoder do
     pipe_through :browser

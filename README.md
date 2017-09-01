@@ -3,14 +3,16 @@ SlackCoder
 
 ## Slack Bot for watching your Github & (CI) builds
 
-### Setup and deploy to Heroku
+### Nanobox deployment
+
+You'll have to (install the nanobox CLI)[https://docs.nanobox.io/install/] tool first.
 
 1. Fork and clone this repo
-2. Checkout a deploy branch: `git checkout -b deploy`
-3. Add `prod.secret.exs` file (See below for configuring)
-4. Commit your `prod.secret.exs` **locally!!** `git commit -m 'Prod secret in local branch!'`
-5. Deploy (See deploy instructions below)
+2. Run `nanobox dns add local slack-coder.dev` and follow instructions
+3. Run `nanobox evar add local MIX_ENV=dev`
+4. Run `nanobox run mix do ecto.create, ecto.migrate, run priv/repo/seeds.exs` to migrate your local database
 
+To start it up, run `nanobox run iex -S mix phoenix.server`
 
 ### Configuring
 

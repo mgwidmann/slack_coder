@@ -1,0 +1,53 @@
+run.config:
+  # elixir runtime
+  engine: elixir
+  engine.config:
+    runtime: elixir-1.4
+    erlang_runtime: erlang-20.0
+
+  # we need nodejs in development
+  # ensure inotify exists for hot-code reloading
+  dev_packages:
+    - nodejs
+    - inotify-tools
+
+  # cache node_modules
+  cache_dirs:
+    - node_modules
+
+  # add node_module bins to the $PATH
+  extra_path_dirs:
+    - node_modules/.bin
+
+  # enable the filesystem watcher
+  fs_watch: true
+
+  # run npm install
+  extra_steps:
+    - npm install
+
+  extra_packages:
+    - python-2
+    - git
+
+deploy.config:
+  # run brunch build
+  extra_steps:
+    - brunch build
+    - mix phx.digest
+
+  # just before the new process comes online,
+  # let's migrate the database
+  before_live:
+    web.main:
+      - mix ecto.create --quiet --no-deps-check
+      - mix ecto.migrate --no-deps-check
+
+web.main:
+  start: node-start mix phx.server
+
+# add postgres as a data component
+data.db:
+  image: nanobox/postgresql
+  config:
+    version: 9.6

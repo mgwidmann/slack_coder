@@ -1,0 +1,11 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="error-template text-center">
+      <h1>Unauthorized!</h1>
+      <h2>401 Not Authorized</h2>
+      <div class="error-details">
+        You're not allowed access to that resource
+      </div>
+    </div>
+  </div>
+</div>
