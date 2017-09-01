@@ -44,7 +44,7 @@ deploy.config:
       - mix ecto.migrate --no-deps-check
 
 web.main:
-  start: node-start elixir --sname web --cookie $ELIXIR_COOKIE -S mix phx.server
+  start: node-start mix phx.server
 
 # add postgres as a data component
 data.db:
