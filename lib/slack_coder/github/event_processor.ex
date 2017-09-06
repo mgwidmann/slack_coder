@@ -36,12 +36,15 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   # A user has made a comment on the PR itself (not related to any code).
-  def process(:issue_comment, %{"issue" => %{"number" => pr}}) do
+  def process(:issue_comment, %{"issue" => %{"number" => pr}} = pull_request) do
     Logger.debug "EventProcessor received issue_comment event"
 
-    %PR{number: pr}
-    |> Github.find_watcher()
-    |> PullRequest.unstale()
+    # TODO: Get working again
+    # owner = pull_request["base"]["repo"]["owner"]["login"]
+    # repo = pull_request["base"]["repo"]["name"]
+    # %PR{owner: owner, repo: repo, number: pr}
+    # |> Github.find_watcher()
+    # |> PullRequest.unstale()
   end
 
   # A user has made a comment on code belonging to a PR. When a user makes a comment on a commit not related to a PR,
@@ -49,9 +52,12 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(:commit_comment, params) do
     Logger.debug "EventProcessor received commit_comment event"
 
-    %PR{number: pr_number(params)}
-    |> Github.find_watcher()
-    |> PullRequest.unstale()
+    # TODO: Get working again
+    # owner = pull_request["base"]["repo"]["owner"]["login"]
+    # repo = pull_request["base"]["repo"]["name"]
+    # %PR{owner: owner, repo: repo, number: pr_number(params)}
+    # |> Github.find_watcher()
+    # |> PullRequest.unstale()
   end
 
   # Issues have been changed/created. Ignoring this.
@@ -64,9 +70,10 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(:pull_request, %{"action" => opened, "number" => number, "pull_request" => pull_request}) when opened in ["opened", "reopened"] do
     Logger.debug "EventProcessor received #{opened} event"
 
-    owner = pull_request["base"]["repo"]["owner"]["login"]
-    repo = pull_request["base"]["repo"]["name"]
-    pid = %PR{owner: owner, repo: repo, number: number, sha: pull_request["head"]["sha"]}
+    # Handling a modified version of the pull_request object which comes from SlackCoder.Github
+    owner = pull_request["base"]["repo"]["owner"]["login"] || pull_request[:owner]
+    repo = pull_request["base"]["repo"]["name"] || pull_request[:repo]
+    pid = %PR{owner: owner, repo: repo, number: number, sha: pull_request["head"]["sha"] || pull_request[:sha]}
           |> Github.start_watcher()
     pid
     |> PullRequest.fetch()
