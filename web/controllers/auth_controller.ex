@@ -14,6 +14,7 @@ defmodule SlackCoder.AuthController do
   def delete(conn, _params) do
     conn
     |> put_flash(:info, "You have been logged out!")
+    |> SlackCoder.Guardian.Plug.sign_out()
     |> configure_session(drop: true)
     |> redirect(to: "/")
   end
@@ -47,10 +48,13 @@ defmodule SlackCoder.AuthController do
   defp authorize_url!, do: SlackCoder.OAuth.Github.authorize_url!
 
   defp after_login(conn, user) do
+    conn = conn
+           |> SlackCoder.Guardian.Plug.sign_in(user, %{admin: user.admin})
+           |> put_flash(:info, "Successfully authenticated.")
+
     SlackCoder.Slack.send_to(user.slack, "Signed in successfully!")
+
     conn
-    |> put_flash(:info, "Successfully authenticated.")
-    |> put_session(:current_user, user)
   end
 
 end

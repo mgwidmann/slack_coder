@@ -4,6 +4,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   alias SlackCoder.Models.PR
   alias SlackCoder.Services.PRService
   alias SlackCoder.Repo
+  require Logger
 
   @stale_check_interval 60_000
 
@@ -46,7 +47,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     :timer.send_interval @stale_check_interval, :stale_check
     SlackCoder.Github.ShaMapper.register(pr.sha)
     SlackCoder.Github.Watchers.MergeConflict.queue(pr)
-    {:noreply, {pr, callouts}}
+    {:noreply, {pr |> PRService.check_failed(), callouts}}
   end
 
   def handle_cast({:build, sha, url, state}, {%PR{sha: sha} = pr, callouts}) do
@@ -69,7 +70,17 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     {:noreply, {updated_pr, callouts}}
   end
 
-  def handle_cast(_, state), do: {:noreply, state}
+  def handle_cast(message, state) do
+    Logger.warn [
+      IO.ANSI.green,
+      "[", inspect(__MODULE__), "]", IO.ANSI.default_color,
+      " Ignoring message received.\nMessage\t\t*** ",
+      inspect(message),
+      "\nCurrent state\t*** ",
+      inspect(state)
+    ]
+    {:noreply, state}
+  end
 
   defp update_pr(raw_pr, old_pr) do
     {:ok, new_pr} = old_pr |> PR.reg_changeset(extract_pr_data(raw_pr, old_pr)) |> PRService.save
@@ -137,5 +148,11 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     GenServer.call(pid, :fetch)
   end
   def fetch(_), do: nil
+
+  def last_failed_jobs(pid) when is_pid(pid) do
+    %PR{last_failed_jobs: last_failed_jobs} = GenServer.call(pid, :fetch)
+    last_failed_jobs
+  end
+  def last_failed_jobs(_), do: []
 
 end

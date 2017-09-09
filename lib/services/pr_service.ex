@@ -12,6 +12,7 @@ defmodule SlackCoder.Services.PRService do
   def save(changeset) do
     changeset
     |> put_change(:opened, opened?(changeset))
+    |> random_failure()
     |> stale_notification()
     |> unstale_notification()
     |> closed_notification()
@@ -23,13 +24,12 @@ defmodule SlackCoder.Services.PRService do
     |> Repo.insert_or_update()
     |> case do
       {:ok, pr} ->
-        {:ok, pr |> notifications() |> broadcast()}
+        {:ok, pr |> check_failed() |> notifications() |> broadcast()}
       errored_changeset ->
         Logger.error "Unable to save PR: #{inspect errored_changeset}"
         errored_changeset
     end
   end
-
 
   def open_notification(cs = %Ecto.Changeset{changes: %{opened: true}, data: %PR{opened: false}}) do
     cs |> put_change(:notifications, [:open | cs.changes[:notifications] || cs.data.notifications])
@@ -94,7 +94,9 @@ defmodule SlackCoder.Services.PRService do
   def successful_notification(cs), do: cs
 
   def failure_notification(cs = %Ecto.Changeset{changes: %{build_status: "failure"}, data: %PR{build_status: status}}) when status in ["pending", "success"] do
-    cs |> put_change(:notifications, [:failure | cs.changes[:notifications] || cs.data.notifications])
+    cs
+    |> put_change(:last_failed_sha, cs.data.sha)
+    |> put_change(:notifications, [:failure | cs.changes[:notifications] || cs.data.notifications])
   end
   def failure_notification(cs), do: cs
 
@@ -113,6 +115,16 @@ defmodule SlackCoder.Services.PRService do
     end
   end
 
+  def random_failure(%Ecto.Changeset{changes: %{build_status: "success"} = changes, data: %PR{build_status: "pending", last_failed_sha: sha, sha: sha} = pr} = cs) do
+    case changes do
+      %{sha: new_sha} when sha != new_sha -> cs # Acceptable case, sha is changed
+      _ -> # Sha not changed but status did change
+        save_random_failure(pr)
+        cs # Return changeset to carry on normally
+    end
+  end
+  def random_failure(cs), do: cs
+
   def notifications(pr = %PR{notifications: []}), do: pr
   for type <- [:open, :stale, :unstale, :merged, :closed, :conflict, :success, :failure] do
     def notifications(pr = %PR{notifications: [unquote(type) | notifications]}) do
@@ -129,4 +141,13 @@ defmodule SlackCoder.Services.PRService do
     Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
     pr
   end
+
+  def save_random_failure(pr) do
+    Task.start SlackCoder.Services.RandomFailureService, :save_random_failure, [pr]
+  end
+
+  def check_failed(%PR{build_status: "failure"} = pr) do
+    %PR{ pr | last_failed_jobs: SlackCoder.BuildSystem.failed_jobs(pr)}
+  end
+  def check_failed(pr), do: pr
 end

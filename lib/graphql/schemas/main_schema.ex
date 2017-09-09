@@ -3,8 +3,13 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
   """
   use Absinthe.Schema
   alias SlackCoder.{Repo, Models.User}
+
+  import_types SlackCoder.GraphQL.Schemas.Scalars
+  import_types SlackCoder.GraphQL.Schemas.User
   import_types SlackCoder.GraphQL.Schemas.PR
+  import_types SlackCoder.GraphQL.Schemas.RandomFailure
   import_types SlackCoder.GraphQL.InputObjects.User
+  import_types SlackCoder.GraphQL.Schemas.Pagination
 
   @desc "Only used for querying, never returned."
   enum :pull_request_type do
@@ -15,8 +20,20 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
     value :inactive, description: "Returns all inactive `PullRequest`s that were previously tracked."
   end
 
+  @desc "Only used for querying, never returned"
+  enum :random_failure_sort_field do
+    value :count, description: ""
+    value :recent, description: ""
+  end
+
+  @desc "Direction used for sorting. Query only, never returned."
+  enum :direction do
+    value :asc, description: "Values sorted in ascending order."
+    value :desc, description: "Values sorted in descending order."
+  end
+
   query do
-    @desc "Fetch a group of PRs"
+    @desc "Fetch a group of PRs -- not yet functional"
     field :pull_requests, type: :pull_request do
       @desc "The type of `PullRequest`s you'd like to fetch."
       arg :type, :pull_request_type
@@ -46,10 +63,25 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
     end
 
     @desc "Fetching users of the system."
-    field :users, type: list_of(:user) do
-      resolve fn _, _, _ ->
-        {:ok, Repo.all(User)}
-      end
+    field :users, type: :pagination do
+      @desc "The page number"
+      arg :page, :integer
+      @desc "The number of items in a page, maximum 100"
+      arg :per_page, :integer
+      resolve &SlackCoder.GraphQL.Resolvers.UserResolver.list/3
+    end
+
+    @desc "List of random failures"
+    field :failures, type: :pagination do
+      @desc "The page number"
+      arg :page, :integer
+      @desc "The number of items in a page, maximum 100"
+      arg :per_page, :integer
+      @desc "Sort by"
+      arg :sort, :random_failure_sort_field
+      @desc "Sort direction"
+      arg :dir, :direction
+      resolve &SlackCoder.GraphQL.Resolvers.RandomFailureResolver.list/3
     end
   end
 

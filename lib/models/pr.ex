@@ -28,6 +28,9 @@ defmodule SlackCoder.Models.PR do
     field :analysis_status, :string
     field :build_url, :string
     field :analysis_url, :string
+    # Random failure tracking
+    field :last_failed_jobs, {:array, :map}, virtual: true, default: []
+    field :last_failed_sha, :string, virtual: true
 
     belongs_to :user, SlackCoder.Models.User
 

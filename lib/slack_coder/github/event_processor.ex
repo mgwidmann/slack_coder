@@ -141,6 +141,7 @@ defmodule SlackCoder.Github.EventProcessor do
   # Build has changed status for a CI system
   def process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha}) when ci_system in ["default", "ci/circleci", "continuous-integration/travis-ci/pr", "semaphoreci"] do
     Logger.debug "EventProcessor received build status event of state #{state}"
+
     ShaMapper.find(sha)
     |> PullRequest.status(:build, sha, url, state)
   end

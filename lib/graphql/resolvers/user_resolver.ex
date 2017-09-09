@@ -5,6 +5,10 @@ defmodule SlackCoder.GraphQL.Resolvers.UserResolver do
   alias SlackCoder.Models.User
   alias SlackCoder.Repo
 
+  def list(_, params, _) do
+    {:ok, Repo.paginate(User, params)}
+  end
+
   def update(_, %{id: id, user: user_params}, _resolution) do
     case Repo.get(User, id) do
       %User{} = user ->
