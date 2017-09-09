@@ -24,6 +24,10 @@ $('#view_user').on('change', function() {
   document.location.href = `/?user=${$(this).val()}`;
 });
 
+$( document ).ajaxSend((event, xhr, settings) => {
+  xhr.setRequestHeader('Authorization', `Bearer ${window.token}`);
+});
+
 $(document).on('click', '.refresh-pr', function(){
   var owner = $(this).data('owner');
   var repo = $(this).data('repo');
