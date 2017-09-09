@@ -40,6 +40,9 @@ config :ueberauth, Ueberauth.Strategy.Github.OAuth,
   client_id: System.get_env("GITHUB_CLIENT_ID"),
   client_secret: System.get_env("GITHUB_CLIENT_SECRET")
 
+config :slack_coder, SlackCoder.Guardian,
+  secret_key: System.get_env("GUARDIAN_SECRET")
+
 config :slack_coder, :notifications,
   min_hour: 8,
   max_hour: 17,

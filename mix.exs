@@ -52,12 +52,13 @@ defmodule SlackCoder.Mixfile do
       {:poison, "~> 3.1", override: true},
       {:ecto, "~> 2.0", override: true},
       {:ueberauth_github, "~> 0.4"},
+      {:guardian, "~> 1.0.0-beta.0"},
       {:stub_alias, "~> 0.1.2"},
       {:scrivener_html, "~> 1.5"},
       {:scrivener_ecto, "~> 1.0"},
-      {:absinthe, "~> 1.2"},
-      {:absinthe_plug, "~> 1.2"},
-      {:absinthe_ecto, github: "absinthe-graphql/absinthe_ecto"},
+      {:absinthe, "~> 1.4.0-beta.5"},
+      {:absinthe_plug, github: "mgwidmann/absinthe_plug", branch: "default_headers_connection"},
+      {:absinthe_ecto, github: "mgwidmann/absinthe_ecto", branch: "1.4.0-beta"},
 
       # Monitoring
       {:flames, github: "mgwidmann/flames"},

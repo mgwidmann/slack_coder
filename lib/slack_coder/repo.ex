@@ -1,6 +1,6 @@
 defmodule SlackCoder.Repo do
   use Ecto.Repo, otp_app: :slack_coder
-  use Scrivener
+  use Scrivener, max_page_size: 100
 
   # Fun addition
   def count(queryable) do

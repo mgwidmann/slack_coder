@@ -8,19 +8,21 @@ defmodule SlackCoder.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug Ueberauth
-    plug :assign_current_user
+    plug SlackCoder.Guardian.Pipeline
   end
 
   pipeline :restricted do
-    plug SlackCoder.VerifyUser
+    plug SlackCoder.Guardian.RestrictedPipeline
   end
 
   pipeline :admin do
-    plug SlackCoder.VerifyUser, admin: true
+    plug SlackCoder.Guardian.AdminPipeline
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug Guardian.Plug.VerifyHeader, module: SlackCoder.Guardian,
+                                     error_handler: SlackCoder.Guardian.AuthErrorHandler
   end
 
   scope "/" do
@@ -32,10 +34,13 @@ defmodule SlackCoder.Router do
       pipe_through :restricted
       resources "/users", SlackCoder.UserController, only: [:index, :new, :create, :edit, :update]
 
+      forward "/graphiql", Absinthe.Plug.GraphiQL,
+        schema: SlackCoder.GraphQL.Schemas.MainSchema,
+        default_headers: {__MODULE__, :graphiql_headers},
+        default_url: "/api/graphql"
+
       scope "/admin" do
         pipe_through :admin
-
-        forward "/graphiql", Absinthe.Plug.GraphiQL, schema: SlackCoder.GraphQL.Schemas.MainSchema
 
         scope "/", SlackCoder do
           get "/users/external/:github", UserController, :external
@@ -50,11 +55,15 @@ defmodule SlackCoder.Router do
   scope "/api" do
     pipe_through :api
 
-    forward "/graphql", Absinthe.Plug, schema: SlackCoder.GraphQL.Schemas.MainSchema
-
-    get "/pull_requests/:owner/:repo/:pr/refresh", SlackCoder.PageController, :synchronize
-
     post "/github/event", SlackCoder.GithubController, :event
+
+    scope "/" do
+      pipe_through :restricted
+
+      forward "/graphql", Absinthe.Plug, schema: SlackCoder.GraphQL.Schemas.MainSchema
+
+      get "/pull_requests/:owner/:repo/:pr/refresh", SlackCoder.PageController, :synchronize
+    end
   end
 
   forward "/errors", Flames.Web
@@ -73,10 +82,7 @@ defmodule SlackCoder.Router do
   #   pipe_through :api
   # end
 
-  # Fetch the current user from the session and add it to `conn.assigns`. This
-  # will allow you to have access to the current user in your views with
-  # `@current_user`.
-  defp assign_current_user(conn, _) do
-    assign(conn, :current_user, get_session(conn, :current_user))
+  def graphiql_headers(conn) do
+    %{"Authorization" => "Bearer #{SlackCoder.Guardian.Plug.current_token(conn)}"}
   end
 end

@@ -5,8 +5,6 @@ defmodule SlackCoder.GraphQL.Schemas.PR do
   use Absinthe.Ecto, repo: SlackCoder.Repo
   import SlackCoder.GraphQL.Resolvers.DefaultResolvers
 
-  import_types SlackCoder.GraphQL.Schemas.Scalars
-  import_types SlackCoder.GraphQL.Schemas.User
 
   @desc "A replica of the Github Pull Request data stripped down to what this project needs."
   object :pull_request do

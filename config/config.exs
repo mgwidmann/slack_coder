@@ -43,6 +43,13 @@ config :ueberauth, Ueberauth,
     github: {Ueberauth.Strategy.Github, [default_scope: "user,public_repo"]}
   ]
 
+config :slack_coder, SlackCoder.Guardian,
+  allowed_algos: ["HS512", "HS384"],
+  issuer: "SlackCoder",
+  ttl: { 30, :days },
+  serializer: SlackCoder.Guardian,
+  secret_key: "nUzHV60AayAhzalp8iRhB5FokH7tcVv67ozi6PTjO0PZcUtyO4uoQRfcrVk5bc54"
+
 config :scrivener_html,
   routes_helper: SlackCoder.Router.Helpers
 
