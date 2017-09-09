@@ -2,6 +2,8 @@ defmodule SlackCoder.Services.RandomFailureService do
   @moduledoc """
   """
   alias SlackCoder.Models.RandomFailure
+  alias SlackCoder.Github.Watchers.PullRequest
+  alias SlackCoder.Github.Watchers.Supervisor, as: GithubSupervisor
   alias SlackCoder.Travis.Job
   alias SlackCoder.Repo
   require Logger
@@ -11,7 +13,7 @@ defmodule SlackCoder.Services.RandomFailureService do
     |> Repo.insert_or_update()
     |> case do
       {:ok, random_failure} ->
-        {:ok, random_failure}# All is good
+        {:ok, random_failure} # All is good
       errored_changeset ->
         Logger.error("Unable to save random failure\n\tchangeset: #{inspect changeset}\n\trandom failure: #{inspect changeset.data}")
         errored_changeset
@@ -19,7 +21,7 @@ defmodule SlackCoder.Services.RandomFailureService do
   end
 
   def save_random_failure(pr) do
-    for %Job{rspec: rspec, rspec_seed: rspec_seed, cucumber: cucumber, cucumber_seed: cucumber_seed} <- SlackCoder.BuildSystem.failed_jobs(pr) do
+    for %Job{rspec: rspec, rspec_seed: rspec_seed, cucumber: cucumber, cucumber_seed: cucumber_seed} <- pr.last_failed_jobs do
       find_or_create_and_update!(rspec, rspec_seed, pr)
       find_or_create_and_update!(cucumber, cucumber_seed, pr)
     end

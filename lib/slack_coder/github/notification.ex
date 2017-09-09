@@ -3,6 +3,8 @@ defmodule SlackCoder.Github.Notification do
   import StubAlias
   stub_alias SlackCoder.Users.User
   stub_alias SlackCoder.Users.Supervisor, as: Users
+  alias SlackCoder.Github.Watchers.Supervisor, as: GithubSupervisor
+  alias SlackCoder.Github.Watchers.PullRequest
 
   defstruct [:slack_user, :type, :called_out?, :message_for, :message]
 
@@ -31,7 +33,6 @@ defmodule SlackCoder.Github.Notification do
   def failure(pr) do
     case user_for_pr(pr) |> slack_user_with_monitors do
       [message_for | slack_users] ->
-        failed_jobs = SlackCoder.BuildSystem.failed_jobs(pr)
         message = %{
                     attachments: [
                       %{
@@ -42,10 +43,10 @@ defmodule SlackCoder.Github.Notification do
                         title_link: pr.html_url,
                         text: """
                         <#{pr.build_url}|Travis Build>
-                        #{failed_job_output(failed_jobs)}
+                        #{failed_job_output(pr.last_failed_jobs)}
                         """,
                         mrkdwn_in: ["text"],
-                        footer: "#{Enum.sum(Enum.map(failed_jobs, &(Enum.count(&1.rspec))))} rspec, #{Enum.sum(Enum.map(failed_jobs, &(Enum.count(&1.cucumber))))} cucumber"
+                        footer: "#{Enum.sum(Enum.map(pr.last_failed_jobs, &(Enum.count(&1.rspec))))} rspec, #{Enum.sum(Enum.map(pr.last_failed_jobs, &(Enum.count(&1.cucumber))))} cucumber"
                       }
                     ]
                   }
