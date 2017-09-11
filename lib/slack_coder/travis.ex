@@ -31,7 +31,17 @@ defmodule SlackCoder.Travis do
       # Cannot use follow_redirect: true, cause need to drop authorization header
       {:ok, %HTTPoison.Response{status_code: 307, headers: headers}} ->
         {"Location", redirect} = Enum.find(headers, &(match?({"Location", _}, &1)))
-        HTTPoison.get!(redirect)
+        HTTPoison.get(redirect)
+        |> case do
+          {:ok, response} -> response
+          {:error, problem} ->
+            Logger.warn """
+            #{__MODULE__} job log fetch failed
+
+            #{inspect problem}
+            """
+            %{body: ""}
+        end
         |> Map.fetch!(:body)
         |> Job.filter_log()
         |> Job.new()
