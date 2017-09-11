@@ -15,7 +15,7 @@ defmodule SlackCoder.Travis do
 
         #{inspect problem}
         """
-        [] # Return nothing
+        %{body: []} # Return nothing
     end
     |> Map.fetch!(:body)
   end
