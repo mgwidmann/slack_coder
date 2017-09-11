@@ -139,7 +139,8 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   # Build has changed status for a CI system
-  def process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha}) when ci_system in ["default", "ci/circleci", "continuous-integration/travis-ci/pr", "semaphoreci"] do
+  @ci_systems ~w(default ci/circleci continuous-integration/travis-ci/pr continuous-integration/travis-ci/push semaphoreci)
+  def process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha}) when ci_system in @ci_systems do
     Logger.debug "EventProcessor received build status event of state #{state}"
 
     ShaMapper.find(sha)
@@ -147,7 +148,8 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   # Build has change status for an Analysis system
-  def process(:status, %{"context" => "codeclimate", "state" => state, "target_url" => url, "sha" => sha}) do
+  @analysis_systems ~w(codeclimate)
+  def process(:status, %{"context" => analysis_system, "state" => state, "target_url" => url, "sha" => sha}) when analysis_system in @analysis_systems do
     Logger.debug "EventProcessor received analysis status event of state #{state}"
 
     ShaMapper.find(sha)
