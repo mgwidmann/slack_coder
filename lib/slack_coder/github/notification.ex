@@ -3,8 +3,6 @@ defmodule SlackCoder.Github.Notification do
   import StubAlias
   stub_alias SlackCoder.Users.User
   stub_alias SlackCoder.Users.Supervisor, as: Users
-  alias SlackCoder.Github.Watchers.Supervisor, as: GithubSupervisor
-  alias SlackCoder.Github.Watchers.PullRequest
 
   defstruct [:slack_user, :type, :called_out?, :message_for, :message]
 

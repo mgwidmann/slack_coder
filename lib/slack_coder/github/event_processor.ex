@@ -36,7 +36,7 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   # A user has made a comment on the PR itself (not related to any code).
-  def process(:issue_comment, %{"issue" => %{"number" => pr}} = pull_request) do
+  def process(:issue_comment, %{"issue" => %{"number" => _pr}} = _pull_request) do
     Logger.debug "EventProcessor received issue_comment event"
 
     # TODO: Get working again
@@ -49,7 +49,7 @@ defmodule SlackCoder.Github.EventProcessor do
 
   # A user has made a comment on code belonging to a PR. When a user makes a comment on a commit not related to a PR,
   # the `find_watcher/1` call will return `nil` and subsequent function calls will just do nothing.
-  def process(:commit_comment, params) do
+  def process(:commit_comment, _params) do
     Logger.debug "EventProcessor received commit_comment event"
 
     # TODO: Get working again

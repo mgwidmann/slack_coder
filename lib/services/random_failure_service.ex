@@ -2,8 +2,6 @@ defmodule SlackCoder.Services.RandomFailureService do
   @moduledoc """
   """
   alias SlackCoder.Models.RandomFailure
-  alias SlackCoder.Github.Watchers.PullRequest
-  alias SlackCoder.Github.Watchers.Supervisor, as: GithubSupervisor
   alias SlackCoder.Travis.Job
   alias SlackCoder.Repo
   require Logger

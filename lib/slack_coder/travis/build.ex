@@ -1,5 +1,6 @@
 defmodule SlackCoder.Travis.Build do
   use HTTPoison.Base
+  require Logger
 
   @keys ~w(id repository_id result)a
   defstruct @keys
@@ -21,9 +22,11 @@ defmodule SlackCoder.Travis.Build do
 
   @data_key "matrix"
   defp process_response_body(body) when is_binary(body) do
-    body
-    |> Poison.decode!()
-    |> Map.fetch!(@data_key)
+    decoded = Poison.decode!(body)
+    unless @data_key in Map.keys(decoded) do
+      Logger.warn ["[", IO.ANSI.green, inspect(__MODULE__), "] ", IO.ANSI.default_color, "Received unexpected response: ", inspect(decoded)]
+    end
+    Map.get(decoded, @data_key, [])
     |> Enum.map(fn build ->
       build
       |> Enum.map(fn({k, v}) -> {String.to_atom(k), v} end)

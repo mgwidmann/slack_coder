@@ -27,7 +27,6 @@ defmodule SlackCoder.GraphQL.Schemas.RandomFailure do
     @desc "The browser URL to the build"
     field :log_url, :string
 
-    field :inserted_at, :datetime
-    field :updated_at, :datetime
+    timestamps()
   end
 end

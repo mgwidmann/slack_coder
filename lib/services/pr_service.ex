@@ -147,7 +147,18 @@ defmodule SlackCoder.Services.PRService do
   end
 
   def check_failed(%PR{build_status: "failure"} = pr) do
-    %PR{ pr | last_failed_jobs: SlackCoder.BuildSystem.failed_jobs(pr)}
+    failed_jobs = try do
+      SlackCoder.BuildSystem.failed_jobs(pr)
+    catch
+      e ->
+        Logger.error("CATCH: Unable to check failed: #{inspect e}")
+        []
+    rescue
+      e ->
+        Logger.error("RESCUE: Unable to check failed: #{inspect e}")
+        []
+    end
+    %PR{pr | last_failed_jobs: failed_jobs}
   end
   def check_failed(pr), do: pr
 end
