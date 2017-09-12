@@ -27,6 +27,10 @@ defmodule SlackCoder.BuildSystem.Travis do
     |> handle_job_fetch()
     |> Enum.filter(&(&1))
   end
+  def job_log(build) do
+    Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to fetch job log data for build: #{inspect build}"]
+    []
+  end
 
   defp handle_job_fetch({:ok, %HTTPoison.Response{status_code: 200, body: body}}) do
     body
