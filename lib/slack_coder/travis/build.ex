@@ -23,8 +23,7 @@ defmodule SlackCoder.Travis.Build do
   defp process_response_body(body) when is_binary(body) do
     body
     |> Poison.decode!()
-    |> Map.take([@data_key])
-    |> Map.get(@data_key)
+    |> Map.fetch!(@data_key)
     |> Enum.map(fn build ->
       build
       |> Enum.map(fn({k, v}) -> {String.to_atom(k), v} end)
