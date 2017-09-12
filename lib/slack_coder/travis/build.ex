@@ -20,7 +20,7 @@ defmodule SlackCoder.Travis.Build do
   end
 
   @data_key "matrix"
-  defp process_response_body(body) do
+  defp process_response_body(body) when is_binary(body) do
     body
     |> Poison.decode!()
     |> Map.take([@data_key])

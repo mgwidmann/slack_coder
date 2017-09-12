@@ -54,7 +54,7 @@ defmodule SlackCoder.Travis.Job do
     |> Enum.map(&({Map.fetch!(&1, "file"), Map.fetch!(&1, "line")}))
   end
 
-  def filter_log(body) do
+  def filter_log(body) when is_binary(body) do
     body
     |> String.split("\r\n")
     |> Stream.filter(&keep?/1)
