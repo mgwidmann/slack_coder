@@ -25,6 +25,7 @@ defmodule SlackCoder do
     end
 
     children = children ++ [
+      :hackney_pool.child_spec(:default, [timeout: 15000, max_connections: 100]),
       worker(SlackCoder.Github.Watchers.MergeConflict, []),
       supervisor(SlackCoder.Github.Supervisor, [])
     ]

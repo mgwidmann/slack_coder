@@ -20,7 +20,8 @@ defmodule SlackCoder.BuildSystem do
         module.build_info(pr.owner, pr.repo, build_id)
         |> Enum.filter(&match?(%Build{result: :failure}, &1))
         |> Enum.reject(&match?(%Build{id: nil}, &1))
-        |> Enum.map(&module.job_log(&1))
+        |> Enum.map(&(module.job_log(&1)))
+        |> Enum.filter(&(&1))
       other ->
         Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to extract build_url: #{inspect other}"]
         []

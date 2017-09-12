@@ -21,11 +21,10 @@ defmodule SlackCoder.BuildSystem.Travis do
     [] # Return nothing
   end
 
-  def job_log(%SlackCoder.BuildSystem.Build{id: id}) when is_binary(id) do
+  def job_log(%SlackCoder.BuildSystem.Build{id: id}) when is_integer(id) do
     "/jobs/#{id}/log"
     |> Job.get()
     |> handle_job_fetch()
-    |> Enum.filter(&(&1))
   end
   def job_log(build) do
     Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to fetch job log data for build: #{inspect build}"]
