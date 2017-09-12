@@ -153,14 +153,14 @@ defmodule SlackCoder.Github.EventProcessorTest do
       assert [%RandomFailure{
           sha: @sha,
           file: "./spec/some/file.rb",
-          line: 32,
+          line: "32",
           seed: 90872,
           count: 1,
           log_url: "https://semaphoreci.com/mgwidmann/slack_coder/branches/random_failures/builds/4"
         }, %RandomFailure{
           sha: @sha,
           file: "features/some.feature",
-          line: 14,
+          line: "14",
           seed: 27832,
           count: 1,
           log_url: "https://semaphoreci.com/mgwidmann/slack_coder/branches/random_failures/builds/4"

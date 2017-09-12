@@ -27,6 +27,7 @@ defmodule SlackCoder.Models.RandomFailure do
 
   def find_unique(query \\ __MODULE__, owner, repo, file, line) do
     import Ecto.Query
+    line = to_string(line)
     from q in query, where: q.owner == ^owner and q.repo == ^repo and q.file == ^file and q.line == ^line, limit: 1
   end
 end

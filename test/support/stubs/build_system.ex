@@ -5,7 +5,7 @@ defmodule SlackCoder.Stubs.BuildSystem do
 
     def build_info(_owner, _repo, _build_id) do
       [
-        %Build{result: :failure}
+        %Build{id: "123", result: :failure}
       ]
     end
     def job_log(_build) do
@@ -18,7 +18,7 @@ defmodule SlackCoder.Stubs.BuildSystem do
 
     def build_info(_owner, _repo, _build_id) do
       [
-        %Build{result: :failure}
+        %Build{id: "123", result: :failure}
       ]
     end
     def job_log(_build) do
@@ -31,7 +31,7 @@ defmodule SlackCoder.Stubs.BuildSystem do
 
     def build_info(_owner, _repo, _build_id) do
       [
-        %Build{result: :failure}
+        %Build{id: "123", result: :failure}
       ]
     end
     def job_log(_build) do

@@ -39,7 +39,7 @@ defmodule SlackCoder.Services.RandomFailureService do
           pr: pr.number,
           sha: pr.sha,
           file: file,
-          line: line,
+          line: to_string(line),
           seed: seed,
           count: 1,
           log_url: pr.build_url
