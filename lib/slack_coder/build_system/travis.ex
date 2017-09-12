@@ -1,6 +1,6 @@
-defmodule SlackCoder.Travis do
-  alias SlackCoder.Travis.Build
-  alias SlackCoder.Travis.Job
+defmodule SlackCoder.BuildSystem.Travis do
+  alias SlackCoder.BuildSystem.Travis.Build
+  alias SlackCoder.BuildSystem.Travis.Job
   require Logger
 
   def build_info(owner, repo, build) do
@@ -21,7 +21,7 @@ defmodule SlackCoder.Travis do
     [] # Return nothing
   end
 
-  def job_log(%Build{id: id}) do
+  def job_log(%SlackCoder.BuildSystem.Build{id: id}) do
     "/jobs/#{id}/log"
     |> Job.get()
     |> handle_job_fetch()

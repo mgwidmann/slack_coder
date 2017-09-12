@@ -2,7 +2,7 @@ defmodule SlackCoder.Services.RandomFailureService do
   @moduledoc """
   """
   alias SlackCoder.Models.RandomFailure
-  alias SlackCoder.Travis.Job
+  alias SlackCoder.BuildSystem.Job
   alias SlackCoder.Repo
   require Logger
 

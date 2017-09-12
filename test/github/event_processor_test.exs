@@ -110,7 +110,7 @@ defmodule SlackCoder.Github.EventProcessorTest do
   describe "status" do
     alias SlackCoder.Github.Watchers.Supervisor, as: GithubSupervisor
     alias SlackCoder.Github.Watchers.PullRequest
-    alias SlackCoder.Travis.Job
+    alias SlackCoder.BuildSystem.Job
 
     @before_sha "theshabefore"
     setup do

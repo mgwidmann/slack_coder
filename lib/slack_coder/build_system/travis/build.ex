@@ -1,20 +1,19 @@
-defmodule SlackCoder.Travis.Build do
+defmodule SlackCoder.BuildSystem.Travis.Build do
   use HTTPoison.Base
   require Logger
+  alias SlackCoder.BuildSystem.Build
 
-  @keys ~w(id repository_id result)a
-  defstruct @keys
-
+  @keys Map.keys(Build.__struct__)
   def new(build) do
-    __MODULE__
+    Build
     |> struct!(build |> Keyword.take(@keys))
     |> migrate_result()
   end
 
-  defp migrate_result(%__MODULE__{result: 0} = build), do: Map.put(build, :result, :success)
-  defp migrate_result(%__MODULE__{result: 1} = build), do: Map.put(build, :result, :failure)
-  defp migrate_result(%__MODULE__{result: nil} = build), do: Map.put(build, :result, :error)
-  defp migrate_result(%__MODULE__{result: _} = build), do: Map.put(build, :result, :unknown)
+  defp migrate_result(%Build{result: 0} = build), do: Map.put(build, :result, :success)
+  defp migrate_result(%Build{result: 1} = build), do: Map.put(build, :result, :failure)
+  defp migrate_result(%Build{result: nil} = build), do: Map.put(build, :result, :error)
+  defp migrate_result(%Build{result: _} = build), do: Map.put(build, :result, :unknown)
 
   defp process_url(url) do
     "https://api.travis-ci.com" <> url

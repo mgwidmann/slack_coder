@@ -1,12 +1,11 @@
-defmodule SlackCoder.Travis.Job do
+defmodule SlackCoder.BuildSystem.Travis.Job do
   use HTTPoison.Base
-  defstruct [:rspec_seed, :rspec, :cucumber_seed, :cucumber]
 
   def new(results) do
     seed = find_seed(results)
     rspec_seed = Enum.at(seed, 0) # Safe indexing in case theres nothing here
     cucumber_seed = Enum.at(seed, 1)
-    %__MODULE__{
+    %SlackCoder.BuildSystem.Job{
       rspec_seed: rspec_seed,
       rspec: find_rspec_failures(results),
       cucumber_seed: cucumber_seed,
@@ -70,22 +69,4 @@ defmodule SlackCoder.Travis.Job do
   defp remove_colors(text), do: String.replace(text, ~r/\e\[.+?m/, "")
 
   defp remove_comments(text), do: String.replace(text, ~r/ #.*$/, "")
-
-  defimpl String.Chars do
-    def to_string(%SlackCoder.Travis.Job{rspec_seed: rspec_seed, rspec: rspec, cucumber_seed: cucumber_seed, cucumber: cucumber}) do
-      if rspec != [] do
-        """
-        bundle exec rspec #{rspec |> Enum.map(&(Tuple.to_list(&1) |> Enum.join(":"))) |> Enum.join(" ")} --seed #{rspec_seed}
-        """
-      else
-        ""
-      end <> (if cucumber != [] do
-        """
-        bundle exec cucumber #{cucumber |> Enum.map(&(Tuple.to_list(&1) |> Enum.join(":"))) |> Enum.join(" ")} --order random:#{cucumber_seed}
-        """
-      else
-        ""
-      end) |> String.trim_trailing()
-    end
-  end
 end
