@@ -7,11 +7,10 @@ defmodule SlackCoder.Travis do
     "/repos/#{owner}/#{repo}/builds/#{build}"
     |> Build.get()
     |> handle_build_fetch()
-    |> Map.get(:body, [])
   end
 
-  defp handle_build_fetch({:ok, %HTTPoison.Response{status_code: 200} = response}) do
-    response
+  defp handle_build_fetch({:ok, %HTTPoison.Response{status_code: 200, body: body}}) when is_list(body) do
+    body
   end
   defp handle_build_fetch({ok_or_error, problem}) when ok_or_error in ~w(ok error)a do
     Logger.warn """
@@ -19,7 +18,7 @@ defmodule SlackCoder.Travis do
 
     #{inspect problem}
     """
-    %{body: []} # Return nothing
+    [] # Return nothing
   end
 
   def job_log(%Build{id: id}) do
