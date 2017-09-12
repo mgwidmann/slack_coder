@@ -21,10 +21,11 @@ defmodule SlackCoder.BuildSystem.Travis do
     [] # Return nothing
   end
 
-  def job_log(%SlackCoder.BuildSystem.Build{id: id}) do
+  def job_log(%SlackCoder.BuildSystem.Build{id: id}) when is_binary(id) do
     "/jobs/#{id}/log"
     |> Job.get()
     |> handle_job_fetch()
+    |> Enum.filter(&(&1))
   end
 
   defp handle_job_fetch({:ok, %HTTPoison.Response{status_code: 200, body: body}}) do
@@ -45,7 +46,7 @@ defmodule SlackCoder.BuildSystem.Travis do
 
     #{inspect response}
     """
-    Job.new([])
+    nil
   end
 
 end

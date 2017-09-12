@@ -7,7 +7,7 @@ defmodule SlackCoder.Models.RandomFailure do
     field :pr, :integer
     field :sha, :string
     field :file, :string
-    field :line, :integer
+    field :line, :string
     field :seed, :integer
     field :count, :integer, default: 0
     field :log_url, :string

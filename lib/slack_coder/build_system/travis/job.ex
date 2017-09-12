@@ -39,16 +39,17 @@ defmodule SlackCoder.BuildSystem.Travis.Job do
     |> Enum.to_list()
   end
 
+  @file_line_matcher ~r/(?<file>.+?[^\[]):?(?<line>\d+|\[.+\])/
   defp find_rspec_failures(results) do
     results
-    |> Stream.map(&Regex.named_captures(~r/rspec (?<file>.+):(?<line>.+)/, &1))
+    |> Stream.map(&Regex.named_captures(~r/rspec #{@file_line_matcher.source}/, &1))
     |> Stream.filter(&(&1))
     |> Enum.map(&({Map.fetch!(&1, "file"), Map.fetch!(&1, "line")}))
   end
 
   defp find_cucumber_failures(results) do
     results
-    |> Stream.map(&Regex.named_captures(~r/cucumber (?<file>.+):(?<line>.+)/, &1))
+    |> Stream.map(&Regex.named_captures(~r/cucumber #{@file_line_matcher.source}/, &1))
     |> Stream.filter(&(&1))
     |> Enum.map(&({Map.fetch!(&1, "file"), Map.fetch!(&1, "line")}))
   end
