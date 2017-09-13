@@ -5,7 +5,6 @@ defmodule SlackCoder.Services.RandomFailureService do
   alias SlackCoder.BuildSystem.Job
   alias SlackCoder.Repo
   alias SlackCoder.Models.PR
-  alias SlackCoder.Services.PRService
   require Logger
 
   def save(changeset) do
@@ -21,9 +20,11 @@ defmodule SlackCoder.Services.RandomFailureService do
   end
 
   def save_random_failure(%PR{last_failed_jobs: []} = pr) do
-    pr
-    |> PRService.check_failed()
-    |> save_random_failure()
+    Logger.warn """
+    Attempt to save random failed job but found no failure data.
+
+    #{inspect pr}
+    """
   end
   def save_random_failure(%PR{last_failed_jobs: [_ | _] = last_failed_jobs} = pr) do
     for %Job{rspec: rspec, rspec_seed: rspec_seed, cucumber: cucumber, cucumber_seed: cucumber_seed} <- last_failed_jobs do

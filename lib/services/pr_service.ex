@@ -146,9 +146,23 @@ defmodule SlackCoder.Services.PRService do
     Task.start SlackCoder.Services.RandomFailureService, :save_random_failure, [pr]
   end
 
-  def check_failed(%PR{build_status: "failure"} = pr) do
-    failed_jobs = SlackCoder.BuildSystem.failed_jobs(pr)
-    %PR{pr | last_failed_jobs: failed_jobs, last_failed_sha: pr.sha}
+  def check_failed(pr, attempted_once \\ false)
+  def check_failed(%PR{build_status: status} = pr, attempted_once) when status in ~w(failure pending) do
+    case SlackCoder.BuildSystem.failed_jobs(pr) do
+      [] ->
+        if attempted_once do
+          Logger.warn """
+          Checking failed job data returned empty twice in a row.
+
+          #{inspect pr}
+          """
+          pr
+        else
+          check_failed(pr, true)
+        end
+      failed_jobs ->
+        %PR{pr | last_failed_jobs: failed_jobs, last_failed_sha: pr.sha}
+    end
   end
-  def check_failed(pr), do: pr
+  def check_failed(pr, _attempted_once), do: pr
 end
