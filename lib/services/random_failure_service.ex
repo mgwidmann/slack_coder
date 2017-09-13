@@ -28,13 +28,13 @@ defmodule SlackCoder.Services.RandomFailureService do
   end
   def save_random_failure(%PR{last_failed_jobs: [_ | _] = last_failed_jobs} = pr) do
     for %Job{rspec: rspec, rspec_seed: rspec_seed, cucumber: cucumber, cucumber_seed: cucumber_seed} <- last_failed_jobs do
-      find_or_create_and_update!(rspec, rspec_seed, pr)
-      find_or_create_and_update!(cucumber, cucumber_seed, pr)
+      find_or_create_and_update!(rspec, :rspec, rspec_seed, pr)
+      find_or_create_and_update!(cucumber, :cucumber, cucumber_seed, pr)
     end
   end
 
-  defp find_or_create_and_update!([], _seed, _pr), do: nil
-  defp find_or_create_and_update!([{file, line} | failures], seed, pr) do
+  defp find_or_create_and_update!([], _type, _seed, _pr), do: nil
+  defp find_or_create_and_update!([{file, line} | failures], type, seed, pr) do
     RandomFailure.find_unique(pr.owner, pr.repo, file, line)
     |> Repo.one()
     |> case do
@@ -50,11 +50,12 @@ defmodule SlackCoder.Services.RandomFailureService do
           line: to_string(line),
           seed: seed,
           count: 1,
-          log_url: pr.build_url
+          log_url: pr.build_url,
+          type: to_string(type)
         })
     end
     |> save()
 
-    find_or_create_and_update!(failures, seed, pr)
+    find_or_create_and_update!(failures, type, seed, pr)
   end
 end

@@ -3,6 +3,13 @@ defmodule SlackCoder.GraphQL.Schemas.RandomFailure do
   """
   use Absinthe.Schema.Notation
   use Absinthe.Ecto, repo: SlackCoder.Repo
+  import SlackCoder.GraphQL.Resolvers.DefaultResolvers
+  alias SlackCoder.GraphQL.Resolvers.RandomFailureResolver
+
+  enum :failure_type do
+    value :rspec, description: "This failure occurred within an RSpec test."
+    value :cucumber, description: "This failure occurred within a cucumber integration test."
+  end
 
   object :failure do
     @desc "The primary identifier for each failure."
@@ -26,6 +33,10 @@ defmodule SlackCoder.GraphQL.Schemas.RandomFailure do
     field :count, :integer
     @desc "The browser URL to the build"
     field :log_url, :string
+    @desc "The system used to run the test."
+    field :type, :failure_type
+    @desc "Command to run to replicate this failure."
+    field :run_command, :string, resolve: as(&RandomFailureResolver.run_command/1)
 
     timestamps()
   end

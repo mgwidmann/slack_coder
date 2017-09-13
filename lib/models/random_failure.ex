@@ -11,6 +11,7 @@ defmodule SlackCoder.Models.RandomFailure do
     field :seed, :integer
     field :count, :integer, default: 0
     field :log_url, :string
+    field :type, :string
 
     timestamps()
   end
