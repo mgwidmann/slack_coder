@@ -125,7 +125,7 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(:pull_request, %{"action" => action}) when action in @unprocessed, do: true
 
   def process(:pull_request, %{"action" => other} = _params) do
-    Logger.warn "Ignoring :pull_request event: #{other}"
+    Logger.warn "Ignoring :pull_request event #{other}"
     false
   end
 
@@ -166,7 +166,7 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   def process(unknown_event, params) do
-    Logger.info "EventProcessor received unknown event #{inspect unknown_event} with params #{inspect params}"
+    Logger.warn "EventProcessor received unknown event #{inspect unknown_event} with params #{inspect params, pretty: true}"
   end
 
   def pr_number(%{"comment" => %{"pull_request_url" => url}}) do

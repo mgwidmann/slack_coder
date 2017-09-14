@@ -25,6 +25,7 @@ defmodule SlackCoder.BuildSystem.Travis do
     "/jobs/#{id}/log"
     |> Job.get()
     |> handle_job_fetch()
+    |> put_job_id(id)
   end
   def job_log(build) do
     Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to fetch job log data for build: #{inspect build}"]
@@ -47,9 +48,12 @@ defmodule SlackCoder.BuildSystem.Travis do
     Logger.warn """
     #{__MODULE__} job log fetch failed
 
-    #{inspect response}
+    #{inspect response, pretty: true}
     """
     nil
   end
+
+  defp put_job_id(nil, _id), do: nil
+  defp put_job_id(job, id), do: Map.put(job, :id, id)
 
 end

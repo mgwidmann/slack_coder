@@ -11,7 +11,7 @@ defmodule SlackCoder.BuildSystem do
     defstruct [:id, :repository_id, :result]
   end
   defmodule Job do
-    defstruct [:rspec_seed, :rspec, :cucumber_seed, :cucumber]
+    defstruct [:id, :rspec_seed, :rspec, :cucumber_seed, :cucumber]
   end
 
   def failed_jobs(pr) do
@@ -23,7 +23,7 @@ defmodule SlackCoder.BuildSystem do
         |> Enum.map(&(module.job_log(&1)))
         |> Enum.filter(&(&1))
       other ->
-        Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to extract build_url: #{inspect other}"]
+        Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to extract build_url: #{inspect other, pretty: true}"]
         []
     end
   end

@@ -154,7 +154,7 @@ defmodule SlackCoder.Services.PRService do
           Logger.warn """
           Checking failed job data returned empty twice in a row.
 
-          #{inspect pr}
+          #{inspect pr, pretty: true}
           """
           pr
         else

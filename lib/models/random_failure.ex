@@ -1,5 +1,6 @@
 defmodule SlackCoder.Models.RandomFailure do
   use SlackCoder.Web, :model
+  alias SlackCoder.Models.RandomFailure.{RunType, CISystem}
 
   schema "random_failures" do
     field :owner, :string
@@ -10,8 +11,9 @@ defmodule SlackCoder.Models.RandomFailure do
     field :line, :string
     field :seed, :integer
     field :count, :integer, default: 0
-    field :log_url, :string
-    field :type, :string
+    field :type, RunType
+    field :external_id, :integer
+    field :system, CISystem
 
     timestamps()
   end

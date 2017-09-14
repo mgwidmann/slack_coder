@@ -26,7 +26,10 @@ config :slack_coder,
   timezone: "America/New_York",
   pr_backoff_start: 4,
   caretaker: :matt,
+  # Used for internal API access
   travis_token: System.get_env("TRAVIS_API_TOKEN"),
+  # Returned in `RandomFailure` file links and so is a potentially publicly accessible token
+  travis_public_token: System.get_env("TRAVIS_PUBLIC_API_TOKEN"),
   circle_ci_token: System.get_env("CIRCLE_CI_API_TOKEN")
 
 config :slack,

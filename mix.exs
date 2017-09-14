@@ -51,6 +51,7 @@ defmodule SlackCoder.Mixfile do
       {:phoenix_ecto, "~> 3.0"},
       {:scrivener_ecto, "~> 1.0"},
       {:timex_ecto, "~> 3.0"},
+      {:ecto_enum, "~> 1.0"},
       {:postgrex, "~> 0.11"},
       #### Authentication ####
       {:guardian, "~> 1.0.0-beta.0"},

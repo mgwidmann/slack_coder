@@ -11,6 +11,12 @@ defmodule SlackCoder.GraphQL.Schemas.RandomFailure do
     value :cucumber, description: "This failure occurred within a cucumber integration test."
   end
 
+  enum :system_type do
+    value :travis, description: "Job was run on https://travis-ci.com/"
+    value :circle_c_i, description: "Job was run on https://circleci.com/"
+    value :semaphore, description: "Job was run on https://semaphoreci.com/"
+  end
+
   object :failure do
     @desc "The primary identifier for each failure."
     field :id, :id
@@ -32,9 +38,11 @@ defmodule SlackCoder.GraphQL.Schemas.RandomFailure do
     @desc "The number of times this failure has occurred."
     field :count, :integer
     @desc "The browser URL to the build"
-    field :log_url, :string
+    field :log_url, :string, resolve: as(&RandomFailureResolver.log_url/1)
     @desc "The system used to run the test."
     field :type, :failure_type
+    @desc "Which CI system the job was run on."
+    field :system, :system_type
     @desc "Command to run to replicate this failure."
     field :run_command, :string, resolve: as(&RandomFailureResolver.run_command/1)
 
