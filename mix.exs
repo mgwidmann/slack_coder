@@ -38,29 +38,38 @@ defmodule SlackCoder.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      # Prod dependencies
+      ###########################
+      #### Prod dependencies ####
+      ###########################
+      #### Core ####
       {:phoenix, "~> 1.3.0-rc"},
-      {:phoenix_ecto, "~> 3.0"},
-      {:postgrex, "~> 0.11"},
       {:phoenix_html, "~> 2.6"},
       {:cowboy, "~> 1.0"},
-      {:timex_ecto, "~> 3.0"},
-      {:slack, github: "BlakeWilliams/Elixir-Slack"},
-      {:websocket_client, "~> 1.2", override: true},
-      {:tentacat, "~> 0.6"},
-      {:httpoison, "~> 0.10"},
-      {:poison, "~> 3.1", override: true},
+      #### Ecto ####
       {:ecto, "~> 2.0", override: true},
-      {:ueberauth_github, "~> 0.4"},
-      {:guardian, "~> 1.0.0-beta.0"},
-      {:stub_alias, "~> 0.1.2"},
-      {:scrivener_html, "~> 1.5"},
+      {:absinthe_ecto, github: "mgwidmann/absinthe_ecto", branch: "1.4.0-beta"},
+      {:phoenix_ecto, "~> 3.0"},
       {:scrivener_ecto, "~> 1.0"},
+      {:timex_ecto, "~> 3.0"},
+      {:postgrex, "~> 0.11"},
+      #### Authentication ####
+      {:guardian, "~> 1.0.0-beta.0"},
+      {:ueberauth_github, "~> 0.4"},
+      #### GraphQL ####
       {:absinthe, "~> 1.4.0-beta.5"},
       {:absinthe_plug, github: "mgwidmann/absinthe_plug", branch: "default_headers_connection"},
-      {:absinthe_ecto, github: "mgwidmann/absinthe_ecto", branch: "1.4.0-beta"},
-
-      # Monitoring
+      #### Slack ####
+      {:slack, github: "BlakeWilliams/Elixir-Slack"},
+      {:websocket_client, "~> 1.2", override: true},
+      #### Github ####
+      {:tentacat, "~> 0.6"},
+      #### Misc ####
+      {:scrivener_html, "~> 1.5"},
+      {:httpoison, "~> 0.10"},
+      {:poison, "~> 3.1", override: true},
+      ### Testing ####
+      {:stub_alias, "~> 0.1.2"}, # Note: Needed for all environments to compile
+      #### Monitoring ####
       {:flames, github: "mgwidmann/flames"},
       {:wobserver, "~> 0.1"},
 
