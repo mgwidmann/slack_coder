@@ -27,15 +27,15 @@ defmodule SlackCoder.Services.RandomFailureService do
     """
   end
   def save_random_failure(%PR{last_failed_jobs: [_ | _] = last_failed_jobs} = pr) do
-    for %Job{id: id, rspec: rspec, rspec_seed: rspec_seed, cucumber: cucumber, cucumber_seed: cucumber_seed} <- last_failed_jobs do
-      find_or_create_and_update!(rspec, id, :rspec, rspec_seed, pr)
-      find_or_create_and_update!(cucumber, id, :cucumber, cucumber_seed, pr)
+    for %Job{id: id, system: system, rspec: rspec, rspec_seed: rspec_seed, cucumber: cucumber, cucumber_seed: cucumber_seed} <- last_failed_jobs do
+      find_or_create_and_update!(rspec, id, system, :rspec, rspec_seed, pr)
+      find_or_create_and_update!(cucumber, id, system, :cucumber, cucumber_seed, pr)
     end
   end
 
-  defp find_or_create_and_update!([], _id, _type, _seed, _pr), do: nil
-  defp find_or_create_and_update!([{file, line} | failures], id, type, seed, pr) do
-    RandomFailure.find_unique(pr.owner, pr.repo, file, line)
+  defp find_or_create_and_update!([], _id, _system, _type, _seed, _pr), do: nil
+  defp find_or_create_and_update!([{file, line, description} | failures], id, system, type, seed, pr) do
+    RandomFailure.find_unique(pr.owner, pr.repo, file, line, description)
     |> Repo.one()
     |> case do
       %RandomFailure{count: count} = random_failure ->
@@ -48,14 +48,16 @@ defmodule SlackCoder.Services.RandomFailureService do
           sha: pr.sha,
           file: file,
           line: to_string(line),
+          description: description,
           seed: seed,
           count: 1,
           external_id: id,
+          system: system,
           type: to_string(type)
         })
     end
     |> save()
 
-    find_or_create_and_update!(failures, id, type, seed, pr)
+    find_or_create_and_update!(failures, id, system, type, seed, pr)
   end
 end

@@ -9,7 +9,7 @@ defmodule SlackCoder.Stubs.BuildSystem do
       ]
     end
     def job_log(_build) do
-      %Job{rspec_seed: "90872", rspec: [{"./spec/some/file.rb", 32}], cucumber_seed: "27832", cucumber: [{"features/some.feature", 14}]}
+      %Job{id: "4", rspec_seed: "90872", rspec: [{"./spec/some/file.rb", "32", "The test name"}], cucumber_seed: "27832", cucumber: [{"features/some.feature", "14", "The cucumber test"}]}
     end
   end
   defmodule CircleCI do
@@ -22,7 +22,7 @@ defmodule SlackCoder.Stubs.BuildSystem do
       ]
     end
     def job_log(_build) do
-      %Job{rspec_seed: "90872", rspec: [{"./spec/some/file.rb", 32}], cucumber_seed: "27832", cucumber: [{"features/some.feature", 14}]}
+      %Job{id: "4", rspec_seed: "90872", rspec: [{"./spec/some/file.rb", "32", "The test name"}], cucumber_seed: "27832", cucumber: [{"features/some.feature", "14", "The cucumber test"}]}
     end
   end
   defmodule Semaphore do
@@ -35,7 +35,7 @@ defmodule SlackCoder.Stubs.BuildSystem do
       ]
     end
     def job_log(_build) do
-      %Job{rspec_seed: "90872", rspec: [{"./spec/some/file.rb", 32}], cucumber_seed: "27832", cucumber: [{"features/some.feature", 14}]}
+      %Job{id: "4", rspec_seed: "90872", rspec: [{"./spec/some/file.rb", "32", "The test name"}], cucumber_seed: "27832", cucumber: [{"features/some.feature", "14", "The cucumber test"}]}
     end
   end
 end

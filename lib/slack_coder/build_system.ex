@@ -11,7 +11,7 @@ defmodule SlackCoder.BuildSystem do
     defstruct [:id, :repository_id, :result]
   end
   defmodule Job do
-    defstruct [:id, :rspec_seed, :rspec, :cucumber_seed, :cucumber]
+    defstruct [:id, :system, :rspec_seed, :rspec, :cucumber_seed, :cucumber]
   end
 
   def failed_jobs(pr) do
@@ -22,11 +22,16 @@ defmodule SlackCoder.BuildSystem do
         |> Enum.reject(&match?(%Build{id: nil}, &1))
         |> Enum.map(&(module.job_log(&1)))
         |> Enum.filter(&(&1))
+        |> Enum.map(&(Map.put(&1, :system, system_for_module(module))))
       other ->
         Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to extract build_url: #{inspect other, pretty: true}"]
         []
     end
   end
+
+  defp system_for_module(Travis), do: :travis
+  defp system_for_module(CircleCI), do: :circleci
+  defp system_for_module(Semaphore), do: :semaphore
 
   defp build_regex(pr) do
     [
@@ -54,16 +59,20 @@ defimpl String.Chars, for: SlackCoder.BuildSystem.Job do
   def to_string(%SlackCoder.BuildSystem.Job{rspec_seed: rspec_seed, rspec: rspec, cucumber_seed: cucumber_seed, cucumber: cucumber}) do
     if rspec != [] do
       """
-      bundle exec rspec #{rspec |> Enum.map(&(Tuple.to_list(&1) |> Enum.join(":"))) |> Enum.join(" ")} --seed #{rspec_seed}
+      bundle exec rspec#{executable_line(rspec)} --seed #{rspec_seed}
       """
     else
       ""
     end <> (if cucumber != [] do
       """
-      bundle exec cucumber #{cucumber |> Enum.map(&(Tuple.to_list(&1) |> Enum.join(":"))) |> Enum.join(" ")} --order random:#{cucumber_seed}
+      bundle exec cucumber#{executable_line(cucumber)} --order random:#{cucumber_seed}
       """
     else
       ""
     end) |> String.trim_trailing()
   end
+
+  def executable_line(list, acc \\ "")
+  def executable_line([], acc), do: acc
+  def executable_line([{file, line, _desc} | rest], acc), do: executable_line(rest, acc <> " " <> file <> ":" <> line)
 end

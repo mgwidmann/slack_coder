@@ -149,22 +149,27 @@ defmodule SlackCoder.Github.EventProcessorTest do
 
       Process.sleep(100) # Wait for random failure service to finish processing
       number = pr.number
-      failures = Repo.all(from(f in RandomFailure, where: f.pr == ^number, order_by: [asc: :id]))
-      assert [%RandomFailure{
+      [rspec_failure, cucumber_failure] = Repo.all(from(f in RandomFailure, where: f.pr == ^number, order_by: [asc: :id]))
+      assert %RandomFailure{
           sha: @sha,
           file: "./spec/some/file.rb",
           line: "32",
           seed: 90872,
           count: 1,
-          log_url: "https://semaphoreci.com/mgwidmann/slack_coder/branches/random_failures/builds/4"
-        }, %RandomFailure{
+          external_id: 4,
+          system: :semaphore,
+          type: :rspec
+        } = rspec_failure
+      assert %RandomFailure{
           sha: @sha,
           file: "features/some.feature",
           line: "14",
           seed: 27832,
           count: 1,
-          log_url: "https://semaphoreci.com/mgwidmann/slack_coder/branches/random_failures/builds/4"
-        }] = failures
+          external_id: 4,
+          system: :semaphore,
+          type: :cucumber
+        } = cucumber_failure
     end
   end
 

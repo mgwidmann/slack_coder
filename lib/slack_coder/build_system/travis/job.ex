@@ -40,18 +40,13 @@ defmodule SlackCoder.BuildSystem.Travis.Job do
   end
 
   @file_line_matcher ~r/(?<file>.+?[^\[]):?(?<line>\d+|\[.+\])/
-  defp find_rspec_failures(results) do
-    results
-    |> Stream.map(&Regex.named_captures(~r/rspec #{@file_line_matcher.source}/, &1))
-    |> Stream.filter(&(&1))
-    |> Enum.map(&({Map.fetch!(&1, "file"), Map.fetch!(&1, "line")}))
-  end
-
-  defp find_cucumber_failures(results) do
-    results
-    |> Stream.map(&Regex.named_captures(~r/cucumber #{@file_line_matcher.source}/, &1))
-    |> Stream.filter(&(&1))
-    |> Enum.map(&({Map.fetch!(&1, "file"), Map.fetch!(&1, "line")}))
+  for type <- ~w(rspec cucumber) do
+    defp unquote(:"find_#{type}_failures")(results) do
+      results
+      |> Stream.map(&Regex.named_captures(~r/#{unquote(type)} #{@file_line_matcher.source}( # )?(?<description>.*)/, &1))
+      |> Stream.filter(&(&1))
+      |> Enum.map(&({Map.fetch!(&1, "file"), Map.fetch!(&1, "line"), Map.fetch!(&1, "description")}))
+    end
   end
 
   def filter_log(body) when is_binary(body) do
