@@ -37,6 +37,8 @@ defmodule SlackCoder.GraphQL.Schemas.RandomFailure do
     field :seed, :integer
     @desc "The number of times this failure has occurred."
     field :count, :integer
+    @desc "The description of the test."
+    field :description, :string
     @desc "The browser URL to the build"
     field :log_url, :string, resolve: as(&RandomFailureResolver.log_url/1)
     @desc "The system used to run the test."
