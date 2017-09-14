@@ -1,7 +1,7 @@
 defmodule SlackCoder.Repo.Migrations.CreateRandomFailures do
   use Ecto.Migration
 
-  def change do
+  def up do
     create table(:random_failures) do
       add :owner, :string, null: false
       add :repo, :string, null: false
@@ -15,5 +15,9 @@ defmodule SlackCoder.Repo.Migrations.CreateRandomFailures do
 
       timestamps()
     end
+  end
+
+  def down do
+    drop table(:random_failures)
   end
 end
