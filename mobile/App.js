@@ -1,24 +1,14 @@
 import React, { Component } from 'react';
-import { Text, View } from 'react-native';
-import ScrollableTabView from 'react-native-scrollable-tab-view';
-import tabStyles from './app/styles/tab';
-import { PRIMARY_COLOR, SECONDARY_COLOR, FOREGROUND_COLOR } from './app/styles/constants';
-import PRView from './app/components/PRView'
+import { Provider } from 'react-redux';
+import Main from './app/containers/Main';
+import store from './app/store';
 
 export default class App extends React.Component {
   render() {
     return (
-      <ScrollableTabView
-        tabBarPosition="bottom"
-        style={tabStyles.tabBarContainer}
-        tabBarBackgroundColor={PRIMARY_COLOR}
-        tabBarActiveTextColor={FOREGROUND_COLOR}
-        tabBarUnderlineStyle={tabStyles.tabBarUnderline}
-        >
-        <PRView tabLabel='My PRs' />
-        <PRView tabLabel='Monitors' />
-        <PRView tabLabel='Hidden' />
-      </ScrollableTabView>
+      <Provider store={store}>
+        <Main />
+      </Provider>
     );
   }
 }

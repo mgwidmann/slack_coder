@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 export default class PRView extends Component {
   render () {
     return (
-      <Text>A view of PRs</Text>
+      <Text>A view of PRs {this.props.count}</Text>
     )
   }
 }
