@@ -1,10 +1,26 @@
 import React, { Component } from 'react';
-import { Text, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+import PRRow from './PRRow';
 
 export default class PRView extends Component {
+  constructor(props) {
+    super(props);
+    this.renderPR = this.renderPR.bind(this);
+  }
+
+  renderPR(pr) {
+    const { tab, dispatch } = this.props;
+    return <PRRow key={pr.id} pr={pr} dispatch={dispatch} tab={tab} />;
+  }
+
   render () {
     return (
-      <Text>A view of PRs {this.props.count}</Text>
+      <ScrollView>
+        {this.props.prs.map(this.renderPR)}
+      </ScrollView>
     )
   }
 }
+
+const styles = StyleSheet.create({
+});

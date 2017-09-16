@@ -1,0 +1,1 @@
+export const TOGGLE_EXPAND_PR = 'TOGGLE_EXPAND';

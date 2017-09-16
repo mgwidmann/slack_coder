@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux'
-import simple from './simple';
+import pullRequests from './pullRequests';
 
 const reducers = combineReducers({
-  simple
+  pullRequests
 })
 
 export default reducers;

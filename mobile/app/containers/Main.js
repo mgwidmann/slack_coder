@@ -6,10 +6,8 @@ import { PRIMARY_COLOR, SECONDARY_COLOR, FOREGROUND_COLOR } from '../styles/cons
 import PRView from '../components/PRView'
 
 class Main extends Component {
-  componentDidMount() {
-    this.props.dispatch({type: '-'});
-  }
   render () {
+    const { dispatch, pullRequests } = this.props;
     return (
       <ScrollableTabView
         tabBarPosition="bottom"
@@ -18,9 +16,9 @@ class Main extends Component {
         tabBarActiveTextColor={FOREGROUND_COLOR}
         tabBarUnderlineStyle={tabStyles.tabBarUnderline}
         >
-        <PRView tabLabel='My PRs' count={this.props.simple} />
-        <PRView tabLabel='Monitors' count={this.props.simple + 1} />
-        <PRView tabLabel='Hidden' count={this.props.simple - 1}/>
+        <PRView tabLabel='Main' dispatch={dispatch} tab={'main'} prs={pullRequests.main} />
+        <PRView tabLabel='Monitors' dispatch={dispatch} tab={'monitors'} prs={pullRequests.monitors} />
+        <PRView tabLabel='Hidden' dispatch={dispatch} tab={'hidden'} prs={pullRequests.hidden} />
       </ScrollableTabView>
     )
   }
