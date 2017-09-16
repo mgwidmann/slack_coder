@@ -44,6 +44,8 @@ deploy.config:
       - mix ecto.migrate --no-deps-check
 
 web.main:
+  writable_dirs:
+    - _build
   log_watch:
     app[crash]: erl_crash.dump
   start: node-start mix phx.server
