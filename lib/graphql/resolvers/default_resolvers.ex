@@ -16,4 +16,8 @@ defmodule SlackCoder.GraphQL.Resolvers.DefaultResolvers do
       end
     end
   end
+
+  def force_boolean(field) do
+    fn _, %{source: data} -> {:ok, !!Map.get(data, field)} end
+  end
 end

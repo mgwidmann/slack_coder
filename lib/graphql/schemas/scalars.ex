@@ -7,7 +7,11 @@ defmodule SlackCoder.GraphQL.Schemas.Scalars do
   `"2015-06-24 04:50:34"`).
   """
   scalar :datetime, description: "ISO time" do
-    parse &Ecto.DateTime.cast/1
-    serialize &Ecto.DateTime.to_string/1
+    parse fn string ->
+      DateTime.from_iso8601(string)
+    end
+    serialize fn datetime ->
+      DateTime.to_iso8601(datetime)
+    end
   end
 end
