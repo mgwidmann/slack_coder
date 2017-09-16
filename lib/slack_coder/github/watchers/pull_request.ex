@@ -4,6 +4,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   alias SlackCoder.Models.PR
   alias SlackCoder.Services.PRService
   alias SlackCoder.Repo
+  import Ecto.Query
   require Logger
 
   @stale_check_interval 60_000
@@ -106,10 +107,18 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
       mergeable: not raw_pr["mergeable_state"] in ["dirty", "conflicting"],
       github_user: raw_pr["user"]["login"] || pr.github_user,
       github_user_avatar: raw_pr["user"]["avatar_url"] || pr.github_user_avatar,
-      sha: raw_pr["head"]["sha"] || pr.sha
+      sha: raw_pr["head"]["sha"] || pr.sha,
+      user_id: pr.user_id || user_id(raw_pr["user"]["login"])
     }
     |> mergeable_unknown(raw_pr)
     |> fork_data(raw_pr)
+  end
+
+  defp user_id(github) do
+    github
+    |> SlackCoder.Models.User.by_github()
+    |> select([u], u.id)
+    |> Repo.one
   end
 
   defp mergeable_unknown(changes, %{"mergeable_state" => "unknown"}) do

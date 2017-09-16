@@ -33,14 +33,15 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
   end
 
   query do
-    @desc "Fetch a group of PRs -- not yet functional"
-    field :pull_requests, type: :pull_request do
+    @desc "Fetch a group of PRs"
+    field :pull_requests, type: list_of(:pull_request) do
       @desc "The type of `PullRequest`s you'd like to fetch."
       arg :type, :pull_request_type
 
       resolve fn
-        _, %{type: :mine}, _ ->
-          {:ok, []}
+        _, %{type: :mine}, %{context: %{current_user: current_user}} ->
+          IO.inspect current_user
+          {:ok, SlackCoder.Github.Watchers.Supervisor.pull_requests()[String.to_atom(current_user.github)]}
         _, %{type: :monitors}, _ ->
           {:ok, []}
         _, %{type: :other}, _ ->
