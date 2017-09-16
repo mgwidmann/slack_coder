@@ -28,7 +28,7 @@ export default class PRView extends Component {
             </StatusText>
           </View>
         </TouchableHighlight>
-        <View style={{display: pr.expand ? 'flex' : 'none', height: 150}}>
+        <View style={[{display: pr.expand ? 'flex' : 'none'}, styles.hiddenView]}>
           <Text>Shows up when clicked</Text>
         </View>
       </View>
@@ -51,5 +51,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between'
+  },
+  hiddenView: {
+    height: 150
   }
 });
