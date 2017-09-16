@@ -1,8 +1,10 @@
 defmodule SlackCoder.Github.Watchers.PullRequest do
   use GenServer
+  import StubAlias
   import SlackCoder.Github.TimeHelper
   alias SlackCoder.Models.PR
-  alias SlackCoder.Services.{PRService, UserService}
+  stub_alias SlackCoder.Services.UserService
+  alias SlackCoder.Services.PRService
   alias SlackCoder.Repo
   import Ecto.Query
   require Logger
