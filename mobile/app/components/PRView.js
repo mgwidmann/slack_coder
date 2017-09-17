@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import PRRow from './PRRow';
+import { gql, graphql } from 'react-apollo';
 
 export default class PRView extends Component {
   constructor(props) {
@@ -24,3 +25,11 @@ export default class PRView extends Component {
 
 const styles = StyleSheet.create({
 });
+
+// export default graphql(gql`
+//   query PRs {
+//     pullRequests {
+//       id
+//     }
+//   }
+// `)(PRView);

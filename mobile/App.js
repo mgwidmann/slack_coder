@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
-import { Provider } from 'react-redux';
+import { ApolloProvider } from 'react-apollo';
 import Main from './app/containers/Main';
 import store from './app/store';
+import client from './app/graphql/client';
 
 export default class App extends React.Component {
   render() {
     return (
-      <Provider store={store}>
+      <ApolloProvider client={client} store={store}>
         <Main />
-      </Provider>
+      </ApolloProvider>
     );
   }
 }
