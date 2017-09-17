@@ -11,7 +11,24 @@ defmodule SlackCoder.Guardian do
   end
 
   def resource_from_claims(claims) do
+    IO.puts "Getting user for #{inspect claims}"
     {:ok, Repo.get!(User, claims["sub"])}
+  end
+
+  defmodule CurrentUser do
+    import Plug.Conn
+    @moduledoc """
+    Fetch the current user from the session and add it to `conn.assigns`. This
+    will allow you to have access to the current user in your views with
+    `@current_user`.
+    """
+    def init(_), do: nil
+    def call(conn, _) do
+      current_user = SlackCoder.Guardian.Plug.current_resource(conn)
+      conn
+      |> assign(:current_user, current_user)
+      |> put_private(:absinthe, %{context: %{current_user: current_user}})
+    end
   end
 
   defmodule Pipeline do
@@ -21,17 +38,7 @@ defmodule SlackCoder.Guardian do
 
     plug Guardian.Plug.VerifySession
     plug Guardian.Plug.LoadResource, allow_blank: true
-    plug :assign_current_user
-
-    # Fetch the current user from the session and add it to `conn.assigns`. This
-    # will allow you to have access to the current user in your views with
-    # `@current_user`.
-    defp assign_current_user(conn, _) do
-      current_user = SlackCoder.Guardian.Plug.current_resource(conn)
-      conn
-      |> assign(:current_user, current_user)
-      |> put_private(:absinthe, %{context: %{current_user: current_user}}) # For Absinthe
-    end
+    plug SlackCoder.Guardian.CurrentUser
   end
 
   defmodule RestrictedPipeline do
@@ -40,6 +47,8 @@ defmodule SlackCoder.Guardian do
                                 error_handler: SlackCoder.Guardian.AuthErrorHandler
 
     plug Guardian.Plug.EnsureAuthenticated
+    plug Guardian.Plug.LoadResource
+    plug SlackCoder.Guardian.CurrentUser
   end
 
   defmodule AdminPipeline do
@@ -48,6 +57,8 @@ defmodule SlackCoder.Guardian do
                                 error_handler: SlackCoder.Guardian.AuthErrorHandler
 
     plug Guardian.Plug.VerifySession, claims: %{admin: true}
+    plug Guardian.Plug.LoadResource
+    plug SlackCoder.Guardian.CurrentUser
   end
 
   defmodule AuthErrorHandler do

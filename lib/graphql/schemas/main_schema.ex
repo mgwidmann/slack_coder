@@ -15,9 +15,14 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
   enum :pull_request_type do
     value :mine, description: "Returns only `PullRequest`s that belong to the current user."
     value :monitors, description: "Returns only `PullRequest`s that belong to the current user's monitor list."
-    value :other, description: "Returns `PullRequest`s that are not in the MINE or MONITORS category, based upon the current user."
-    value :all, description: "Returns all active `PullRequest`s that are currently being tracked."
-    value :inactive, description: "Returns all inactive `PullRequest`s that were previously tracked."
+    # value :other, description: "Returns `PullRequest`s that are not in the MINE or MONITORS category, based upon the current user."
+    # value :all, description: "Returns all active `PullRequest`s that are currently being tracked."
+    # value :inactive, description: "Returns all inactive `PullRequest`s that were previously tracked."
+  end
+
+  enum :pull_request_status do
+    value :open, description: "The PR is currently open."
+    value :merged, description: "The PR has been merged."
   end
 
   @desc "Only used for querying, never returned"
@@ -33,21 +38,16 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
   end
 
   query do
-    @desc "Fetch a group of PRs -- not yet functional"
-    field :pull_requests, type: :pull_request do
+    @desc "Fetch a group of PRs"
+    field :pull_requests, type: list_of(:pull_request) do
       @desc "The type of `PullRequest`s you'd like to fetch."
       arg :type, :pull_request_type
+      arg :status, :pull_request_status
 
       resolve fn
-        _, %{type: :mine}, _ ->
-          {:ok, []}
-        _, %{type: :monitors}, _ ->
-          {:ok, []}
-        _, %{type: :other}, _ ->
-          {:ok, []}
-        _, %{type: :all}, _ ->
-          {:ok, []}
-        _, %{type: :inactive}, _ ->
+        _, %{type: :mine} = args, %{context: %{current_user: current_user}} ->
+          SlackCoder.GraphQL.Resolvers.PRResolver.list(current_user, :mine, args[:status] || :open)
+        _, %{type: :monitors}, %{context: %{current_user: _current_user}} ->
           {:ok, []}
       end
     end

@@ -8,16 +8,16 @@ defmodule SlackCoder.GraphQL.Schemas.PR do
 
   @desc "A replica of the Github Pull Request data stripped down to what this project needs."
   object :pull_request do
-    field :id, :id
+    field :id, non_null(:id)
 
     @desc "The owner of the repository, either the user or organization name."
-    field :owner, :string
+    field :owner, non_null(:string)
     @desc "The repository name of the pull request."
-    field :repository, :string, resolve: as(:repo)
+    field :repository, non_null(:string), resolve: as(:repo)
     @desc "The name of the branch of the pull request submitter."
-    field :branch, :string
+    field :branch, non_null(:string)
     @desc "If the branch of the pull request submitter is from a fork or not."
-    field :fork, :boolean
+    field :fork, non_null(:boolean), resolve: force_boolean(:fork)
 
     # Stale PR tracking
     @desc "The timestamp of the last comment on the `PullRequest`."
@@ -31,37 +31,37 @@ defmodule SlackCoder.GraphQL.Schemas.PR do
     @desc "The timestamp of when the `PullRequest` was merged (does not include closing unless it was previously closed)."
     field :merged_at, :datetime
     @desc "The number of hours after the latest comment timestamp in which a stale notification will be sent. Nights and weekends automatically excluded."
-    field :backoff, :integer
+    field :backoff, non_null(:integer)
 
     # Used in view
     @desc "The title of the `PullRequest`."
-    field :title, :string
+    field :title, non_null(:string)
     @desc "The Github Pull Request primary identifier."
-    field :number, :integer
+    field :number, non_null(:integer)
     @desc "The HTML interface URL of the `PullRequest`."
-    field :html_url, :string
+    field :html_url, non_null(:string)
     @desc "If the `PullRequest` is in a mergable state (there are no conflicts, does not take into account build status)."
-    field :mergeable, :boolean
+    field :mergeable, non_null(:boolean), resolve: force_boolean(:mergeable)
 
     # # Build status info
     @desc "The latest git commit SHA."
-    field :sha, :string
+    field :sha, non_null(:string)
     @desc "The status of the build."
-    field :build_status, :pull_request_build_status
+    field :build_status, :pull_request_build_status, resolve: as(&SlackCoder.GraphQL.Resolvers.PRResolver.build_status/1)
     @desc "The status of the code analysis."
-    field :analysis_status, :pull_request_analysis_status
+    field :analysis_status, :pull_request_analysis_status, resolve: as(&SlackCoder.GraphQL.Resolvers.PRResolver.analysis_status/1)
     @desc "The HTML URL of the build."
     field :build_url, :string
     @desc "The HTML URL of the code analysis."
     field :analysis_url, :string
 
     @desc "The user who opened the `PullRequest`."
-    field :user, :user
+    field :user, :user, resolve: assoc(:user)
   end
 
   @desc "The status of a `PullRequest` build"
   enum :pull_request_build_status do
-    value :failed, description: "The build did not succeed (tests failed)."
+    value :failure, description: "The build did not succeed (tests failed)."
     value :error, description: "The build failed because of an error which prevented it from running to completion."
     value :conflict, description: "There is a merge conflict."
     value :pending, description: "The build is currently being processed."
@@ -70,7 +70,7 @@ defmodule SlackCoder.GraphQL.Schemas.PR do
 
   @desc "The status of a `PullRequest` code analysis"
   enum :pull_request_analysis_status do
-    value :failed, description: "The changes added code style issues."
+    value :failure, description: "The changes added code style issues."
     value :pending, description: "The code analysis is currently being processed."
     value :success, description: "The build successfully passed all analysis checks."
   end
