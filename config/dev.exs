@@ -13,7 +13,7 @@ config :slack_coder, SlackCoder.Endpoint,
   cache_static_lookup: false,
   check_origin: false,
   watchers: [node: ["node_modules/.bin/webpack", "--watch",
-               cd: Path.expand("../", __DIR__)]]
+               cd: Path.expand("../client", __DIR__)]]
 
 # Watch static and templates for browser reloading.
 config :slack_coder, SlackCoder.Endpoint,
