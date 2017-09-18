@@ -14,85 +14,15 @@
     <script type="text/javascript">
       <% token = SlackCoder.Guardian.Plug.current_token(@conn) %>
       window.token = <%= raw if(token, do: inspect(token), else: "null") %>;
+      <% current_user = SlackCoder.Guardian.Plug.current_resource(@conn) %>
+      window.currentUser = <%= raw if(current_user, do: SlackCoder.UserView.render("user.json", user: current_user) |> Poison.encode!(), else: "null") %>;
+      window.commitSha = <%= raw inspect git_commit() %>;
     </script>
   </head>
 
   <body>
-    <div class="header">
-      <div class="container">
-        <div class="col-md-3 hidden-xs hidden-sm">
-          <a class="logo" href="/"></a>
-        </div>
-        <div class="col-md-6 col-sm-8 hidden-xs text-center">
-          <h1>
-            Slack Coder
-          </h1>
-          <p class="lead">Monitoring your <strong>dead</strong> pull requests</p>
-        </div>
-        <%= if @current_user do %>
-          <div class="col-md-3 col-sm-4 col-xs-12 text-right">
-            <span>
-              <img src="<%= @current_user.avatar_url %>" class="img-xs img-circle"/>
-              <%= if @current_user.id do %>
-                <%= link @current_user.github, to: user_path(@conn, :edit, @current_user.id)%>
-              <% else %>
-                <%= link @current_user.github, to: user_path(@conn, :new)%>
-              <% end %>
-            </span>
-            |
-            <%= link "Logout", to: auth_path(@conn, :delete), method: :delete %>
-          </div>
-          <div class="col-md-3 col-sm-4 col-xs-12 text-right">
-            <%= link to: user_path(@conn, :index) do %>
-              <i class="glyphicon glyphicon-user"></i> Users
-            <% end %>
-          </div>
-        <% end %>
-        <div class="col-md-3 col-sm-4 col-xs-12 text-right">
-          <a href="/wobserver">
-            <i class="glyphicon glyphicon-time"></i> Application Metrics
-          </a>
-          |
-          <%= link to: "/errors" do %>
-            <i class="glyphicon glyphicon-remove"></i> Errors
-          <% end %>
-        </div>
-        <div class="col-md-3 col-sm-4 col-xs-12 text-right">
-          <%= if @current_user do %>
-            <%= link to: "/graphiql" do %>
-              <i class="glyphicon glyphicon-console"></i> GraphiQL
-            <% end %>
-            |
-          <% end %>
-          <%= link to: "https://github.com/mgwidmann/slack_coder/commit/#{git_commit()}" do %>
-            <i class="glyphicon glyphicon-tag"></i> Version
-          <% end %>
-        </div>
-      </div>
-    </div>
-
-    <div class="container" role="main">
-      <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-      <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
-
-      <%= if @current_user do %>
-        <%= render @view_module, @view_template, assigns %>
-      <% else %>
-        <div class="center sign-in">
-          <a class="btn btn-default btn-xxl" href="<%= auth_path @conn, :index, "github" %>">
-            <i class="fa fa-github"></i>
-            Sign in with GitHub
-            <i class="fa fa-angle-right"></i>
-          </a>
-        </div>
-      <% end %>
-
-    </div> <!-- /container -->
-    <%= if @current_user do %>
-      <script>
-        window.github = "<%= @current_user.github %>";
-      </script>
-    <% end %>
-    <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
+    <div id="app"></div>
+    <script src="<%= static_path(@conn, "/js/dependencies.js") %>"></script>
+    <script src="<%= static_path(@conn, "/js/App.js") %>"></script>
   </body>
 </html>

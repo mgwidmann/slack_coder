@@ -3,12 +3,16 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { join, resolve } = require('path');
 
-var BUILD_DIR = resolve(__dirname, 'priv/static');
-var APP_DIR = resolve(__dirname, 'static');
+var BUILD_DIR = resolve(__dirname, '../priv/static');
+var APP_DIR = __dirname;
 
 var config = {
   entry:{
-    'app': [resolve(__dirname, 'static/js/app.js')]
+    'App': [resolve(__dirname, 'js/App.js')],
+    'dependencies': [
+      'react',
+      'redux'
+    ]
   },
   output: {
     path: BUILD_DIR,
@@ -30,7 +34,7 @@ var config = {
       jQuery: "jquery",
       "window.jQuery": "jquery"
     }),
-    new CopyWebpackPlugin([{ from: resolve(join(__dirname, "./static/assets")) }], { ignore: [resolve(join(__dirname, '.gitkeep'))] }),
+    new CopyWebpackPlugin([{ from: resolve(join(__dirname, "./assets")) }], { ignore: [resolve(join(__dirname, '.gitkeep'))] }),
   ],
   resolve: {
     extensions: ['.json', '.jsx', '.js']
@@ -39,12 +43,12 @@ var config = {
     loaders: [
       {
         test: /\.jsx?$/,
-        include: join(__dirname, 'static'),
+        include: __dirname,
         use: {
           loader: 'babel-loader',
           options: {
             presets: ['es2015', 'react', 'stage-0'],
-            plugins: ['transform-decorators-legacy', 'transform-class-properties', ["resolver", { "resolveDirs": [resolve(join(__dirname, 'static', 'js'))] }]]
+            plugins: ['transform-decorators-legacy', 'transform-class-properties', ["resolver", { "resolveDirs": [resolve(join(__dirname, 'js'))] }]]
           }
         }
       },

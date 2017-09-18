@@ -137,8 +137,8 @@ defmodule SlackCoder.Services.PRService do
     pr
   end
   def broadcast(pr) do
-    html = PageView.render("pull_request.html", pr: pr)
-    Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
+    pr_json = PageView.render("pull_request.json", pr: pr)
+    Endpoint.broadcast("prs:all", "pr:update", %{pr: pr_json, github: pr.github_user})
     pr
   end
 

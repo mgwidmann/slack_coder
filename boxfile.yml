@@ -13,18 +13,18 @@ run.config:
 
   # cache node_modules
   cache_dirs:
-    - node_modules
+    - client/node_modules
 
   # add node_module bins to the $PATH
   extra_path_dirs:
-    - node_modules/.bin
+    - client/node_modules/.bin
 
   # enable the filesystem watcher
   fs_watch: true
 
   # run npm install
   extra_steps:
-    - yarn install
+    - cd client && yarn install
 
   extra_packages:
     - python-2
@@ -33,7 +33,7 @@ run.config:
 deploy.config:
   # run brunch build
   extra_steps:
-    - yarn build
+    - cd client && yarn build
     - mix phx.digest
 
   # just before the new process comes online,

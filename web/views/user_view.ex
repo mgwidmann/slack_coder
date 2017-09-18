@@ -29,4 +29,18 @@ defmodule SlackCoder.UserView do
   def label_for("stale" <> _), do: "Stale PRs"
   def label_for("unstale" <> _), do: "Unstale PRs"
   def label_for(label), do: label
+
+  def render("user.json", %{user: user}) do
+    %{
+      id: user.id,
+      slack: user.slack,
+      github: user.github,
+      avatar_url: user.avatar_url,
+      html_url: user.html_url,
+      name: user.name,
+      monitors: user.monitors,
+      muted: user.muted,
+      admin: user.admin
+    }
+  end
 end

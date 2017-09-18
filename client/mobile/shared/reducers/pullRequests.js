@@ -39,7 +39,7 @@ const initialState = {
   ]
 }
 
-export default pullRequests = (state = initialState, action) => {
+export default (state = initialState, action) => {
   switch (action.type) {
     case TOGGLE_EXPAND_PR:
       let newState = Object.assign({}, state);

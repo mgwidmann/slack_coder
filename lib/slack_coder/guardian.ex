@@ -11,7 +11,6 @@ defmodule SlackCoder.Guardian do
   end
 
   def resource_from_claims(claims) do
-    IO.puts "Getting user for #{inspect claims}"
     {:ok, Repo.get!(User, claims["sub"])}
   end
 

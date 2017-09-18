@@ -18,4 +18,10 @@ defmodule SlackCoder.PageView do
     user && String.to_atom(user) || String.to_atom(current_user.github)
   end
 
+  def render("pull_request.json", %{pr: pr}) do
+    %{
+      id: pr.id
+    }
+  end
+
 end

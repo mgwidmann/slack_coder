@@ -3,7 +3,7 @@ import { Text, View, TouchableHighlight, StyleSheet } from 'react-native';
 import Title from './pr/Title';
 import StatusText from './pr/StatusText';
 import RepoText from './pr/RepoText';
-import { toggleExpandPR } from '../actions/pullRequest';
+import { toggleExpandPR } from '../../shared/actions/pullRequest';
 
 export default class PRView extends Component {
   constructor(props) {
