@@ -39,15 +39,27 @@ defmodule SlackCoder.GraphQL.Schemas.RandomFailure do
     field :count, :integer
     @desc "The description of the test."
     field :description, :string
-    @desc "The browser URL to the build"
-    field :log_url, :string, resolve: as(&RandomFailureResolver.log_url/1)
     @desc "The system used to run the test."
     field :type, :failure_type
     @desc "Which CI system the job was run on."
     field :system, :system_type
     @desc "Command to run to replicate this failure."
     field :run_command, :string, resolve: as(&RandomFailureResolver.run_command/1)
+    @desc "The log information for this failed job."
+    field :log, :log, resolve: assoc(:failure_log)
 
     timestamps()
+  end
+
+  object :log do
+    @desc "The primary identifier for each failure."
+    field :id, :id
+
+    @desc "The Pull Request which this random failure occurred."
+    field :pull_request, :pull_request, resolve: assoc(:pr)
+    @desc "The external system ID which the log was retrieved from."
+    field :external_id
+    @desc "The URL to the captured log file within the slack bot."
+    field :log_url, :string, resolve: as(&RandomFailureResolver.log_url/1)
   end
 end

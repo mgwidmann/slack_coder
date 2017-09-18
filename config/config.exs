@@ -2,7 +2,7 @@ use Mix.Config
 
 # Configures the endpoint
 config :slack_coder, SlackCoder.Endpoint,
-  url: [host: "localhost"],
+  url: [host: "localhost", port: 4000],
   root: Path.dirname(__DIR__),
   secret_key_base: "nHDNPeBEPIE+B6ltD8exVpSo2aISVfImcTrZhy6Uogg8nGmGNo/882R/HejimCIZ",
   render_errors: [accepts: ~w(html json)],

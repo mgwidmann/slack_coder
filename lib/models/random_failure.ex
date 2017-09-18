@@ -1,6 +1,6 @@
 defmodule SlackCoder.Models.RandomFailure do
   use SlackCoder.Web, :model
-  alias SlackCoder.Models.RandomFailure.{RunType, CISystem}
+  alias SlackCoder.Models.RandomFailure.{RunType, CISystem, FailureLog}
 
   schema "random_failures" do
     field :owner, :string
@@ -12,15 +12,16 @@ defmodule SlackCoder.Models.RandomFailure do
     field :seed, :integer
     field :count, :integer, default: 0
     field :type, RunType
-    field :external_id, :integer
     field :system, CISystem
     field :description, :string
+
+    belongs_to :failure_log, FailureLog
 
     timestamps()
   end
 
   @required_fields ~w(owner repo pr file line description)a
-  @optional_fields ~w(sha seed count system type external_id)a
+  @optional_fields ~w(sha seed count system type)a
   @all_fields @required_fields ++ @optional_fields
 
   def changeset(model, params \\ %{}) do

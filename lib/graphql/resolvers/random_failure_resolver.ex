@@ -1,6 +1,7 @@
 defmodule SlackCoder.GraphQL.Resolvers.RandomFailureResolver do
   alias SlackCoder.Repo
   alias SlackCoder.Models.RandomFailure
+  alias SlackCoder.Models.RandomFailure.FailureLog
   import Ecto.Query
 
   def list(_, params, _) do
@@ -20,8 +21,9 @@ defmodule SlackCoder.GraphQL.Resolvers.RandomFailureResolver do
   end
   defp order_clause(query, _params), do: query
 
-  def log_url(%RandomFailure{external_id: id, system: :travis}) do
-    "https://api.travis-ci.com/jobs/#{id}/log.txt?deansi=true&access_token=#{Application.get_env(:slack_coder, :travis_public_token)}"
+  def log_url(%FailureLog{id: id}) do
+    app_config = Application.get_env(:slack_coder, SlackCoder.Endpoint)
+    "http://#{app_config[:url][:host]}:#{app_config[:url][:port] || 4000}/api/failure_logs/#{id}"
   end
 
   def run_command(%RandomFailure{type: type, file: file, line: line, seed: seed}) do

@@ -147,7 +147,7 @@ defmodule SlackCoder.Services.PRService do
   end
 
   def check_failed(pr, attempted_once \\ false)
-  def check_failed(%PR{build_status: status} = pr, attempted_once) when status in ~w(failure pending) do
+  def check_failed(%PR{build_status: status} = pr, attempted_once) when status in ~w(failure) do
     case SlackCoder.BuildSystem.failed_jobs(pr) do
       [] ->
         if attempted_once do
