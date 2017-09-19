@@ -147,6 +147,10 @@ defmodule SlackCoder.Github.EventProcessor do
     |> PullRequest.status(:build, sha, url, state)
   end
 
+  def process(:status, %{"context" => "ci/bitrise" <> _}) do
+    # Ignore
+  end
+
   # Build has change status for an Analysis system
   @analysis_systems ~w(codeclimate)
   def process(:status, %{"context" => analysis_system, "state" => state, "target_url" => url, "sha" => sha}) when analysis_system in @analysis_systems do
@@ -162,6 +166,34 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   def process(:project_card, _params) do
+    # Ignore
+  end
+
+  def process(:pull_request_review, _params) do
+    # Ignore
+  end
+
+  def process(:create, _params) do
+    # Ignore
+  end
+
+  def process(:release, _params) do
+    # Ignore
+  end
+
+  def process(:delete, _params) do
+    # Ignore
+  end
+
+  def process(:team, _params) do
+    # Ignore
+  end
+
+  def process(:team_add, _params) do
+    # Ignore
+  end
+
+  def process(:fork, _params) do
     # Ignore
   end
 
