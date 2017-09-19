@@ -22,8 +22,7 @@ defmodule SlackCoder.GraphQL.Resolvers.RandomFailureResolver do
   defp order_clause(query, _params), do: query
 
   def log_url(%FailureLog{id: id}) do
-    app_config = Application.get_env(:slack_coder, SlackCoder.Endpoint)
-    "http://#{app_config[:url][:host]}:#{app_config[:url][:port] || 4000}/api/failure_logs/#{id}"
+    SlackCoder.Router.Helpers.random_failure_url(SlackCoder.Endpoint, :log, id)
   end
 
   def run_command(%RandomFailure{type: type, file: file, line: line, seed: seed}) do

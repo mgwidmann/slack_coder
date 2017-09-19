@@ -34,6 +34,8 @@ defmodule SlackCoder.Router do
       pipe_through :restricted
       resources "/users", SlackCoder.UserController, only: [:index, :new, :create, :edit, :update]
 
+      get "/failure_logs/:id", SlackCoder.Web.RandomFailureController, :log
+
       forward "/graphiql", Absinthe.Plug.GraphiQL,
         schema: SlackCoder.GraphQL.Schemas.MainSchema,
         default_headers: {__MODULE__, :graphiql_headers},
