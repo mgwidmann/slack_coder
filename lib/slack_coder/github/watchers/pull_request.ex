@@ -50,7 +50,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     :timer.send_interval @stale_check_interval, :stale_check
     SlackCoder.Github.ShaMapper.register(pr.sha)
     SlackCoder.Github.Watchers.MergeConflict.queue(pr)
-    {:noreply, {pr, callouts}}
+    {:noreply, {pr |> PRService.check_failed(), callouts}}
   end
 
   def handle_cast({:build, sha, url, state}, {%PR{sha: sha} = pr, callouts}) do
