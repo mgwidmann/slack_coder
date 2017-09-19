@@ -43,7 +43,7 @@ defmodule SlackCoder.BuildSystem.Travis.Job do
   for type <- ~w(rspec cucumber) do
     defp unquote(:"find_#{type}_failures")(results) do
       results
-      |> Stream.map(&Regex.named_captures(~r/#{unquote(type)} #{@file_line_matcher.source}( # )?(?<description>.*)/, &1))
+      |> Stream.map(&Regex.named_captures(~r/#{unquote(type)} #{@file_line_matcher.source}(#{IO.ANSI.light_black} # )?(?<description>.*)/, &1))
       |> Stream.filter(&(&1))
       |> Enum.map(&({Map.fetch!(&1, "file"), Map.fetch!(&1, "line"), Map.fetch!(&1, "description")}))
     end
