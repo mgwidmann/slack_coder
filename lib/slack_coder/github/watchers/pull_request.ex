@@ -47,7 +47,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
            existing_pr ->
              existing_pr
          end
-    :timer.send_interval @stale_check_interval, :stale_check
+    # :timer.send_interval @stale_check_interval, :stale_check
     SlackCoder.Github.ShaMapper.register(pr.sha)
     SlackCoder.Github.Watchers.MergeConflict.queue(pr)
     {:noreply, {pr |> PRService.check_failed(), callouts}}

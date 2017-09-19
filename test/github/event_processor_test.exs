@@ -164,7 +164,7 @@ defmodule SlackCoder.Github.EventProcessorTest do
           line: "32",
           seed: 90872,
           count: 1,
-          system: :semaphore,
+          system: :travis,
           type: :rspec
         } = rspec_failure
       assert %RandomFailure{
@@ -174,7 +174,7 @@ defmodule SlackCoder.Github.EventProcessorTest do
           line: "14",
           seed: 27832,
           count: 1,
-          system: :semaphore,
+          system: :travis,
           type: :cucumber
         } = cucumber_failure
       assert %FailureLog{

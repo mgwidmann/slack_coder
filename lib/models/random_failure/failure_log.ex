@@ -27,7 +27,6 @@ defmodule SlackCoder.Models.RandomFailure.FailureLog do
   end
 
   def with_external_id(query \\ __MODULE__, id) do
-    IO.puts "with_external_id(#{inspect id})"
     from log in query, where: log.external_id == ^id
   end
 end

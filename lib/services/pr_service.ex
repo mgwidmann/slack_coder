@@ -150,15 +150,18 @@ defmodule SlackCoder.Services.PRService do
   def check_failed(%PR{build_status: status} = pr, attempted_once) when status in ~w(failure) do
     case SlackCoder.BuildSystem.failed_jobs(pr) do
       [] ->
-        if attempted_once do
-          Logger.warn """
-          Checking failed job data returned empty twice in a row.
+        cond do
+          attempted_once && SlackCoder.BuildSystem.supported?(pr) ->
+            Logger.warn """
+            Checking failed job data returned empty twice in a row.
 
-          #{inspect pr, pretty: true}
-          """
-          pr
-        else
-          check_failed(pr, true)
+            #{inspect pr, pretty: true}
+            """
+            pr
+          SlackCoder.BuildSystem.supported?(pr) ->
+            check_failed(pr, true)
+          true ->
+            pr
         end
       failed_jobs ->
         %PR{pr | last_failed_jobs: failed_jobs, last_failed_sha: pr.sha}

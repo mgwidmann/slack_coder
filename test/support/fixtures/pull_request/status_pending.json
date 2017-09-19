@@ -2,9 +2,9 @@
   "id": 1531014205,
   "sha": "5e66e3fc3f61e06e4938ad9cd0d2eb1628246808",
   "name": "mgwidmann/slack_coder",
-  "target_url": "https://semaphoreci.com/mgwidmann/slack_coder/branches/random_failures/builds/4",
-  "context": "semaphoreci",
-  "description": "The build is pending on Semaphore.",
+  "target_url": "https://travis-ci.com/mgwidmann/slack_coder/builds/4",
+  "context": "continuous-integration/travis-ci/pr",
+  "description": "The build failed on Travis.",
   "state": "pending",
   "commit": {
     "sha": "5e66e3fc3f61e06e4938ad9cd0d2eb1628246808",

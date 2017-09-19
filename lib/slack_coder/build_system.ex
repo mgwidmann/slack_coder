@@ -26,17 +26,26 @@ defmodule SlackCoder.BuildSystem do
         |> Enum.filter(&(&1))
         |> Enum.map(&(Map.put(&1, :system, system_for_module(module))))
       other ->
-        Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to extract build_url: #{inspect other, pretty: true}"]
+        if supported?(pr) do
+          Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to extract build_url: #{inspect other, pretty: true}"]
+        end
         []
     end
   end
 
-  def record_failure_log(%SlackCoder.BuildSystem.Job{id: id, rspec: rspec, cucumber: cucumber} = job, log, pr) when is_binary(id) and (length(rspec) > 0 or length(cucumber) > 0) do
+  def record_failure_log(%SlackCoder.BuildSystem.Job{id: id, rspec: rspec, cucumber: cucumber} = job, log, pr) when is_integer(id) and (length(rspec) > 0 or length(cucumber) > 0) do
     Repo.delete_all(FailureLog.by_pr(pr) |> FailureLog.with_external_id(id)) # Clean up old logs
     %FailureLog{id: id} = Repo.insert!(FailureLog.changeset(%FailureLog{}, %{pr_id: pr.id, log: log, external_id: id}))
     %{job | failure_log_id: id}
   end
   def record_failure_log(job, _log, _pr), do: job
+
+  def supported?(pr) do
+    case build_id(pr) do
+      {_module, _build_id} -> true
+      _                    -> false
+    end
+  end
 
   defp system_for_module(Travis), do: :travis
   defp system_for_module(CircleCI), do: :circleci
@@ -46,8 +55,8 @@ defmodule SlackCoder.BuildSystem do
     [
       {Travis, ~r/https:\/\/travis-ci\.com\/#{pr.owner}\/#{pr.repo}\/builds\/(?<build_id>\d+)/},
       {Travis, ~r/https:\/\/magnum\.travis-ci\.com\/#{pr.owner}\/#{pr.repo}\/builds\/(?<build_id>\d+)/},
-      {CircleCI, ~r/https:\/\/circleci\.com\/gh\/#{pr.owner}\/#{pr.repo}\/(?<build_id>\d+)/},
-      {Semaphore, ~r/https:\/\/semaphoreci\.com\/#{pr.owner}\/#{pr.repo}\/branches\/#{pr.branch}\/builds\/(?<build_id>\d+)/}
+      # {CircleCI, ~r/https:\/\/circleci\.com\/gh\/#{pr.owner}\/#{pr.repo}\/(?<build_id>\d+)/},
+      # {Semaphore, ~r/https:\/\/semaphoreci\.com\/#{pr.owner}\/#{pr.repo}\/branches\/#{pr.branch}\/builds\/(?<build_id>\d+)/}
     ]
   end
 
