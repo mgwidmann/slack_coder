@@ -100,9 +100,8 @@ defmodule SlackCoder.Services.PRService do
   end
   def failure_notification(cs), do: cs
 
-  def opened?(%Ecto.Changeset{changes: %{closed_at: closed, merged_at: merged}}) when not is_nil(closed) or not is_nil(merged) do
-    false
-  end
+  def opened?(%Ecto.Changeset{changes: %{closed_at: closed}}) when not is_nil(closed), do: false
+  def opened?(%Ecto.Changeset{changes: %{merged_at: merged}}) when not is_nil(merged), do: false
   def opened?(_cs), do: true
 
   def next_backoff(backoff, greater_than) do
