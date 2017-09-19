@@ -20,8 +20,8 @@ defmodule SlackCoder.Models.RandomFailure do
     timestamps()
   end
 
-  @required_fields ~w(owner repo pr file line description)a
-  @optional_fields ~w(sha seed count system type)a
+  @required_fields ~w(owner repo pr file line)a
+  @optional_fields ~w(description sha seed count system type)a
   @all_fields @required_fields ++ @optional_fields
 
   def changeset(model, params \\ %{}) do
