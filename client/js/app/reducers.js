@@ -4,8 +4,8 @@ import pullRequests from '../../mobile/shared/reducers/pullRequests';
 import immutable from '../../mobile/shared/reducers/immutable';
 
 const reducers = combineReducers({
-  currentUser: immutable,
-  token: immutable,
+  currentUser: immutable('currentUser'),
+  token: immutable('token'),
   router: routerReducer,
   pullRequests
 })

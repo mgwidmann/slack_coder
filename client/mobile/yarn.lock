@@ -4497,6 +4497,12 @@ react-native-scrollable-tab-view@^0.6.7:
   dependencies:
     react-timer-mixin "^0.13.3"
 
+react-native-spinkit@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-spinkit/-/react-native-spinkit-1.1.1.tgz#3ae512f3978bc750b7c02639911e1710750d8539"
+  dependencies:
+    prop-types "^15.5.8"
+
 react-native-svg@5.3.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/react-native-svg/-/react-native-svg-5.3.0.tgz#0d2ca98bee6726d627c2ca31617ac9c5f7d42daf"
