@@ -33,6 +33,7 @@ defmodule SlackCoder.Models.PR do
     field :last_failed_sha, :string, virtual: true
 
     belongs_to :user, SlackCoder.Models.User
+    has_many :failure_logs, SlackCoder.Models.RandomFailure.FailureLog
 
     timestamps()
   end

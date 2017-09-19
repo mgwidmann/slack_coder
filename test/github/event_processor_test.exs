@@ -5,9 +5,10 @@ defmodule SlackCoder.Github.EventProcessorTest do
   alias SlackCoder.Repo
   alias SlackCoder.Models.PR
   alias SlackCoder.Models.RandomFailure
+  alias SlackCoder.Models.RandomFailure.FailureLog
 
   setup_all do
-    [PR, RandomFailure] |> Enum.each(&Repo.delete_all/1)
+    [RandomFailure, FailureLog, PR] |> Enum.each(&Repo.delete_all/1)
     SlackCoder.Github.Watchers.Supervisor.start_link
     SlackCoder.Github.ShaMapper.start_link
     :ok
@@ -114,7 +115,7 @@ defmodule SlackCoder.Github.EventProcessorTest do
 
     @before_sha "theshabefore"
     setup do
-      [PR, RandomFailure] |> Enum.each(&Repo.delete_all/1)
+      [RandomFailure, FailureLog, PR] |> Enum.each(&Repo.delete_all/1)
       pr = Repo.insert! %PR{github_user: "github_user", number: round(:rand.uniform() * 10_000), mergeable: true, sha: @before_sha, title: "t", owner: "o", repo: "r", branch: "b", opened_at: DateTime.utc_now, html_url: "u"}
       pid = GithubSupervisor.start_watcher(pr)
       Ecto.Adapters.SQL.Sandbox.allow(Repo, self(), pid)
@@ -150,26 +151,42 @@ defmodule SlackCoder.Github.EventProcessorTest do
       Process.sleep(100) # Wait for random failure service to finish processing
       number = pr.number
       [rspec_failure, cucumber_failure] = Repo.all(from(f in RandomFailure, where: f.pr == ^number, order_by: [asc: :id]))
+      %FailureLog{id: rspec_failure_log_id} = rspec_log = Repo.one(Ecto.assoc(rspec_failure, :failure_log))
+      %FailureLog{id: cucumber_failure_log_id} = cucumber_log = Repo.one(Ecto.assoc(cucumber_failure, :failure_log))
+      %RandomFailure{id: id} = rspec_failure
+      %RandomFailure{id: id} = cucumber_failure
+      pr_id = pr.id
+
       assert %RandomFailure{
           sha: @sha,
+          failure_log_id: ^rspec_failure_log_id,
           file: "./spec/some/file.rb",
           line: "32",
           seed: 90872,
           count: 1,
-          external_id: 4,
           system: :semaphore,
           type: :rspec
         } = rspec_failure
       assert %RandomFailure{
           sha: @sha,
+          failure_log_id: ^cucumber_failure_log_id,
           file: "features/some.feature",
           line: "14",
           seed: 27832,
           count: 1,
-          external_id: 4,
           system: :semaphore,
           type: :cucumber
         } = cucumber_failure
+      assert %FailureLog{
+          pr_id: ^pr_id,
+          external_id: 4,
+          log: "the really long failure log output..."
+        } = rspec_log
+      assert %FailureLog{
+          pr_id: ^pr_id,
+          external_id: 4,
+          log: "the really long failure log output..."
+        } = cucumber_log
     end
   end
 

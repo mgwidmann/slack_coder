@@ -5,13 +5,15 @@ defmodule SlackCoder.BuildSystem do
   stub_alias SlackCoder.BuildSystem.Travis
   stub_alias SlackCoder.BuildSystem.CircleCI
   stub_alias SlackCoder.BuildSystem.Semaphore
+  alias SlackCoder.Models.RandomFailure.FailureLog
+  alias SlackCoder.Repo
   require Logger
 
   defmodule Build do
     defstruct [:id, :repository_id, :result]
   end
   defmodule Job do
-    defstruct [:id, :system, :rspec_seed, :rspec, :cucumber_seed, :cucumber]
+    defstruct [:id, :system, :rspec_seed, :rspec, :cucumber_seed, :cucumber, :failure_log_id]
   end
 
   def failed_jobs(pr) do
@@ -20,7 +22,7 @@ defmodule SlackCoder.BuildSystem do
         module.build_info(pr.owner, pr.repo, build_id)
         |> Enum.filter(&match?(%Build{result: :failure}, &1))
         |> Enum.reject(&match?(%Build{id: nil}, &1))
-        |> Enum.map(&(module.job_log(&1)))
+        |> Enum.map(&(module.job_log(&1, pr)))
         |> Enum.filter(&(&1))
         |> Enum.map(&(Map.put(&1, :system, system_for_module(module))))
       other ->
@@ -28,6 +30,13 @@ defmodule SlackCoder.BuildSystem do
         []
     end
   end
+
+  def record_failure_log(%SlackCoder.BuildSystem.Job{id: id, rspec: rspec, cucumber: cucumber} = job, log, pr) when is_binary(id) and (length(rspec) > 0 or length(cucumber) > 0) do
+    Repo.delete_all(FailureLog.by_pr(pr) |> FailureLog.with_external_id(id)) # Clean up old logs
+    %FailureLog{id: id} = Repo.insert!(FailureLog.changeset(%FailureLog{}, %{pr_id: pr.id, log: log, external_id: id}))
+    %{job | failure_log_id: id}
+  end
+  def record_failure_log(job, _log, _pr), do: job
 
   defp system_for_module(Travis), do: :travis
   defp system_for_module(CircleCI), do: :circleci

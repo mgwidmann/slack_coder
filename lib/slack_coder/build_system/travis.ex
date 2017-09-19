@@ -21,21 +21,21 @@ defmodule SlackCoder.BuildSystem.Travis do
     [] # Return nothing
   end
 
-  def job_log(%SlackCoder.BuildSystem.Build{id: id}) when is_integer(id) do
-    "/jobs/#{id}/log"
-    |> Job.get()
-    |> handle_job_fetch()
-    |> put_job_id(id)
+  def job_log(%SlackCoder.BuildSystem.Build{id: id}, pr) when is_integer(id) do
+    {job, body} = "/jobs/#{id}/log"
+                  |> Job.get()
+                  |> handle_job_fetch()
+                  |> put_job_id(id)
+
+    SlackCoder.BuildSystem.record_failure_log(job, body, pr)
   end
   def job_log(build) do
     Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to fetch job log data for build: #{inspect build}"]
-    []
+    nil
   end
 
   defp handle_job_fetch({:ok, %HTTPoison.Response{status_code: 200, body: body}}) do
-    body
-    |> Job.filter_log()
-    |> Job.new()
+    {body |> Job.filter_log() |> Job.new(), body}
   end
   # Cannot use follow_redirect: true, cause need to drop authorization header
   defp handle_job_fetch({:ok, %HTTPoison.Response{status_code: 307, headers: headers}}) do
@@ -46,14 +46,14 @@ defmodule SlackCoder.BuildSystem.Travis do
   end
   defp handle_job_fetch({ok_or_error, response}) when ok_or_error in ~w(ok error)a do
     Logger.warn """
-    #{__MODULE__} job log fetch failed
+    #{__MODULE__} job log fetch failed for PR
 
     #{inspect response, pretty: true}
     """
     nil
   end
 
-  defp put_job_id(nil, _id), do: nil
-  defp put_job_id(job, id), do: Map.put(job, :id, id)
+  defp put_job_id({nil, _}, _id), do: nil
+  defp put_job_id({job, body}, id), do: {Map.put(job, :id, id), body}
 
 end
