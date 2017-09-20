@@ -11,6 +11,12 @@ defmodule SlackCoder.Router do
     plug SlackCoder.Guardian.Pipeline
   end
 
+  pipeline :tools do
+    plug :fetch_session
+    plug Ueberauth
+    plug SlackCoder.Guardian.Pipeline
+  end
+
   pipeline :restricted do
     plug SlackCoder.Guardian.RestrictedPipeline
   end
@@ -36,15 +42,8 @@ defmodule SlackCoder.Router do
 
       get "/failure_logs/:id", SlackCoder.Web.RandomFailureController, :log
 
-      forward "/graphiql", Absinthe.Plug.GraphiQL,
-        schema: SlackCoder.GraphQL.Schemas.MainSchema,
-        default_headers: {__MODULE__, :graphiql_headers},
-        default_url: "/api/graphql"
-
       scope "/admin" do
         pipe_through :admin
-
-        forward "/wobserver", Wobserver.Web.Router
 
         scope "/", SlackCoder do
           get "/users/external/:github", UserController, :external
@@ -54,6 +53,19 @@ defmodule SlackCoder.Router do
         end
       end
     end
+  end
+
+  # Admin tools
+  scope "/tools" do
+    pipe_through [:tools, :restricted, :admin]
+
+    forward "/graphiql", Absinthe.Plug.GraphiQL,
+      schema: SlackCoder.GraphQL.Schemas.MainSchema,
+      default_headers: {__MODULE__, :graphiql_headers},
+      default_url: "/api/graphql"
+
+    forward "/wobserver", Wobserver.Web.Router
+    forward "/errors", Flames.Web
   end
 
   scope "/api" do
@@ -69,8 +81,6 @@ defmodule SlackCoder.Router do
       get "/pull_requests/:owner/:repo/:pr/refresh", SlackCoder.PageController, :synchronize
     end
   end
-
-  forward "/errors", Flames.Web
 
   scope "/auth", SlackCoder do
     pipe_through :browser

@@ -73,7 +73,7 @@ defmodule SlackCoder.Mixfile do
       {:stub_alias, "~> 0.1.2"}, # Note: Needed for all environments to compile
       #### Monitoring ####
       {:flames, github: "mgwidmann/flames"},
-      {:wobserver, "~> 0.1"},
+      {:wobserver, path: "../wobserver"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev}

@@ -1,0 +1,11 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="error-template text-center">
+      <h1>Oops!</h1>
+      <h2>403 Forbidden</h2>
+      <div class="error-details">
+        You're not allowed access to that page!
+      </div>
+    </div>
+  </div>
+</div>
