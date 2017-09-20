@@ -26,7 +26,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
 
   def handle_call(:touch, _from, {pr, callouts}) do
-    pr = pr |> PR.reg_changeset() |> PRService.save()
+    {:ok, pr} = pr |> PR.reg_changeset() |> PRService.save()
     {:reply, pr, {pr, callouts}}
   end
 
