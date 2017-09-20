@@ -156,20 +156,27 @@ defmodule SlackCoder.Services.PRService do
 
             #{inspect pr, pretty: true}
             """
-            case Ecto.assoc(pr, :failure_logs) |> Repo.all() do
-              [] -> pr
-              [log | _] = failure_logs ->
-                failures = Enum.map(failure_logs, &SlackCoder.BuildSystem.LogParser.parse(&1.log))
-                %{pr | last_failed_jobs: failures, last_failed_sha: log.sha}
-            end
+            load_failed_from_db(pr)
           SlackCoder.BuildSystem.supported?(pr) ->
             check_failed(pr, true)
           true ->
-            pr
+            load_failed_from_db(pr)
         end
       failed_jobs ->
         %PR{pr | last_failed_jobs: failed_jobs, last_failed_sha: pr.sha}
     end
   end
+  def check_failed(%PR{build_status: status} = pr, _attempted_once) when status in ~w(pending) do
+    load_failed_from_db(pr)
+  end
   def check_failed(pr, _attempted_once), do: pr
+
+  defp load_failed_from_db(pr) do
+    case Ecto.assoc(pr, :failure_logs) |> Repo.all() do
+      [] -> pr
+      [log | _] = failure_logs ->
+        failures = Enum.map(failure_logs, &SlackCoder.BuildSystem.LogParser.parse(&1.log))
+        %{pr | last_failed_jobs: failures, last_failed_sha: log.sha}
+    end
+  end
 end
