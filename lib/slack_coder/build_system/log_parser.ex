@@ -46,15 +46,18 @@ defmodule SlackCoder.BuildSystem.LogParser do
     end
   end
 
-  @file_line_matcher ~r/(?<file>.+?[^\[]):?(?<line>\d+|\[.+\])/
+  @file_line_matcher ~r/(?<file>.+[^\[\d])(?<line>:\d+|\[.+\])/
   for type <- ~w(rspec cucumber)a do
     defp unquote(:"find_#{type}_failures")(results) do
       results
       |> Stream.map(&Regex.named_captures(~r/#{unquote(type)} #{@file_line_matcher.source}.*?# (?<description>.*)/, &1))
       |> Stream.filter(&(&1))
-      |> Enum.map(&({Map.fetch!(&1, "file"), Map.fetch!(&1, "line"), Map.fetch!(&1, "description")}))
+      |> Enum.map(&({Map.fetch!(&1, "file"), fix_line(Map.fetch!(&1, "line")), Map.fetch!(&1, "description")}))
     end
   end
+
+  defp fix_line(":" <> line), do: line
+  defp fix_line(line), do: line
 
   @line_separator if(Mix.env == :test, do: "\n", else: "\r\n")
   def filter_log(body) when is_binary(body) do
