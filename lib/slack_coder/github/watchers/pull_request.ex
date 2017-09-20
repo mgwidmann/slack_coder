@@ -146,39 +146,40 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
   defp fork_data(changes, _), do: changes
 
+  def update(nil, _), do: nil
   def update(pr_pid, pr) when is_pid(pr_pid) do
     GenServer.cast(pr_pid, {:update, pr})
     pr_pid
   end
-  def update(_, _), do: nil
 
+  def update_sync(nil, _), do: nil
   def update_sync(pr_pid, pr) when is_pid(pr_pid) and is_map(pr) do
     GenServer.call(pr_pid, {:update, pr})
   end
-  def update_sync(_, _), do: nil
 
+  def unstale(nil), do: nil
   def unstale(pr_pid) when is_pid(pr_pid) do
     GenServer.cast(pr_pid, :unstale)
     pr_pid
   end
-  def unstale(_), do: nil
 
   def status(pr_pid, type, sha, url, state) when is_pid(pr_pid) and type in [:build, :analysis] do
     GenServer.cast(pr_pid, {type, sha, url, state})
   end
   def status(_, _, _, _, _), do: nil
 
+  def fetch(nil), do: nil
   def fetch(name_or_pid) when is_pid(name_or_pid) or is_atom(name_or_pid) do
     GenServer.call(name_or_pid, :fetch)
   end
-  def fetch(_), do: nil
 
+  def last_failed_jobs(nil), do: []
   def last_failed_jobs(name_or_pid) when is_pid(name_or_pid) or is_atom(name_or_pid) do
     %PR{last_failed_jobs: last_failed_jobs} = fetch(name_or_pid)
     last_failed_jobs
   end
-  def last_failed_jobs(_), do: []
 
+  def touch(nil), do: nil
   def touch(name_or_pid) when is_pid(name_or_pid) or is_atom(name_or_pid) do
     GenServer.call(name_or_pid, :touch)
   end
