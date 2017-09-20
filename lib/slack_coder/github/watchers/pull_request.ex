@@ -25,6 +25,11 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     {:reply, pr, {pr, callouts}}
   end
 
+  def handle_call(:touch, _from, {pr, callouts}) do
+    pr = pr |> PR.reg_changeset() |> PRService.save()
+    {:reply, pr, {pr, callouts}}
+  end
+
   def handle_call({:update, raw_pr}, _from, {pr, callouts}) do
     pr = update_pr(raw_pr, pr)
     {:reply, pr, {pr, callouts}}
@@ -163,15 +168,19 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
   def status(_, _, _, _, _), do: nil
 
-  def fetch(pid) when is_pid(pid) do
-    GenServer.call(pid, :fetch)
+  def fetch(name_or_pid) when is_pid(name_or_pid) or is_atom(name_or_pid) do
+    GenServer.call(name_or_pid, :fetch)
   end
   def fetch(_), do: nil
 
-  def last_failed_jobs(pid) when is_pid(pid) do
-    %PR{last_failed_jobs: last_failed_jobs} = GenServer.call(pid, :fetch)
+  def last_failed_jobs(name_or_pid) when is_pid(name_or_pid) or is_atom(name_or_pid) do
+    %PR{last_failed_jobs: last_failed_jobs} = fetch(name_or_pid)
     last_failed_jobs
   end
   def last_failed_jobs(_), do: []
+
+  def touch(name_or_pid) when is_pid(name_or_pid) or is_atom(name_or_pid) do
+    GenServer.call(name_or_pid, :touch)
+  end
 
 end
