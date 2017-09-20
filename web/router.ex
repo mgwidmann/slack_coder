@@ -44,6 +44,8 @@ defmodule SlackCoder.Router do
       scope "/admin" do
         pipe_through :admin
 
+        forward "/wobserver", Wobserver.Web.Router
+
         scope "/", SlackCoder do
           get "/users/external/:github", UserController, :external
           post "/users/external/:github", UserController, :create_external
@@ -69,7 +71,6 @@ defmodule SlackCoder.Router do
   end
 
   forward "/errors", Flames.Web
-  forward "/wobserver", Wobserver.Web.Router
 
   scope "/auth", SlackCoder do
     pipe_through :browser
