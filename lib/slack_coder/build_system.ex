@@ -13,7 +13,10 @@ defmodule SlackCoder.BuildSystem do
     defstruct [:id, :repository_id, :result]
   end
   defmodule Job do
-    defstruct [:id, :system, :rspec_seed, :rspec, :cucumber_seed, :cucumber, :failure_log_id]
+    defstruct [:id, :system, :tests, :failure_log_id]
+    defmodule Test do
+      defstruct [:type, :seed, :files]
+    end
   end
 
   def failed_jobs(pr) do
@@ -33,9 +36,9 @@ defmodule SlackCoder.BuildSystem do
     end
   end
 
-  def record_failure_log(%SlackCoder.BuildSystem.Job{id: id, rspec: rspec, cucumber: cucumber} = job, log, pr) when is_integer(id) and (length(rspec) > 0 or length(cucumber) > 0) do
+  def record_failure_log(%SlackCoder.BuildSystem.Job{id: id, tests: tests} = job, log, pr) when is_integer(id) and length(tests) > 0 do
     Repo.delete_all(FailureLog.by_pr(pr) |> FailureLog.with_external_id(id)) # Clean up old logs
-    %FailureLog{id: id} = Repo.insert!(FailureLog.changeset(%FailureLog{}, %{pr_id: pr.id, log: log, external_id: id}))
+    %FailureLog{id: id} = Repo.insert!(FailureLog.changeset(%FailureLog{}, %{pr_id: pr.id, log: log, external_id: id, sha: pr.sha}))
     %{job | failure_log_id: id}
   end
   def record_failure_log(job, _log, _pr), do: job
@@ -71,26 +74,35 @@ defmodule SlackCoder.BuildSystem do
       _ -> pr
     end
   end
+
+  def counts(jobs) do
+    jobs
+    |> Enum.map(&(&1.tests))
+    |> List.flatten()
+    |> Enum.reduce(%{}, fn %Job.Test{type: type}, map ->
+      Map.put(map, type, (Map.get(map, type) || 0) + 1)
+    end)
+  end
 end
 
 defimpl String.Chars, for: SlackCoder.BuildSystem.Job do
-  def to_string(%SlackCoder.BuildSystem.Job{rspec_seed: rspec_seed, rspec: rspec, cucumber_seed: cucumber_seed, cucumber: cucumber}) do
-    if rspec != [] do
-      """
-      bundle exec rspec#{executable_line(rspec)} --seed #{rspec_seed}
-      """
-    else
-      ""
-    end <> (if cucumber != [] do
-      """
-      bundle exec cucumber#{executable_line(cucumber)} --order random:#{cucumber_seed}
-      """
-    else
-      ""
-    end) |> String.trim_trailing()
-  end
+  def to_string(%SlackCoder.BuildSystem.Job{tests: tests}), do: Enum.join(tests, "\n") |> String.trim()
+end
 
-  def executable_line(list, acc \\ "")
-  def executable_line([], acc), do: acc
-  def executable_line([{file, line, _desc} | rest], acc), do: executable_line(rest, acc <> " " <> file <> ":" <> line)
+defimpl String.Chars, for: SlackCoder.BuildSystem.Job.Test do
+  def to_string(%SlackCoder.BuildSystem.Job.Test{type: :rspec, seed: seed, files: [_|_] = files}) do
+    """
+    bundle exec rspec#{executable_line(files)} --seed #{seed}
+    """
+  end
+  def to_string(%SlackCoder.BuildSystem.Job.Test{type: :cucumber, files: [_|_] = files}) do
+    """
+    bundle exec cucumber#{executable_line(files)}
+    """
+  end
+  def to_string(_), do: nil
+
+  defp executable_line(list, acc \\ "")
+  defp executable_line([], acc), do: acc
+  defp executable_line([{file, line, _desc} | rest], acc), do: executable_line(rest, acc <> " " <> file <> ":" <> line)
 end

@@ -2,7 +2,7 @@ defmodule SlackCoder.Services.RandomFailureService do
   @moduledoc """
   """
   alias SlackCoder.Models.RandomFailure
-  alias SlackCoder.BuildSystem.Job
+  alias SlackCoder.BuildSystem.{Job, Job.Test}
   alias SlackCoder.Repo
   alias SlackCoder.Models.PR
   require Logger
@@ -27,9 +27,10 @@ defmodule SlackCoder.Services.RandomFailureService do
     """
   end
   def save_random_failure(%PR{last_failed_jobs: [_ | _] = last_failed_jobs} = pr) do
-    for %Job{system: system, rspec: rspec, rspec_seed: rspec_seed, cucumber: cucumber, cucumber_seed: cucumber_seed, failure_log_id: failure_log_id} <- last_failed_jobs do
-      find_or_create_and_update!(rspec, failure_log_id, system, :rspec, rspec_seed, pr)
-      find_or_create_and_update!(cucumber, failure_log_id, system, :cucumber, cucumber_seed, pr)
+    for %Job{system: system, tests: tests, failure_log_id: failure_log_id} <- last_failed_jobs do
+      for %Test{seed: seed, files: files, type: type} <- tests do
+        find_or_create_and_update!(files, failure_log_id, system, type, seed, pr)
+      end
     end
   end
 

@@ -68,6 +68,7 @@ defmodule SlackCoder.Mixfile do
       {:scrivener_html, "~> 1.5"},
       {:httpoison, "~> 0.10"},
       {:poison, "~> 3.1", override: true},
+      {:pattern_tap, "~> 0.4.0"},
       ### Testing ####
       {:stub_alias, "~> 0.1.2"}, # Note: Needed for all environments to compile
       #### Monitoring ####

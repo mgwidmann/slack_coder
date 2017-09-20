@@ -156,7 +156,12 @@ defmodule SlackCoder.Services.PRService do
 
             #{inspect pr, pretty: true}
             """
-            pr
+            case Ecto.assoc(pr, :failure_logs) |> Repo.all() do
+              [] -> pr
+              [log | _] = failure_logs ->
+                failures = Enum.map(failure_logs, &SlackCoder.BuildSystem.LogParser.parse(&1.log))
+                %{pr | last_failed_jobs: failures, last_failed_sha: log.sha}
+            end
           SlackCoder.BuildSystem.supported?(pr) ->
             check_failed(pr, true)
           true ->

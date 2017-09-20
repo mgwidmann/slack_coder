@@ -1,4 +1,5 @@
 defmodule SlackCoder.BuildSystem.Travis do
+  alias SlackCoder.BuildSystem.LogParser
   alias SlackCoder.BuildSystem.Travis.Build
   alias SlackCoder.BuildSystem.Travis.Job
   require Logger
@@ -35,7 +36,7 @@ defmodule SlackCoder.BuildSystem.Travis do
   end
 
   defp handle_job_fetch({:ok, %HTTPoison.Response{status_code: 200, body: body}}) do
-    {body |> Job.filter_log() |> Job.new(), body}
+    {LogParser.parse(body), body}
   end
   # Cannot use follow_redirect: true, cause need to drop authorization header
   defp handle_job_fetch({:ok, %HTTPoison.Response{status_code: 307, headers: headers}}) do

@@ -44,7 +44,7 @@ defmodule SlackCoder.Github.Notification do
                         #{failed_job_output(pr.last_failed_jobs)}
                         """,
                         mrkdwn_in: ["text"],
-                        footer: "#{Enum.sum(Enum.map(pr.last_failed_jobs, &(Enum.count(&1.rspec))))} rspec, #{Enum.sum(Enum.map(pr.last_failed_jobs, &(Enum.count(&1.cucumber))))} cucumber"
+                        footer: "#{footer_text SlackCoder.BuildSystem.counts(pr.last_failed_jobs)}"
                       }
                     ]
                   }
@@ -52,6 +52,13 @@ defmodule SlackCoder.Github.Notification do
         pr
       _ -> pr
     end
+  end
+
+  defp footer_text(failed_jobs) do
+    failed_jobs
+    |> Map.to_list
+    |> Enum.map(fn t -> t |> Tuple.to_list |> Enum.reverse |> Enum.join(" ") end)
+    |> Enum.join(", ")
   end
 
   defp failed_job_output([]), do: ""

@@ -172,7 +172,7 @@ defmodule SlackCoder.Github.EventProcessorTest do
           failure_log_id: ^cucumber_failure_log_id,
           file: "features/some.feature",
           line: "14",
-          seed: 27832,
+          seed: nil,
           count: 1,
           system: :travis,
           type: :cucumber
@@ -180,11 +180,13 @@ defmodule SlackCoder.Github.EventProcessorTest do
       assert %FailureLog{
           pr_id: ^pr_id,
           external_id: 4,
+          sha: @sha,
           log: "the really long failure log output..."
         } = rspec_log
       assert %FailureLog{
           pr_id: ^pr_id,
           external_id: 4,
+          sha: @sha,
           log: "the really long failure log output..."
         } = cucumber_log
     end
