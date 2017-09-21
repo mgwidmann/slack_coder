@@ -73,7 +73,7 @@ defmodule SlackCoder.Mixfile do
       {:stub_alias, "~> 0.1.2"}, # Note: Needed for all environments to compile
       #### Monitoring ####
       {:flames, github: "mgwidmann/flames"},
-      {:wobserver, path: "../wobserver"},
+      {:wobserver, github: "mgwidmann/wobserver", branch: "include_credentials"},
 
       # Dev only
       {:phoenix_live_reload, "~> 1.0", only: :dev}
@@ -87,8 +87,16 @@ defmodule SlackCoder.Mixfile do
   #
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
-    ["ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-     "ecto.reset": ["ecto.drop", "ecto.setup"],
-     "test": ["ecto.create --quiet", "ecto.migrate", "test"]]
+    [
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "test": ["ecto.create --quiet", "ecto.migrate", "test"],
+      "deps.get": ["deps.get", &wobserver_install/1, "deps.compile"] # Builds wobserver assets (remove once off github branch)
+    ]
+  end
+
+  def wobserver_install(_) do
+    System.cmd("npm", ["install"], cd: "deps/wobserver")
+    System.cmd("mix", ["do", "deps.get,", "build"], cd: "deps/wobserver")
   end
 end
