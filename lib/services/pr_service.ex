@@ -122,6 +122,11 @@ defmodule SlackCoder.Services.PRService do
         cs # Return changeset to carry on normally
     end
   end
+  def random_failure(%Ecto.Changeset{changes: %{sha: sha}, data: %PR{last_failed_sha: last_failed_sha}} = cs) when sha != last_failed_sha do
+    cs
+    |> put_change(:last_failed_sha, nil)
+    |> put_change(:last_failed_jobs, [])
+  end
   def random_failure(cs), do: cs
 
   def notifications(pr = %PR{notifications: []}), do: pr
