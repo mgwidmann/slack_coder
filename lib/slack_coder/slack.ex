@@ -44,6 +44,18 @@ defmodule SlackCoder.Slack do
                         end}
   end
 
+  def send_to_channel("#" <> channel, message) do
+    send_to_channel(channel, message)
+  end
+  def send_to_channel(channel, message) when is_binary(message), do: send_to_channel(channel, %{text: message})
+  def send_to_channel(channel, message) when is_map(message) do
+    send :slack, {:channel, "#" <> channel, if Mix.env == :dev do
+                                       Map.put(message, :text, (message[:text] || "") <> "\n*DEV MESSAGE*")
+                                     else
+                                       message
+                                     end}
+  end
+
   @doc """
   Retrieves the current slack data. Useful for inspecting the running process.
   """
@@ -57,6 +69,13 @@ defmodule SlackCoder.Slack do
   @doc false
   def handle_info({:slack, pid}, slack, state) when is_pid(pid) do
     send pid, slack
+    {:ok, state}
+  end
+
+  def handle_info({:channel, channel, message}, slack, %{caretaker_id: caretaker_id} = state) do
+    sending_to = if(Mix.env == :dev, do: Slack.Lookups.lookup_direct_message_id(caretaker_id, slack), else: Slack.Lookups.lookup_channel_id(channel, slack) || Slack.Lookups.lookup_direct_message_id(caretaker_id, slack)) # Ensure not nil
+    message = message |> Map.merge(%{channel: sending_to, type: "message"})
+    deliver_message(nil, message, slack)
     {:ok, state}
   end
 
@@ -91,6 +110,7 @@ defmodule SlackCoder.Slack do
   end
 
   @new_message_timeout 1_000
+  defp deliver_message(nil, %{channel: nil}, _slack), do: Logger.error "Unable to send message to `nil` with channel of `nil`!"
   defp deliver_message(user, %{channel: nil} = message, slack) do
     "@" <> user
     |> Slack.Lookups.lookup_user_id(slack)

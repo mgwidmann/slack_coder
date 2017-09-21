@@ -41,6 +41,16 @@ defmodule SlackCoder.BuildSystem.LogParserTest do
       Blah blah blah
       """
     end
+
+    test "handles numbers in the file name" do
+      assert %Job{tests: [%Test{
+        files: [{"./spec/controllers/v1/some_spec.rb", "54", "The description[0m"}]
+      }]} = LogParser.parse """
+      Blah blah blah
+      [31mrspec ./spec/controllers/v1/some_spec.rb:54[0m [36m# The description[0m
+      Blah blah blah
+      """
+    end
   end
 
 end

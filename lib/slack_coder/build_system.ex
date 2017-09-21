@@ -75,13 +75,18 @@ defmodule SlackCoder.BuildSystem do
     end
   end
 
-  def counts(jobs) do
+  def counts(%Job.Test{} = test), do: counts([test])
+  def counts([%Job.Test{} | _] = tests) do
+    Enum.reduce(tests, %{}, fn %Job.Test{type: type}, map ->
+      Map.put(map, type, (Map.get(map, type) || 0) + 1)
+    end)
+  end
+
+  def counts([%Job{} | _] = jobs) do
     jobs
     |> Enum.map(&(&1.tests))
     |> List.flatten()
-    |> Enum.reduce(%{}, fn %Job.Test{type: type}, map ->
-      Map.put(map, type, (Map.get(map, type) || 0) + 1)
-    end)
+    |> counts()
   end
 end
 
@@ -93,12 +98,12 @@ defimpl String.Chars, for: SlackCoder.BuildSystem.Job.Test do
   def to_string(%SlackCoder.BuildSystem.Job.Test{type: :rspec, seed: seed, files: [_|_] = files}) do
     """
     bundle exec rspec#{executable_line(files)} --seed #{seed}
-    """
+    """ |> String.trim()
   end
   def to_string(%SlackCoder.BuildSystem.Job.Test{type: :cucumber, files: [_|_] = files}) do
     """
     bundle exec cucumber#{executable_line(files)}
-    """
+    """ |> String.trim()
   end
   def to_string(_), do: nil
 

@@ -9,7 +9,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   import Ecto.Query
   require Logger
 
-  @stale_check_interval 60_000
+  # @stale_check_interval 60_000
 
   def start_link(pr) do
     GenServer.start_link __MODULE__, {pr, []}
@@ -26,7 +26,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
 
   def handle_call(:touch, _from, {pr, callouts}) do
-    pr = pr |> PR.reg_changeset() |> PRService.save()
+    {:ok, pr} = pr |> PR.reg_changeset() |> PRService.save()
     {:reply, pr, {pr, callouts}}
   end
 

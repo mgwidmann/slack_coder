@@ -197,6 +197,10 @@ defmodule SlackCoder.Github.EventProcessor do
     # Ignore
   end
 
+  def process(:milestone, _params) do
+    # Ignore
+  end
+
   def process(unknown_event, params) do
     Logger.warn "EventProcessor received unknown event #{inspect unknown_event} with params #{inspect params, pretty: true}"
   end

@@ -3,6 +3,9 @@ defmodule SlackCoder.Github.Notification do
   import StubAlias
   stub_alias SlackCoder.Users.User
   stub_alias SlackCoder.Users.Supervisor, as: Users
+  alias SlackCoder.BuildSystem.{Job.Test}
+  stub_alias SlackCoder.Github
+  stub_alias SlackCoder.Slack
 
   defstruct [:slack_user, :type, :called_out?, :message_for, :message]
 
@@ -62,12 +65,73 @@ defmodule SlackCoder.Github.Notification do
   end
 
   defp failed_job_output([]), do: ""
-  defp failed_job_output(failed_jobs) do
+  defp failed_job_output(%Test{} = test) do
+    """
+    ```
+    #{test}
+    ```
+    """
+  end
+  defp failed_job_output(failed_jobs) when is_list(failed_jobs) do
     """
     ```
     #{Enum.join(failed_jobs, "\n")}
     ```
     """
+  end
+
+  def random_failure(pr) do
+    failed_count = pr.last_failed_jobs |> Enum.map(&(&1.tests)) |> List.flatten() |> length()
+    message = %{
+                attachments: [
+                  %{
+                    author_name: "👻 #{failed_count} RANDOM #{plural_failures(failed_count)} DETECTED",
+                    color: "#FF0000",
+                    fallback: "👻 #{failed_count} RANDOM #{plural_failures(failed_count)} DETECTED",
+                    title: pr.title,
+                    title_link: pr.html_url,
+                    footer: "#{footer_text SlackCoder.BuildSystem.counts(pr.last_failed_jobs)}"
+                  } | blame_attachments(pr)]
+              }
+    Slack.send_to_channel(Application.get_env(:slack_coder, :random_failure_channel), message)
+  end
+
+  defp plural_failures(count) when count >= 2, do: "FAILURES"
+  defp plural_failures(_count), do: "FAILURE"
+
+  defp view_log_action(failure_log_id) do
+    "<#{SlackCoder.Router.Helpers.random_failure_url(SlackCoder.Endpoint, :log, failure_log_id)}|View Log>"
+  end
+
+  @max_blames 19
+  defp blame_attachments(pr) do
+    for job <- pr.last_failed_jobs,
+      %Test{files: files} = test <- job.tests,
+      {file, line, _description} = file_descriptor <- files,
+      Enum.find_index(pr.last_failed_jobs, &(&1 == job)) + 1 +
+      Enum.find_index(job.tests, &(&1 == test)) + 1 +
+      Enum.find_index(files, &(&1 == file_descriptor)) + 1 <= @max_blames do
+      case Integer.parse(line) do
+        {line, ""} ->
+          case Github.blame(pr.owner, pr.repo, pr.last_failed_sha, file, line) do
+            %{"avatarUrl" => avatar, "user" => %{"name" => name}} ->
+              %{
+                author_name: "#{name} wrote test #{file}:#{line}",
+                author_icon: avatar,
+                color: "#FF0000",
+                text: """
+                #{failed_job_output(test)}
+                #{view_log_action(job.failure_log_id)}
+                """,
+                mrkdwn_in: ["text"]
+          		}
+            _ -> nil
+          end
+        :error ->
+          nil
+      end
+    end
+    |> Enum.filter(&(&1))
   end
 
   def success(pr) do
