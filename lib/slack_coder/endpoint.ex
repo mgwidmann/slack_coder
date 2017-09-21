@@ -2,8 +2,8 @@ defmodule SlackCoder.Endpoint do
   use Phoenix.Endpoint, otp_app: :slack_coder
 
   socket "/socket", SlackCoder.UserSocket
-  socket "/errors/socket", Flames.UserSocket
-  socket "/wobserver", Wobserver.Web.PhoenixSocket
+  socket "/tools/errors/socket", Flames.UserSocket
+  socket "/tools/wobserver", Wobserver.Web.PhoenixSocket
 
   # Serve at "/" the static files from "priv/static" directory.
   #
