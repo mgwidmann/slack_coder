@@ -3,60 +3,62 @@ SlackCoder
 
 ## Slack Bot for watching your Github & (CI) builds
 
-### Nanobox deployment
+### Development Setup
 
-You'll have to (install the nanobox CLI)[https://docs.nanobox.io/install/] tool first.
+#### Nanobox
 
-1. Fork and clone this repo
-2. Run `nanobox dns add local slack-coder.dev` and follow instructions
-3. Run `nanobox evar add local MIX_ENV=dev`
-4. Run `nanobox run mix do ecto.create, ecto.migrate, run priv/repo/seeds.exs` to migrate your local database
+You'll have to [install the nanobox CLI](https://docs.nanobox.io/install/) tool first.
 
-To start it up, run `nanobox run iex -S mix phoenix.server`
+1. `git clone git@github.com:mgwidmann/slack_coder.git`
+2. `cd slack_coder`
+3. `nanobox dns add local slack-coder.dev` and follow instructions
+4. `nanobox evar add local MIX_ENV=dev`
+5. `nanobox run mix do ecto.create, ecto.migrate, run priv/repo/seeds.exs` to migrate your local database
 
-### Configuring
+To start it up, run `nanobox run iex -S mix phoenix.server` and access at http://slack-coder.dev:4000/
 
-You'll want to `config :slack_coder, ...` in your `prod.secret.exs` to give your bot the info it needs to know what to watch and who to report to. Heres an example of a configuration to watch a repo on github at `http://www.github.com/my_org/a_new_project`.
+
+### Production
+
+#### Configuring
+
+You'll need to set the following environment variables in order for the application to work properly:
+
+* SECRET_KEY_BASE
+  * Generate a new one with `mix phx.gen.secret`
+* PORT
+  * If using nanobox, set this to 80 otherwise you should know what to put here
+* SLACK_CODER_HOST_NAME
+  * The domain name where your application is deployed.
+* DATA_DB_USER
+  * Username to your database (This value is set by nanobox)
+* DATA_DB_PASS
+  * Password for the user to your database (This value is set by nanobox)
+* DATA_DB_HOST
+  * Host name where your database is located (This value is set by nanobox)
+* SLACK_API_TOKEN
+  * Find your token here: https://api.slack.com/web
+* SLACK_CODER_RANDOM_FAILURE_CHANNEL
+  * Name of the channel where to post random failures
+* TRAVIS_API_TOKEN
+  * Learn how to create one of these here: https://docs.travis-ci.com/api#authentication
+* CIRCLE_CI_TOKEN
+  * ... NOT YET IMPLEMENTED ...
+* GITHUB_PAT
+  * Create your token here: https://github.com/settings/tokens
+* GITHUB_USER
+  * The username which matches with your GITHUB_PAT
+* GITHUB_CLIENT_ID
+  * Register your oauth application here: https://developer.github.com/apps/building-integrations/setting-up-and-registering-oauth-apps/registering-oauth-apps/
+* GITHUB_CLIENT_SECRET
+  * Register your oauth application here: https://developer.github.com/apps/building-integrations/setting-up-and-registering-oauth-apps/registering-oauth-apps/
+* GUARDIAN_SECRET
+  * Generate this with `mix guardian.gen.secret`
+
+If you'd like to modify the configuration on when notifications are sent, change the following:
 
 ```elixir
-config :slack_coder,
-  slack_api_token: "Find your token here: https://api.slack.com/web",
-
-config :slack_coder, :github,
-  pat: "Create your token here: https://github.com/settings/tokens",
-  user: "the-github-user-name-that-goes-with-the-pat-token",
-
-config :slack_coder, :users,
-  # A list of all users the bot should talk to and their
-  # github to slack username translation
-  mgwidmann: [slack: :matt]
-
-config :slack_coder, :repos,
-  # The repositories to watch pull requests
-  [
-    a_new_project: [
-      owner: "my_org",
-      users: [
-        :mgwidmann
-      ]
-    ]},
-    # Multiple repositories are configured as another item in the list
-    old_project: [
-      owner: "my_org",
-      # Note that the users are repeated here. This is due to the fact that
-      # the slack bot does not know which users work with which repositories
-      users: [
-        :mgwidmann
-      ]
-    ]
-  ]
-
 config :slack_coder, :notifications,
-  # Finally where to report build notifications. All possible keys are channel
-  # (string), group (string) and personal (boolean). The bot will only send the
-  # notification to the first configured location it finds (in the above order).
-  channel: nil, # Won't post in any channel because of nil
-  group: "builds", # Posts in a group
   # For stale PR notifications
   # The minimum hour to send a notification (Just stale, passes/fails don't apply)
   min_hour: 8,
@@ -69,12 +71,6 @@ config :slack_coder, :notifications,
   days: [1,2,3,4,5]
 ```
 
-### Deploying
+#### Deployment
 
-To deploy to Heroku, without publishing your `prod.secret.exs`, do the following git commands:
-
-1. `git checkout deploy` (Your local only deploy branch)
-2. `git merge master` (or whichever branch you want to deploy)
-3. `git push heroku deploy:master`
-
-Heroku will have a copy of your `prod.secret.exs`, but with this strategy it should stay out of Github and *somewhat* safer that way. You will have to either deploy from the same machine or push the code to safer git repository where you can safely commit your tokens, ect.
+Just run `nanobox deploy`. Thats it!
