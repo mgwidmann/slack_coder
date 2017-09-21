@@ -15,9 +15,6 @@ config :slack_coder,
     pat: "Create your token here: https://github.com/settings/tokens",
     user: "your-user-name",
   ],
-  repos: [],
-  channel: nil,
-  group: nil,
   timezone: "America/New_York",
   pr_backoff_start: 2
 
@@ -66,4 +63,4 @@ config :tzdata, :autoupdate, :disabled
 
 config :wobserver,
   mode: :plug,
-  remote_url_prefix: "/wobserver"
+  remote_url_prefix: "/tools/wobserver"

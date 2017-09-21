@@ -3,7 +3,7 @@ use Mix.Config
 config :slack_coder, SlackCoder.Endpoint,
   secret_key_base: System.get_env("SECRET_KEY_BASE"),
   http: [port: {:system, "PORT"}],
-  url: [host: "slack-coder.nanoapp.io", port: 80],
+  url: [host: System.get_env("SLACK_CODER_HOST_NAME") || "slack-coder.nanoapp.io", port: 80],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
 config :logger,
@@ -26,11 +26,9 @@ config :slack_coder,
   timezone: "America/New_York",
   pr_backoff_start: 4,
   caretaker: :matt,
-  random_failure_channel: "#travis-fails",
+  random_failure_channel: System.get_env("SLACK_CODER_RANDOM_FAILURE_CHANNEL") || "#travis-fails",
   # Used for internal API access
   travis_token: System.get_env("TRAVIS_API_TOKEN"),
-  # Returned in `RandomFailure` file links and so is a potentially publicly accessible token
-  travis_public_token: System.get_env("TRAVIS_PUBLIC_API_TOKEN"),
   circle_ci_token: System.get_env("CIRCLE_CI_API_TOKEN")
 
 config :slack,

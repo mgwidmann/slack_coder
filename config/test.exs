@@ -14,26 +14,7 @@ config :slack_coder,
     pat: "pat-123",
     user: "slack_coder",
   ],
-  users: [
-    slack_coder: [slack: :slack_coder]
-  ],
-  repos: [
-    cool_project: [
-      owner: :slack_coder,
-      users: [
-        :slack_coder
-      ]
-    ],
-    some_idea: [
-      owner: :slack_coder,
-      users: [
-        :slack_coder
-      ]
-    ]
-  ],
   random_failure_channel: "#travis-fails",
-  channel: "slack_coder_channel",
-  group: "slack_coder_group",
   notifications: [
     always_allow: true, # So tests dont fail
     # Actual config values for prod could be (24 hour format)
