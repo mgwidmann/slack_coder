@@ -15,8 +15,43 @@ You'll have to [install the nanobox CLI](https://docs.nanobox.io/install/) tool 
 4. `nanobox evar add local MIX_ENV=dev`
 5. `nanobox run mix do ecto.create, ecto.migrate, run priv/repo/seeds.exs` to migrate your local database
 
-To start it up, run `nanobox run iex -S mix phoenix.server` and access at http://slack-coder.dev:4000/
+Create a `config/dev.secret.exs` config file with the following contents and fill out values:
 
+```elixir
+use Mix.Config
+
+slack_api_token = "...snip..."
+config :slack_coder,
+  slack_api_token: slack_api_token,
+  personal: true,
+  caretaker: :your_slack_user_name_so_dev_messages_only_come_to_you,
+  random_failure_channel: "#travis-fails",
+  travis_token: "...snip...",
+  travis_public_token: "...snip...",
+  circle_ci_token: "...snip..."
+
+config :slack,
+  api_token: slack_api_token
+
+config :slack_coder, :github,
+  pat: "...snip...",
+  user: "your_github_user_name_goes_Here"
+
+config :ueberauth, Ueberauth.Strategy.Github.OAuth,
+  client_id: "...snip...",
+  client_secret: "...snip..."
+
+config :slack_coder, SlackCoder.Guardian,
+  secret_key: "...snip..." # Doesn't matter, generate a new one with `mix guardian.gen.secret`
+
+config :slack_coder, :notifications,
+  min_hour: 0,
+  max_hour: 24,
+  always_allow: true,
+  days: [1,2,3,4,5,6,7]
+```
+
+To start it up, run `nanobox run iex -S mix phoenix.server` and access at http://slack-coder.dev:4000/
 
 ### Production
 
