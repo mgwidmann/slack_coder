@@ -82,12 +82,13 @@ defmodule SlackCoder.Github.Notification do
 
   def random_failure(pr) do
     failed_count = pr.last_failed_jobs |> Enum.map(&(&1.tests)) |> List.flatten() |> length()
+    failure_message = "🚀 #{failed_count} RANDOM NUCLEAR #{plural_failures(failed_count)} DETECTED"
     message = %{
                 attachments: [
                   %{
-                    author_name: "👻 #{failed_count} RANDOM #{plural_failures(failed_count)} DETECTED",
+                    author_name: failure_message,
                     color: "#FF0000",
-                    fallback: "👻 #{failed_count} RANDOM #{plural_failures(failed_count)} DETECTED",
+                    fallback: failure_message,
                     title: pr.title,
                     title_link: pr.html_url,
                     footer: "#{footer_text SlackCoder.BuildSystem.counts(pr.last_failed_jobs)}"
