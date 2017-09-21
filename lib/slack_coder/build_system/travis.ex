@@ -23,12 +23,15 @@ defmodule SlackCoder.BuildSystem.Travis do
   end
 
   def job_log(%SlackCoder.BuildSystem.Build{id: id}, pr) when is_integer(id) do
-    {job, body} = "/jobs/#{id}/log"
-                  |> Job.get()
-                  |> handle_job_fetch()
-                  |> put_job_id(id)
-
-    SlackCoder.BuildSystem.record_failure_log(job, body, pr)
+    "/jobs/#{id}/log"
+    |> Job.get()
+    |> handle_job_fetch()
+    |> put_job_id(id)
+    |> case do
+      {job, body} ->
+        SlackCoder.BuildSystem.record_failure_log(job, body, pr)
+      _ -> nil
+    end
   end
   def job_log(build) do
     Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to fetch job log data for build: #{inspect build}"]
@@ -51,7 +54,7 @@ defmodule SlackCoder.BuildSystem.Travis do
 
     #{inspect response, pretty: true}
     """
-    nil
+    {nil, nil}
   end
 
   defp put_job_id({nil, _}, _id), do: nil

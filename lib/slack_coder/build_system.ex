@@ -41,7 +41,7 @@ defmodule SlackCoder.BuildSystem do
     %FailureLog{id: id} = Repo.insert!(FailureLog.changeset(%FailureLog{}, %{pr_id: pr.id, log: log, external_id: id, sha: pr.sha}))
     %{job | failure_log_id: id}
   end
-  def record_failure_log(job, _log, _pr), do: job
+  def record_failure_log(_job, _log, _pr), do: nil
 
   def supported?(pr) do
     case build_id(pr) do
