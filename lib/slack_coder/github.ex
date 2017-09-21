@@ -1,5 +1,6 @@
 defmodule SlackCoder.Github do
   require Logger
+  use PatternTap
   alias SlackCoder.Github.EventProcessor
   alias SlackCoder.Services.UserService
   import SlackCoder.Github.TimeHelper
@@ -153,5 +154,44 @@ defmodule SlackCoder.Github do
     |> Enum.each(fn %{"state" => state, "context" => context, "targetUrl" => target_url} ->
       EventProcessor.process(:status, %{"sha" => sha, "state" => String.downcase(state), "context" => context, "target_url" => target_url})
     end)
+  end
+
+  @blame_query """
+  query BlameUser($owner: String!, $name: String!, $commit: GitObjectID!, $file: String!) {
+    repository(owner: $owner, name: $name) {
+      object(oid: $commit) {
+      	... on Commit {
+        	blame(path: $file) {
+            ranges {
+              startingLine
+              endingLine
+              commit {
+                author {
+                  user {
+                    name
+                    login
+                  }
+                  avatarUrl
+                  email
+                }
+              }
+            }
+          }
+      	}
+      }
+    }
+  }
+  """
+  def blame(owner, repo, sha, "./" <> file, line), do: blame(owner, repo, sha, file, line)
+  def blame(owner, repo, sha, file, line) do
+    query(@blame_query, %{owner: owner, name: repo, commit: sha, file: file})
+    |> tap({:ok, data} ~> data)
+    |> get_in(~w(data repository object blame ranges))
+    |> case do
+      nil -> []
+      d -> d
+    end
+    |> Enum.find(&(&1["startingLine"] <= line && &1["endingLine"] >= line))
+    |> get_in(~w(commit author))
   end
 end

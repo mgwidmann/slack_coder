@@ -26,6 +26,7 @@ config :slack_coder,
   timezone: "America/New_York",
   pr_backoff_start: 4,
   caretaker: :matt,
+  random_failure_channel: "#travis-fails",
   # Used for internal API access
   travis_token: System.get_env("TRAVIS_API_TOKEN"),
   # Returned in `RandomFailure` file links and so is a potentially publicly accessible token

@@ -31,6 +31,7 @@ config :slack_coder,
       ]
     ]
   ],
+  random_failure_channel: "#travis-fails",
   channel: "slack_coder_channel",
   group: "slack_coder_group",
   notifications: [
