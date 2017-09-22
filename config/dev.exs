@@ -19,7 +19,7 @@ config :slack_coder, SlackCoder.Endpoint,
 config :slack_coder, SlackCoder.Endpoint,
   live_reload: [
     patterns: [
-      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
+      ~r{client/.*(js|css|png|jpeg|jpg|gif|svg)$},
       ~r{lib/.*(ex)$},
       ~r{web/.*(ex)$},
       ~r{web/.*(eex)$}
@@ -60,7 +60,8 @@ else
     personal: true,
     caretaker: :matt,
     travis_token: nil,
-    circle_ci_token: nil
+    circle_ci_token: nil,
+    random_failure_channel: "#some-channel"
 
   config :slack_coder, :github,
     pat: "a-github-token-that-wont-work",

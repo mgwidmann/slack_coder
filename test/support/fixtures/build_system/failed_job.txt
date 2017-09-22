@@ -1,0 +1,108 @@
+travis_time:end:001f4346:start=1498751882283782543,finish=1498751882293992742,duration=10210199
+[0Ktravis_fold:end:before_script.14
+[0Ktravis_time:start:017484a2
+[0K$ bundle exec rake knapsack_pro:rspec
+[DEPRECATION] `have_enqueued_job` is deprecated.  Please use `have_enqueued_sidekiq_job` instead.
+D, [2017-06-29T11:58:14.174778 #18256] DEBUG -- : [knapsack_pro] API request UUID: abc123
+D, [2017-06-29T11:58:14.174933 #18256] DEBUG -- : [knapsack_pro] Test suite split seed: 987zyw
+D, [2017-06-29T11:58:14.174980 #18256] DEBUG -- : [knapsack_pro] API response:
+D, [2017-06-29T11:58:14.180858 #18256] DEBUG -- : [knapsack_pro] {"build_distribution_id"=>"0392kdkcme3idk", "node_index"=>2, "test_files"=>[{"path"=>"spec/controllers/my_pretend_controller_spec.rb", "time_execution"=>67.06749486923218}, {"path"=>"spec/controllers/some_other_controller_spec.rb", "time_execution"=>30.127568006515503}]}
+/home/travis/.rvm/rubies/ruby-2.4.1/bin/ruby -I/home/travis/build/myorg/myproj/vendor/bundle/ruby/2.4.0/gems/rspec-core-3.6.0/lib:/home/travis/build/myorg/myproj/vendor/bundle/ruby/2.4.0/gems/rspec-support-3.6.0/lib /home/travis/build/myorg/myproj/vendor/bundle/ruby/2.4.0/gems/rspec-core-3.6.0/exe/rspec spec/controllers/some_other_controller_spec.rb spec/controllers/my_pretend_controller_spec.rb  --default-path spec
+[DEPRECATION] `have_enqueued_job` is deprecated.  Please use `have_enqueued_sidekiq_job` instead.
+D, [2017-06-29T11:58:29.586975 #18278] DEBUG -- : [knapsack_pro] Test suite time execution recording enabled.
+
+Randomized with seed 21452
+[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+D, [2017-06-29T12:08:21.403547 #18278] DEBUG -- : [knapsack_pro] API request UUID: iu3eoioidajlkasdf
+D, [2017-06-29T12:08:21.403673 #18278] DEBUG -- : [knapsack_pro] API response:
+D, [2017-06-29T12:08:21.403719 #18278] DEBUG -- : [knapsack_pro]
+D, [2017-06-29T12:08:21.403760 #18278] DEBUG -- : [knapsack_pro] Saved time execution report on API server.
+D, [2017-06-29T12:08:21.403922 #18278] DEBUG -- : [knapsack_pro] Global time execution for tests: 05m 48s
+
+
+  1) User::SomethingController PUT update something processes correctly
+     [31mFailure/Error: "#{model.something.name.parameterize}-#{[model.foo, model.bar].join('-')}-#{model.id}#{File.extname(original_filename)}" if original_filename.present? && super.present?[0m
+     [31m[0m
+     [31mNoMethodError:[0m
+     [31m  undefined method `name' for nil:NilClass[0m
+     [36m# ./app/uploaders/user_something_image_uploader.rb:6:in `filename'[0m
+     [36m# ./spec/factories/user_something_images.rb:12:in `block (3 levels) in <top (required)>'[0m
+     [36m# ./spec/factories/user_somethings.rb:86:in `block (4 levels) in <top (required)>'[0m
+     [36m# ./spec/controllers/users/somethings_controller_spec.rb:332:in `block (4 levels) in <top (required)>'[0m
+     [36m# ./spec/controllers/users/somethings_controller_spec.rb:337:in `block (4 levels) in <top (required)>'[0m
+
+Finished in 6 minutes 44 seconds (files took 15.06 seconds to load)
+[31m1066 examples, 4 failures, 8 pending[0m
+
+Failed examples:
+
+[31mrspec ./spec/controllers/users/somethings_controller_spec.rb:375[0m [36m# User::SomethingsController PUT update with valid params redirect to homepage[0m
+
+Randomized with seed 21452
+
+
+travis_time:end:017484a2:start=1498751882298911963,finish=1498752503112149471,duration=620813237508
+[0K
+[32;1mThe command "bundle exec rake knapsack_pro:rspec" exited with 0.[0m
+travis_time:start:301f52e8
+[0K$ bundle exec rake knapsack_pro:cucumber
+[DEPRECATION] `have_enqueued_job` is deprecated.  Please use `have_enqueued_sidekiq_job` instead.
+D, [2017-06-29T12:08:33.252824 #26383] DEBUG -- : [knapsack_pro] API request UUID: laksdjfalwi3rjlskdf
+D, [2017-06-29T12:08:33.252970 #26383] DEBUG -- : [knapsack_pro] Test suite split seed: 98uweosiafjdlkfm
+D, [2017-06-29T12:08:33.253023 #26383] DEBUG -- : [knapsack_pro] API response:
+D, [2017-06-29T12:08:33.253372 #26383] DEBUG -- : [knapsack_pro] {"build_distribution_id"=>"alksdj490uaisdkjfasd", "node_index"=>2, "test_files"=>[{"path"=>"features/something.feature", "time_execution"=>145.8334538936615}, {"path"=>"features/integration_test.feature", "time_execution"=>70.76741790771484}]}
+[DEPRECATION] `have_enqueued_job` is deprecated.  Please use `have_enqueued_sidekiq_job` instead.
+D, [2017-06-29T12:09:00.104572 #26387] DEBUG -- : [knapsack_pro] Test suite time execution recording enabled.
+Using the default profile...
+Feature: Something
+
+WARNING: The next major version of capybara-webkit will require at least version 5.0 of Qt. You're using version 4.8.1.
+[!!!] Index does not exist (Elasticsearch::Transport::Transport::Errors::NotFound)
+  Scenario: Something[90m                                                      # features/something.feature:4[0m
+    [32mGiven I have a "[32m[1mSomething[0m[0m[32m" with traits [32m[1mwith_stuff[0m[0m[32m[90m                # features/step_definitions/global_step_definitions.rb:28[0m[0m
+      | [36msomething_id[0m[0m |[0m [36mid[0m[0m |[0m
+      | [36m1        [0m[0m |[0m [36m1 [0m[0m |[0m
+    [32mAnd I have a "[32m[1mThing[0m[0m[32m" with:[90m                                                                                  # features/step_definitions/global_step_definitions.rb:28[0m[0m
+      | [36mdata[0m[0m |[0m [36mfoo[0m[0m |[0m
+      | [36m123   [0m[0m |[0m [36mabc        [0m[0m |[0m
+    [32mWhen I go to the [32m[1mPage[0m[0m[32m page [0m[0m[32m[90m # features/step_definitions/global_step_definitions.rb:95[0m[0m
+    [32mThen the element "[32m[1mThing[0m[0m[32m" [32m[1mis visible[0m[0m[32m[90m                                                                        # features/step_definitions/global_step_definitions.rb:383[0m[0m
+
+[36m@some_tag[0m
+Feature: As a user I'd like to do things
+
+  Scenario: A user visits the website[90m                                         # features/storefront/endorsements.feature:3[0m
+    [32mGiven I have a "[32m[1mUser[0m[0m[32m"[0m[0m[32m[90m                                                                                        # features/step_definitions/global_step_definitions.rb:28[0m[0m
+      | [36muser_id[0m[0m |[0m [36mname          [0m[0m |[0m
+      | [36m1        [0m[0m |[0m [36m"Joe Smith"[0m[0m |[0m
+    [32mAnd I go to the [32m[1mDo things[0m[0m[32m page[0m[0m[32m[90m # features/step_definitions/global_step_definitions.rb:95[0m[0m
+    [32mAnd the element "[32m[1mThings[0m[0m[32m" exists[90m                                                                                                           # features/step_definitions/global_step_definitions.rb:108[0m[0m
+
+[31mFailing Scenarios:[0m
+[31mcucumber features/something.feature:16[0m[90m # Scenario: Something[0m
+
+161 scenarios ([31m1 failed[0m, [32m160 passed[0m)
+2336 steps ([31m1 failed[0m, [36m355 skipped[0m, [32m1980 passed[0m)
+11m37.935s
+D, [2017-06-29T12:20:41.069128 #26387] DEBUG -- : [knapsack_pro] API request UUID: i4jfoai4309quifoejflks
+D, [2017-06-29T12:20:41.069237 #26387] DEBUG -- : [knapsack_pro] API response:
+D, [2017-06-29T12:20:41.069290 #26387] DEBUG -- : [knapsack_pro]
+D, [2017-06-29T12:20:41.069340 #26387] DEBUG -- : [knapsack_pro] Saved time execution report on API server.
+D, [2017-06-29T12:20:41.069516 #26387] DEBUG -- : [knapsack_pro] Global time execution for tests: 11m 37s
+
+travis_time:end:301f52e8:start=1498752503117529184,finish=1498753246385947356,duration=743268418172
+[0K
+[31;1mThe command "bundle exec rake knapsack_pro:cucumber" exited with 1.[0m
+travis_fold:start:cache.2
+[0Kstore build cache
+$ bundle clean
+travis_time:start:1a2fe4ba
+[0K
+travis_time:end:1a2fe4ba:start=1498753247113461861,finish=1498753247117943847,duration=4481986
+[0Ktravis_time:start:24405b6a
+[0K[32;1mnothing changed, not updating cache[0m
+
+travis_time:end:24405b6a:start=1498753247122773056,finish=1498753253851665714,duration=6728892658
+[0Ktravis_fold:end:cache.2
+[0K
+Done. Your build exited with 1.

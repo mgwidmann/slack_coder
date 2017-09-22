@@ -2,6 +2,8 @@ use Mix.Config
 # Put all stubs here with the translation from real
 # module to test module inside of test/support/stubs
 config :stub_alias,
+  "SlackCoder.Github":                    SlackCoder.Stubs.Github,
+  "SlackCoder.Slack":                     SlackCoder.Stubs.Slack,
   "SlackCoder.Users.Supervisor":          SlackCoder.Stubs.Users.Supervisor,
   "SlackCoder.Users.User":                SlackCoder.Stubs.Users.User,
   "SlackCoder.Services.UserService":      SlackCoder.Stubs.UserService,

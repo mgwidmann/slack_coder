@@ -2,7 +2,7 @@ defmodule SlackCoder.Services.RandomFailureService do
   @moduledoc """
   """
   alias SlackCoder.Models.RandomFailure
-  alias SlackCoder.BuildSystem.Job
+  alias SlackCoder.BuildSystem.{Job, Job.Test}
   alias SlackCoder.Repo
   alias SlackCoder.Models.PR
   require Logger
@@ -12,7 +12,11 @@ defmodule SlackCoder.Services.RandomFailureService do
     |> Repo.insert_or_update()
     |> case do
       {:ok, random_failure} ->
-        {:ok, random_failure} # All is good
+        if changeset.data.id do
+          {:ok, random_failure} # All is good
+        else
+          {:new, random_failure}
+        end
       errored_changeset ->
         Logger.error("Unable to save random failure\n\tchangeset: #{inspect changeset}\n\trandom failure: #{inspect changeset.data}")
         errored_changeset
@@ -27,14 +31,15 @@ defmodule SlackCoder.Services.RandomFailureService do
     """
   end
   def save_random_failure(%PR{last_failed_jobs: [_ | _] = last_failed_jobs} = pr) do
-    for %Job{system: system, rspec: rspec, rspec_seed: rspec_seed, cucumber: cucumber, cucumber_seed: cucumber_seed, failure_log_id: failure_log_id} <- last_failed_jobs do
-      find_or_create_and_update!(rspec, failure_log_id, system, :rspec, rspec_seed, pr)
-      find_or_create_and_update!(cucumber, failure_log_id, system, :cucumber, cucumber_seed, pr)
-    end
+    create? = for %Job{system: system, tests: tests, failure_log_id: failure_log_id} <- last_failed_jobs,
+      %Test{seed: seed, files: files, type: type} <- tests, file <- files do
+      find_or_create_and_update!(file, failure_log_id, system, type, seed, pr)
+    end |> Enum.any?(&(match?({:new, _}, &1)))
+    if create?, do: SlackCoder.Github.Notification.random_failure(pr)
   end
 
   defp find_or_create_and_update!([], _id, _system, _type, _seed, _pr), do: nil
-  defp find_or_create_and_update!([{file, line, description} | failures], failure_log_id, system, type, seed, pr) do
+  defp find_or_create_and_update!({file, line, description}, failure_log_id, system, type, seed, pr) do
     RandomFailure.find_unique(pr.owner, pr.repo, file, line, description)
     |> Repo.one()
     |> case do
@@ -45,8 +50,6 @@ defmodule SlackCoder.Services.RandomFailureService do
     end
     |> attach_log(failure_log_id)
     |> save()
-
-    find_or_create_and_update!(failures, failure_log_id, system, type, seed, pr)
   end
 
   defp random_failure_updates(pr, file, line, description, seed, system, type) do

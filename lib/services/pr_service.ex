@@ -100,9 +100,8 @@ defmodule SlackCoder.Services.PRService do
   end
   def failure_notification(cs), do: cs
 
-  def opened?(%Ecto.Changeset{changes: %{closed_at: closed, merged_at: merged}}) when not is_nil(closed) or not is_nil(merged) do
-    false
-  end
+  def opened?(%Ecto.Changeset{changes: %{closed_at: closed}}) when not is_nil(closed), do: false
+  def opened?(%Ecto.Changeset{changes: %{merged_at: merged}}) when not is_nil(merged), do: false
   def opened?(_cs), do: true
 
   def next_backoff(backoff, greater_than) do
@@ -122,6 +121,11 @@ defmodule SlackCoder.Services.PRService do
         save_random_failure(pr)
         cs # Return changeset to carry on normally
     end
+  end
+  def random_failure(%Ecto.Changeset{changes: %{sha: sha}, data: %PR{last_failed_sha: last_failed_sha}} = cs) when sha != last_failed_sha do
+    cs
+    |> put_change(:last_failed_sha, nil)
+    |> put_change(:last_failed_jobs, [])
   end
   def random_failure(cs), do: cs
 
@@ -150,19 +154,44 @@ defmodule SlackCoder.Services.PRService do
   def check_failed(%PR{build_status: status} = pr, attempted_once) when status in ~w(failure) do
     case SlackCoder.BuildSystem.failed_jobs(pr) do
       [] ->
-        if attempted_once do
-          Logger.warn """
-          Checking failed job data returned empty twice in a row.
+        cond do
+          attempted_once && SlackCoder.BuildSystem.supported?(pr) ->
+            Logger.warn """
+            Checking failed job data returned empty twice in a row.
 
-          #{inspect pr, pretty: true}
-          """
-          pr
-        else
-          check_failed(pr, true)
+            #{inspect pr, pretty: true}
+            """
+            load_failed_from_db(pr)
+          SlackCoder.BuildSystem.supported?(pr) ->
+            check_failed(pr, true)
+          true ->
+            load_failed_from_db(pr)
         end
       failed_jobs ->
+        failed_jobs = if pr.sha == pr.last_failed_sha do # Add together
+                        Enum.uniq(pr.last_failed_jobs ++ failed_jobs)
+                      else
+                        failed_jobs
+                      end
         %PR{pr | last_failed_jobs: failed_jobs, last_failed_sha: pr.sha}
     end
   end
+  def check_failed(%PR{build_status: status, last_failed_jobs: []} = pr, _attempted_once) when status in ~w(pending) do
+    load_failed_from_db(pr)
+  end
   def check_failed(pr, _attempted_once), do: pr
+
+  defp load_failed_from_db(pr) do
+    case Ecto.assoc(pr, :failure_logs) |> Repo.all() do
+      [] -> pr
+      [log | _] = failure_logs ->
+        failed_jobs = Enum.map(failure_logs, &SlackCoder.BuildSystem.LogParser.parse(&1.log))
+        failed_jobs = if pr.sha == log.sha do # Add together
+                        Enum.uniq(pr.last_failed_jobs ++ failed_jobs)
+                      else
+                        failed_jobs
+                      end
+        %{pr | last_failed_jobs: failed_jobs, last_failed_sha: log.sha}
+    end
+  end
 end
