@@ -10,10 +10,10 @@ class Main extends Component {
       <div>
         <div className="header">
           <div className="container">
-            <div className="col-md-3 hidden-xs hidden-sm">
+            <div className="col-lg-3 hidden-md hidden-xs hidden-sm">
               <a className="logo" href="/"></a>
             </div>
-            <div className="col-md-6 col-sm-8 hidden-xs text-center">
+            <div className="col-lg-6 col-md-7 col-sm-7 hidden-xs text-center">
               <h1>
                 Slack Coder
               </h1>
@@ -21,7 +21,7 @@ class Main extends Component {
             </div>
             {currentUser && (
               <div>
-                <div className="col-md-3 col-sm-4 col-xs-12 text-right">
+                <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
                   <span>
                     <img src={currentUser.avatar_url} className="img-xs img-circle"/>
                     {currentUser.id ? (
@@ -35,14 +35,14 @@ class Main extends Component {
                   &nbsp;|&nbsp;
                   <a href={`/update/this/to/logout`}>Logout</a>
                 </div>
-                <div className="col-md-3 col-sm-4 col-xs-12 text-right">
+                <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
                   <a href={`/update/this/to/users`}>
                     <i className="glyphicon glyphicon-user"></i> Users
                   </a>
                 </div>
               </div>
             )}
-            <div className="col-md-3 col-sm-4 col-xs-12 text-right">
+            <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
               <a href="/wobserver">
                 <i className="glyphicon glyphicon-time"></i> Application Metrics
               </a>
@@ -51,7 +51,7 @@ class Main extends Component {
                 <i className="glyphicon glyphicon-remove"></i> Errors
               </a>
             </div>
-            <div className="col-md-3 col-sm-4 col-xs-12 text-right">
+            <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
               {currentUser && (
                 <span>
                   <a href="/graphiql">

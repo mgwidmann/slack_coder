@@ -41,7 +41,7 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
     @desc "Fetch a group of PRs"
     field :pull_requests, type: list_of(:pull_request) do
       @desc "The type of `PullRequest`s you'd like to fetch."
-      arg :type, :pull_request_type
+      arg :type, non_null(:pull_request_type)
       arg :status, :pull_request_status
 
       resolve fn
@@ -50,6 +50,17 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
         _, %{type: :monitors}, %{context: %{current_user: _current_user}} ->
           {:ok, []}
       end
+    end
+
+    @desc "Fetch a single PR"
+    field :pull_request, type: :pull_request do
+      @desc "The primary key"
+      arg :id, :id
+      arg :owner, :string
+      arg :repository, :string
+      arg :number, :integer
+
+      resolve &SlackCoder.GraphQL.Resolvers.PRResolver.pull_request/3
     end
 
     @desc "Fetching an individual user of the system."

@@ -8,7 +8,7 @@ var APP_DIR = __dirname;
 
 var config = {
   entry:{
-    'App': [resolve(__dirname, 'js/App.js')],
+    'App': [resolve(__dirname, 'js/App.jsx')],
     'dependencies': [
       'react',
       'redux'
@@ -20,15 +20,16 @@ var config = {
     filename: 'js/[name].js'
   },
   plugins: [
+    new webpack.SourceMapDevToolPlugin(),
     new ExtractTextPlugin('css/app.css', { allChunks: true }),
     new webpack.DefinePlugin({
       'process.env': {
         'NODE_ENV': '"production"'
       }
     }),
-    new webpack.ProvidePlugin({
-      Promise: 'babel-polyfill'
-    }),
+    // new webpack.ProvidePlugin({
+    //   Promise: 'babel-polyfill'
+    // }),
     new webpack.ProvidePlugin({
       $: "jquery",
       jQuery: "jquery",
@@ -60,6 +61,11 @@ var config = {
           use: ['css-loader', 'sass-loader']
         })
       },
+      {
+        test: /\.(graphql|gql)$/,
+        exclude: /node_modules/,
+        loader: 'graphql-tag/loader',
+      }
       // { test: /\.png$/, loader: "url-loader?limit=100000" },
       // { test: /\.jpg$/, loader: "file-loader" },
       // { test: /\.(woff2?|svg)$/, loader: 'url?limit=10000' },

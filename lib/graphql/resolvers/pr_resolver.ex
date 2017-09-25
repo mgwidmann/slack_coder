@@ -19,4 +19,12 @@ defmodule SlackCoder.GraphQL.Resolvers.PRResolver do
   def list(current_user, :mine, :merged) do
     {:ok, PR.by_user(current_user.id) |> PR.merged() |> Repo.all()}
   end
+
+  def pull_request(_, %{owner: owner, repository: repo, number: number}, _) do
+    {:ok, PR.by_number(owner, repo, number) |> Repo.one!()}
+  end
+
+  def pull_request(_, %{id: id}, _) do
+    {:ok, Repo.get!(PR, id)}
+  end
 end
