@@ -1,5 +1,0 @@
-#import "../fragments/PullRequest.graphql"
-
-query PullRequest($id: ID!){
-  pullRequest(id: $id) { ... PR }
-}

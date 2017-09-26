@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { graphql } from 'react-apollo';
-import REFRESH_PR_QUERY from '../../../mobile/shared/graphql/queries/refreshPR.graphql';
+import SynchronizePRLink from './SynchronizePRLink';
 
 export default class PRRow extends Component {
   statusClass(status) {
@@ -20,7 +19,7 @@ export default class PRRow extends Component {
   }
 
   render() {
-    const { pr } = this.props;
+    const { pr, synchronize } = this.props;
     return (
       <tr key={pr.id}>
         <td>
@@ -51,9 +50,7 @@ export default class PRRow extends Component {
           )}
         </td>
         <td>
-          <a href="javascript:void(0);" title="Refresh PR" data-toggle="tooltip" data-placement="top" className="refresh-pr">
-            <i className="glyphicon glyphicon-refresh"></i>
-          </a>
+          <SynchronizePRLink owner={pr.owner} repository={pr.repository} number={pr.number} />
         </td>
       </tr>
     );

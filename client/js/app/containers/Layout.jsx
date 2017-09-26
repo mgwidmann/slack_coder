@@ -43,18 +43,18 @@ class Main extends Component {
               </div>
             )}
             <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
-              <a href="/wobserver">
+              <a href="/tools/wobserver">
                 <i className="glyphicon glyphicon-time"></i> Application Metrics
               </a>
               &nbsp;|&nbsp;
-              <a href="/errors">
+              <a href="/tools/errors">
                 <i className="glyphicon glyphicon-remove"></i> Errors
               </a>
             </div>
             <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
               {currentUser && (
                 <span>
-                  <a href="/graphiql">
+                  <a href="/tools/graphiql">
                     <i className="glyphicon glyphicon-console"></i> GraphiQL
                   </a>
                   &nbsp;|&nbsp;

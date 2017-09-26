@@ -24,7 +24,7 @@ class App extends React.Component {
         <ConnectedRouter dispatch={store.dispatch} history={history}>
           <Layout>
             <Route exact path="/" component={PullRequests} />
-            {/* <Route exact path="/mobile/login" render={(props) => <MobileLogin {...props} token={store.getState().token}/>} /> */}
+            <Route exact path="/mobile/login" component={MobileLogin} token={store.getState().token} />
           </Layout>
         </ConnectedRouter>
       </ApolloProvider>

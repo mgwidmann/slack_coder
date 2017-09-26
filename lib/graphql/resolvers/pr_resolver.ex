@@ -1,6 +1,8 @@
 defmodule SlackCoder.GraphQL.Resolvers.PRResolver do
   alias SlackCoder.Models.PR
   alias SlackCoder.Repo
+  alias SlackCoder.Github.Watchers.Supervisor, as: Github
+  alias SlackCoder.Github.Watchers.PullRequest
 
   def build_status(%PR{build_status: status}) when is_binary(status) do
     String.to_atom(status)
@@ -26,5 +28,13 @@ defmodule SlackCoder.GraphQL.Resolvers.PRResolver do
 
   def pull_request(_, %{id: id}, _) do
     {:ok, Repo.get!(PR, id)}
+  end
+
+  def synchronize(_, %{owner: owner, repository: repo, number: number}, _) do
+    SlackCoder.Github.synchronize_pull_request(owner, repo, number)
+
+    {:ok, %PR{owner: owner, repo: repo, number: number}
+          |> Github.find_watcher()
+          |> PullRequest.fetch()}
   end
 end

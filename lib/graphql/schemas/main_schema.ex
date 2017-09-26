@@ -104,6 +104,15 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
 
       resolve &SlackCoder.GraphQL.Resolvers.UserResolver.update/3
     end
+
+    @desc "Refreshes the PR from github"
+    field :synchronize, type: :pull_request do
+      arg :owner, non_null(:string)
+      arg :repository, non_null(:string)
+      arg :number, non_null(:integer)
+
+      resolve &SlackCoder.GraphQL.Resolvers.PRResolver.synchronize/3
+    end
   end
 
 end
