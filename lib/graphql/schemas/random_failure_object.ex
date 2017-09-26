@@ -13,7 +13,7 @@ defmodule SlackCoder.GraphQL.Schemas.RandomFailure do
 
   enum :system_type do
     value :travis, description: "Job was run on https://travis-ci.com/"
-    value :circle_c_i, description: "Job was run on https://circleci.com/"
+    value :circle_ci, description: "Job was run on https://circleci.com/"
     value :semaphore, description: "Job was run on https://semaphoreci.com/"
   end
 
