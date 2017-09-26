@@ -18,10 +18,19 @@ export default class PRRow extends Component {
     }
   }
 
+  componentDidMount() {
+    console.log(this.props);
+    // this.unsubscribe = this.props.subscribePullRequest({ id: this.props.pr.id });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
   render() {
     const { pr, synchronize } = this.props;
     return (
-      <tr key={pr.id}>
+      <tr>
         <td>
           <img src={pr.user && pr.user.avatarUrl} className="img-circle user-avatar" />
         </td>

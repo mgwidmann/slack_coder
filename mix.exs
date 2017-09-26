@@ -59,6 +59,7 @@ defmodule SlackCoder.Mixfile do
       #### GraphQL ####
       {:absinthe, "~> 1.4.0-beta.5"},
       {:absinthe_plug, github: "mgwidmann/absinthe_plug", branch: "default_headers_connection"},
+      {:absinthe_phoenix, github: "absinthe-graphql/absinthe_phoenix"},
       #### Slack ####
       {:slack, github: "BlakeWilliams/Elixir-Slack"},
       {:websocket_client, "~> 1.2", override: true},

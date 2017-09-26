@@ -3,8 +3,7 @@ import thunkMiddleware from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 import createHistory from 'history/createBrowserHistory';
 import { Route } from 'react-router';
-import client from '../../mobile/shared/graphql/client';
-import networkInterface from '../../mobile/shared/graphql/networkInterface';
+import client from './client';
 import { routerMiddleware } from 'react-router-redux';
 import reducers from './reducers';
 
@@ -26,17 +25,18 @@ function configureStore(initialState) {
   return createStore(reducers, initialState, enhancer);
 }
 
-networkInterface.use([{
-  applyMiddleware(req, next) {
-    if (!req.options.headers) {
-      req.options.headers = {};  // Create the header object if needed.
-    }
-    const token = store.getState().token;
-    req.options.headers.authorization = token ? `Bearer ${token}` : null;
+// networkInterface.use([{
+//   applyMiddleware(req, next) {
+//     if (!req.options.headers) {
+//       req.options.headers = {};  // Create the header object if needed.
+//     }
+//     const token = store.getState().token;
+//     req.options.headers.authorization = token ? `Bearer ${token}` : null;
+//
+//     next();
+//   }
+// }]);
 
-    next();
-  }
-}]);
 
 let initialStore = {
   // On window or undefined

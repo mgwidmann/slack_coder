@@ -1,9 +1,10 @@
 {
   "repository": {},
   "scripts": {
-    "build": "node_modules/.bin/webpack -p"
+    "build": "NODE_ENV=production node_modules/.bin/webpack -p"
   },
   "dependencies": {
+    "apollo-phoenix-websocket": "^0.6.2",
     "bootstrap": "^3.3.7",
     "bootstrap-sass": "^3.3.7",
     "copy-webpack-plugin": "^4.0.1",

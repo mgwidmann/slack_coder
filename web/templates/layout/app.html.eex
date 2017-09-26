@@ -22,7 +22,7 @@
 
   <body>
     <div id="app"></div>
-    <script src="<%= static_path(@conn, "/js/dependencies.js") %>"></script>
-    <script src="<%= static_path(@conn, "/js/App.js") %>"></script>
+    <script src="<%= static_path(@conn, "/js/dependencies.bundle.js") %>"></script>
+    <script src="<%= static_path(@conn, "/js/app.bundle.js") %>"></script>
   </body>
 </html>

@@ -2,14 +2,23 @@ import React, { Component } from 'react';
 import PRList from '../components/PRList';
 import { graphql } from 'react-apollo';
 import PULL_REQUESTS_QUERY from '../../../mobile/shared/graphql/queries/pullRequests.graphql';
+import SUBSCRIBE_PULL_REQUEST from '../../../mobile/shared/graphql/subscriptions/pullRequest.graphql';
 
 class PullRequests extends Component {
+  componentWillReceiveProps(nextProps) {
+    if (!this.subscription && !nextProps.loading) {
+      (nextProps.mine + nextProps.monitors).map((pr) => {
+        this.props.subscribePullRequest({ id: pr.id });
+      });
+    }
+  }
+
   renderLoading() {
     return <img src="/images/spinner.gif" className="img-responsive loading-spinner" />;
   }
 
   renderMyEmpty() {
-    if(this.props.data.loading) {
+    if(this.props.loading) {
       return this.renderLoading();
     } else {
       return (
@@ -25,7 +34,7 @@ class PullRequests extends Component {
   }
 
   renderMonitorEmpty() {
-    if(this.props.data.loading) {
+    if(this.props.loading) {
       return this.renderLoading();
     } else {
       return (
@@ -41,7 +50,7 @@ class PullRequests extends Component {
   }
 
   render() {
-    const { currentUser, mine, monitors } = this.props.data;
+    const { currentUser, mine, monitors } = this.props;
     return (
       <div>
         <section className="panel panel-default">
@@ -50,22 +59,20 @@ class PullRequests extends Component {
               My pull requests
             </span>
           </div>
-          <PRList pullRequests={mine || []}>
-            {this.renderMyEmpty()}
-          </PRList>
+          <div className="panel-body">
+            <PRList pullRequests={mine || []}>
+              {this.renderMyEmpty()}
+            </PRList>
+          </div>
         </section>
         <section className="panel panel-default">
           <div className="panel-heading">
             <span className="h3">Team members I monitor</span>
           </div>
           <div className="panel-body">
-            <table className="table table-striped">
-              <tbody id="team-pull-requests">
-                <PRList pullRequests={monitors || []}>
-                  {this.renderMonitorEmpty()}
-                </PRList>
-              </tbody>
-            </table>
+            <PRList pullRequests={monitors || []}>
+              {this.renderMonitorEmpty()}
+            </PRList>
           </div>
         </section>
       </div>
@@ -73,4 +80,21 @@ class PullRequests extends Component {
   }
 }
 
-export default graphql(PULL_REQUESTS_QUERY)(PullRequests);
+export default graphql(PULL_REQUESTS_QUERY, {
+  props: ({ data: { currentUser, mine, monitors, loading, subscribeToMore } }) => {
+    return {
+      currentUser,
+      mine,
+      monitors,
+      loading,
+      subscribePullRequest: (params) => {
+        subscribeToMore({
+          document: SUBSCRIBE_PULL_REQUEST,
+          variables: {
+            id: params.id,
+          }
+        })
+      }
+    };
+  }
+})(PullRequests);

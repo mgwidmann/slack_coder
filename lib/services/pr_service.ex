@@ -156,11 +156,13 @@ defmodule SlackCoder.Services.PRService do
       [] ->
         cond do
           attempted_once && SlackCoder.BuildSystem.supported?(pr) ->
-            Logger.warn """
-            Checking failed job data returned empty twice in a row.
+            if(Mix.env == :prod) do
+              Logger.warn """
+              Checking failed job data returned empty twice in a row.
 
-            #{inspect pr, pretty: true}
-            """
+              #{inspect pr, pretty: true}
+              """
+            end
             load_failed_from_db(pr)
           SlackCoder.BuildSystem.supported?(pr) ->
             check_failed(pr, true)

@@ -5,13 +5,27 @@ const { join, resolve } = require('path');
 
 var BUILD_DIR = resolve(__dirname, '../priv/static');
 var APP_DIR = __dirname;
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 var config = {
   entry:{
-    'App': [resolve(__dirname, 'js/App.jsx')],
-    'dependencies': [
-      'react',
-      'redux'
+    'app.bundle': [resolve(__dirname, 'js/App.jsx')],
+    'store.bundle': [resolve(__dirname, 'js/app/store.js')],
+    'dependencies.bundle': [
+      "react",
+      "react-dom",
+      "react-redux",
+      "redux-thunk",
+      "redux-logger",
+      "react-router-redux",
+      "history",
+      "react-apollo",
+      "qrcode.react",
+      "graphql-tag",
+      "apollo-phoenix-websocket",
+      "jquery",
+      "phoenix",
+      "bootstrap",
     ]
   },
   output: {
@@ -22,11 +36,11 @@ var config = {
   plugins: [
     new webpack.SourceMapDevToolPlugin(),
     new ExtractTextPlugin('css/app.css', { allChunks: true }),
-    new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': '"production"'
-      }
+    new webpack.EnvironmentPlugin({
+      NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+      DEBUG: process.env.NODE_ENV == 'development'
     }),
+    new webpack.optimize.CommonsChunkPlugin({ name: "dependencies.bundle", filename: 'js/[name].js', minChunks: Infinity }),
     // new webpack.ProvidePlugin({
     //   Promise: 'babel-polyfill'
     // }),
@@ -44,6 +58,7 @@ var config = {
     loaders: [
       {
         test: /\.jsx?$/,
+        exclude: /node_modules/,
         include: __dirname,
         use: {
           loader: 'babel-loader',

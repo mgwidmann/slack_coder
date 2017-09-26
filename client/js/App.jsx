@@ -8,14 +8,9 @@ import Layout from './app/containers/Layout';
 import PullRequests from './app/containers/PullRequests';
 import MobileLogin from './app/containers/MobileLogin';
 import { store, history } from './app/store';
-import client from '../mobile/shared/graphql/client';
+import client from './app/client';
 import '../css/app.scss';
 import 'bootstrap';
-import socket from "./socket";
-
-$( document ).ajaxSend((event, xhr, settings) => {
-  xhr.setRequestHeader('Authorization', `Bearer ${window.token}`);
-});
 
 class App extends React.Component {
   render() {

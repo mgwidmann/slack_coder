@@ -1,7 +1,14 @@
-import { ApolloClient, createNetworkInterface } from 'react-apollo';
-import networkInterface from './networkInterface';
+import { ApolloClient } from 'react-apollo';
 
-export default new ApolloClient({
-  reduxRootSelector: (state) => state.graphql,
-  networkInterface: networkInterface
-});
+let client;
+export default (networkInterface) => {
+  if (client) {
+    return client;
+  } else {
+    client = new ApolloClient({
+      reduxRootSelector: (state) => state.graphql,
+      networkInterface: networkInterface
+    });
+    return client;
+  }
+};
