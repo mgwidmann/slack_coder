@@ -69,7 +69,9 @@ defmodule SlackCoder.BuildSystem.LogParser do
 
   defp keep?("Randomized with seed" <> _), do: true
   defp keep?(unquote(IO.ANSI.red) <> "rspec ./spec" <> _), do: true
+  defp keep?("rspec ./spec" <> _), do: true
   defp keep?(unquote(IO.ANSI.red) <> "cucumber features/" <> _), do: true
+  defp keep?("cucumber features/" <> _), do: true
   defp keep?(_line), do: false
 
   defp remove_colors(text), do: String.replace(text, ~r/\e\[.+?m/, "")
