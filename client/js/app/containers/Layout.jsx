@@ -27,7 +27,7 @@ class Main extends Component {
                     {currentUser.id ? (
                       <a href={`/users/${currentUser.id}/edit`}>{currentUser.github}</a>
                     ) : (
-                      <a href={`/update/this/to/new`}>{currentUser.github}</a>
+                      null
                     )}
                   </span>
                   &nbsp;|&nbsp;
@@ -36,7 +36,7 @@ class Main extends Component {
                   <a href={`/auth/logout`}>Logout</a>
                 </div>
                 <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
-                  <a href={`/update/this/to/users`}>
+                  <a href={`/users`}>
                     <i className="glyphicon glyphicon-user"></i> Users
                   </a>
                 </div>

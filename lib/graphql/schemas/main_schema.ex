@@ -80,7 +80,7 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
       @desc "The page number"
       arg :page, :integer
       @desc "The number of items in a page, maximum 100"
-      arg :per_page, :integer
+      arg :page_size, :integer
       resolve &SlackCoder.GraphQL.Resolvers.UserResolver.list/3
     end
 
@@ -89,7 +89,7 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
       @desc "The page number"
       arg :page, :integer
       @desc "The number of items in a page, maximum 100"
-      arg :per_page, :integer
+      arg :page_size, :integer
       @desc "Sort by"
       arg :sort, :random_failure_sort_field
       @desc "Sort direction"

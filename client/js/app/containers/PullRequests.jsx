@@ -6,8 +6,8 @@ import SUBSCRIBE_PULL_REQUEST from '../../../mobile/shared/graphql/subscriptions
 
 class PullRequests extends Component {
   componentWillReceiveProps(nextProps) {
-    if (!this.subscription && !nextProps.loading) {
-      (nextProps.mine + nextProps.monitors).map((pr) => {
+    if (!this.subscription && !nextProps.loading && nextProps.mine && nextProps.monitors) {
+      (nextProps.mine.concat(nextProps.monitors)).map((pr) => {
         this.props.subscribePullRequest({ id: pr.id });
       });
     }
