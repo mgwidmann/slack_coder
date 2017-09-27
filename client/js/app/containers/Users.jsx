@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { compose } from 'react-apollo';
 import usersQuery from '../../../mobile/shared/graphql/queries/users';
 import UserRow from '../components/UserRow';
 import Pagination from '../components/Pagination';
@@ -31,4 +32,6 @@ class Users extends Component {
   }
 }
 
-export default usersQuery(Users);
+export default compose(
+  usersQuery
+)(Users);

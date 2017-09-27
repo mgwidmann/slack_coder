@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import PRList from '../components/PRList';
 import { graphql } from 'react-apollo';
-import PULL_REQUESTS_QUERY from '../../../mobile/shared/graphql/queries/pullRequests.graphql';
-import SUBSCRIBE_PULL_REQUEST from '../../../mobile/shared/graphql/subscriptions/pullRequest.graphql';
+import subscribePullRequests from '../../../mobile/shared/graphql/subscriptions/pullRequest';
 
 class PullRequests extends Component {
   componentWillReceiveProps(nextProps) {
@@ -80,21 +79,4 @@ class PullRequests extends Component {
   }
 }
 
-export default graphql(PULL_REQUESTS_QUERY, {
-  props: ({ data: { currentUser, mine, monitors, loading, subscribeToMore } }) => {
-    return {
-      currentUser,
-      mine,
-      monitors,
-      loading,
-      subscribePullRequest: (params) => {
-        subscribeToMore({
-          document: SUBSCRIBE_PULL_REQUEST,
-          variables: {
-            id: params.id,
-          }
-        })
-      }
-    };
-  }
-})(PullRequests);
+export default subscribePullRequests(PullRequests);

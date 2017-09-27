@@ -1,15 +1,22 @@
 import { graphql } from 'react-apollo';
 import SUBSCRIBE_PULL_REQUEST from './pullRequest.graphql';
+import PULL_REQUESTS_QUERY from '../queries/pullRequests.graphql';
 
-export default graphql(SUBSCRIBE_PULL_REQUEST, {
-  options: ({ pr }) => {
+export default graphql(PULL_REQUESTS_QUERY, {
+  props: ({ data: { currentUser, mine, monitors, loading, subscribeToMore } }) => {
     return {
-      props: () => {
-        console.log("props called")
-      },
+      currentUser,
+      mine,
+      monitors,
+      loading,
       subscribePullRequest: (params) => {
-        console.log("Called subscribe", params);
+        subscribeToMore({
+          document: SUBSCRIBE_PULL_REQUEST,
+          variables: {
+            id: params.id,
+          }
+        })
       }
-    }
+    };
   }
 })
