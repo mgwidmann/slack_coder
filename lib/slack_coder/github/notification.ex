@@ -100,6 +100,7 @@ defmodule SlackCoder.Github.Notification do
   defp plural_failures(count) when count >= 2, do: "FAILURES"
   defp plural_failures(_count), do: "FAILURE"
 
+  defp view_log_action(nil), do: ""
   defp view_log_action(failure_log_id) do
     "<#{SlackCoder.Router.Helpers.random_failure_url(SlackCoder.Endpoint, :log, failure_log_id)}|View Log>"
   end

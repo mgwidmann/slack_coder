@@ -148,8 +148,10 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   @ignored_contexts ~w(ci/bitrise codeclimate/diff-coverage codeclimate/total-coverage codecov/project codecov/patch)
-  def process(:status, %{"context" => analysis_system <> _}) when analysis_system in @ignored_contexts do
-    # Ignore
+  for context <- @ignored_contexts do
+    def process(:status, %{"context" => unquote(context) <> _}) do
+      # Ignore
+    end
   end
 
   # Build has change status for an Analysis system
