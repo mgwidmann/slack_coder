@@ -30,4 +30,8 @@ defmodule SlackCoder.Models.RandomFailure.FailureLog do
   def with_external_id(query \\ __MODULE__, id) do
     from log in query, where: log.external_id == ^id
   end
+
+  def without_random_failure(query \\ __MODULE__, id) do
+    from log in query, join: r in assoc(log, :random_failure), where: log.id == ^id, select: true
+  end
 end

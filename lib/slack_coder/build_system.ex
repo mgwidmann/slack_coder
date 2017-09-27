@@ -7,6 +7,7 @@ defmodule SlackCoder.BuildSystem do
   stub_alias SlackCoder.BuildSystem.Semaphore
   alias SlackCoder.Models.RandomFailure.FailureLog
   alias SlackCoder.Repo
+  import Ecto.Query
   require Logger
 
   defmodule Build do
@@ -37,7 +38,8 @@ defmodule SlackCoder.BuildSystem do
   end
 
   def record_failure_log(%SlackCoder.BuildSystem.Job{id: id, tests: tests} = job, log, pr) when is_integer(id) and length(tests) > 0 do
-    Repo.delete_all(FailureLog.by_pr(pr) |> FailureLog.with_external_id(id)) # Clean up old logs
+    ids_to_delete = for id <- FailureLog.by_pr(pr) |> FailureLog.with_external_id(id) |> select([q], q.id) |> Repo.all, Repo.one(FailureLog.without_random_failure(id)) != true, do: id
+    Repo.delete_all(from(f in FailureLog, where: f.id in ^ids_to_delete)) # Clean up old logs
     %FailureLog{id: id} = Repo.insert!(FailureLog.changeset(%FailureLog{}, %{pr_id: pr.id, log: log, external_id: id, sha: pr.sha}))
     %{job | failure_log_id: id}
   end
@@ -81,6 +83,8 @@ defmodule SlackCoder.BuildSystem do
       Map.put(map, type, (Map.get(map, type) || 0) + 1)
     end)
   end
+
+  def counts([]), do: Map.new
 
   def counts([%Job{} | _] = jobs) do
     jobs

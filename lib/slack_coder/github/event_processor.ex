@@ -147,7 +147,8 @@ defmodule SlackCoder.Github.EventProcessor do
     |> PullRequest.status(:build, sha, url, state)
   end
 
-  def process(:status, %{"context" => "ci/bitrise" <> _}) do
+  @ignored_contexts ~w(ci/bitrise codeclimate/diff-coverage codeclimate/total-coverage codecov/project codecov/patch)
+  def process(:status, %{"context" => analysis_system <> _}) when analysis_system in @ignored_contexts do
     # Ignore
   end
 
@@ -198,6 +199,14 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   def process(:milestone, _params) do
+    # Ignore
+  end
+
+  def process(:organization, _params) do
+    # Ignore
+  end
+
+  def process(:membership, _params) do
     # Ignore
   end
 
