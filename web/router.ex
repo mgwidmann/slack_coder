@@ -87,15 +87,11 @@ defmodule SlackCoder.Router do
   scope "/auth", SlackCoder do
     pipe_through :browser
 
+    get "/logout", AuthController, :delete
+    delete "/logout", AuthController, :delete
     get "/:provider", AuthController, :index
     get "/:provider/callback", AuthController, :callback
-    delete "/logout", AuthController, :delete
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", SlackCoder do
-  #   pipe_through :api
-  # end
 
   def graphiql_headers(conn) do
     %{"Authorization" => "Bearer #{SlackCoder.Guardian.Plug.current_token(conn)}"}

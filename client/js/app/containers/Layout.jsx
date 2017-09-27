@@ -33,7 +33,7 @@ class Main extends Component {
                   &nbsp;|&nbsp;
                   <a href='/mobile/login'>Mobile</a>
                   &nbsp;|&nbsp;
-                  <a href={`/update/this/to/logout`}>Logout</a>
+                  <a href={`/auth/logout`}>Logout</a>
                 </div>
                 <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
                   <a href={`/update/this/to/users`}>
@@ -43,13 +43,17 @@ class Main extends Component {
               </div>
             )}
             <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
-              <a href="/tools/wobserver">
-                <i className="glyphicon glyphicon-time"></i> Application Metrics
-              </a>
-              &nbsp;|&nbsp;
-              <a href="/tools/errors">
-                <i className="glyphicon glyphicon-remove"></i> Errors
-              </a>
+              {currentUser && (
+                <span>
+                  <a href="/tools/wobserver">
+                    <i className="glyphicon glyphicon-time"></i> Application Metrics
+                  </a>
+                  &nbsp;|&nbsp;
+                  <a href="/tools/errors">
+                    <i className="glyphicon glyphicon-remove"></i> Errors
+                  </a>
+                </span>
+              )}
             </div>
             <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
               {currentUser && (
@@ -58,11 +62,13 @@ class Main extends Component {
                     <i className="glyphicon glyphicon-console"></i> GraphiQL
                   </a>
                   &nbsp;|&nbsp;
-                  <a href={`https://github.com/mgwidmann/slack_coder/commit/${window.commitSha}`}>
-                    <i className="glyphicon glyphicon-tag"></i> Version
-                  </a>
                 </span>
               )}
+              <span>
+                <a href={`https://github.com/mgwidmann/slack_coder/commit/${window.commitSha}`}>
+                  <i className="glyphicon glyphicon-tag"></i> Version
+                </a>
+              </span>
             </div>
           </div>
         </div>

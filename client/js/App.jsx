@@ -14,12 +14,15 @@ import 'bootstrap';
 
 class App extends React.Component {
   render() {
+    console.log(store.getState().token);
     return (
       <ApolloProvider client={client} store={store}>
         <ConnectedRouter dispatch={store.dispatch} history={history}>
           <Layout>
             <Route exact path="/" component={PullRequests} />
-            <Route exact path="/mobile/login" component={MobileLogin} token={store.getState().token} />
+            <Route exact path="/mobile/login" render={() => {
+              return <MobileLogin token={store.getState().token} />
+            }} />
           </Layout>
         </ConnectedRouter>
       </ApolloProvider>
