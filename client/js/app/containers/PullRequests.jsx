@@ -50,7 +50,7 @@ class PullRequests extends Component {
               My pull requests
             </span>
           </div>
-          <div className="panel-body">
+          <div className="panel-body pull-request-pannel">
             <PRList pullRequests={mine || []} type={'mine'} subscribe={subscribe} >
               {this.renderMyEmpty()}
             </PRList>
@@ -60,7 +60,7 @@ class PullRequests extends Component {
           <div className="panel-heading">
             <span className="h3">Team members I monitor</span>
           </div>
-          <div className="panel-body">
+          <div className="panel-body pull-request-pannel">
             <PRList pullRequests={monitors || []} type={'monitors'} subscribe={subscribe} >
               {this.renderMonitorEmpty()}
             </PRList>

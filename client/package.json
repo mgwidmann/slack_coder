@@ -16,6 +16,7 @@
     "react": "^15.6.1",
     "react-apollo": "^1.4.15",
     "react-dom": "^15.6.1",
+    "react-flip-move": "^2.9.15",
     "react-redux": "^5.0.6",
     "react-router-redux": "next",
     "redux-logger": "^3.0.6",

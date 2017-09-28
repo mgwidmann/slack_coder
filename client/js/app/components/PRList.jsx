@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import FlipMove from 'react-flip-move';
 import PRRow from '../components/PRRow';
 
 export default class PRList extends Component {
@@ -6,11 +7,11 @@ export default class PRList extends Component {
     const { pullRequests, type, subscribe } = this.props;
     return (
       <div>
-        <table className="table table-striped">
-          <tbody id="pull-requests">
+        <div className="table table-striped">
+          <FlipMove easing={'linear'}>
             { pullRequests.map((pr) => { return <PRRow key={pr.id} pr={pr} type={type} subscribe={subscribe} /> }) }
-          </tbody>
-        </table>
+          </FlipMove>
+        </div>
         { pullRequests.length == 0 && this.props.children}
       </div>
     );
