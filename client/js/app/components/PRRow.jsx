@@ -19,8 +19,8 @@ export default class PRRow extends Component {
   }
 
   componentDidMount() {
-    // console.log(this.props);
-    // this.unsubscribe = this.props.subscribePullRequest({ id: this.props.pr.id });
+    let { type, pr, subscribe } = this.props;
+    this.unsubscribe = subscribe(pr, type);
   }
 
   componentWillUnmount() {

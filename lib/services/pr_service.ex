@@ -1,5 +1,6 @@
 defmodule SlackCoder.Services.PRService do
   use Timex
+  use PatternTap
   alias SlackCoder.Repo
   alias SlackCoder.Github.Notification
   alias SlackCoder.Models.PR
@@ -12,6 +13,7 @@ defmodule SlackCoder.Services.PRService do
   def save(changeset) do
     changeset
     |> put_change(:opened, opened?(changeset))
+    |> destruct(changeset ~> changeset) # Update local variable
     |> random_failure()
     |> stale_notification()
     |> unstale_notification()
@@ -24,7 +26,7 @@ defmodule SlackCoder.Services.PRService do
     |> Repo.insert_or_update()
     |> case do
       {:ok, pr} ->
-        {:ok, pr |> check_failed() |> notifications() |> broadcast()}
+        {:ok, pr |> check_failed() |> notifications() |> broadcast(Map.to_list(changeset.changes))}
       errored_changeset ->
         Logger.error "Unable to save PR: #{inspect errored_changeset}"
         errored_changeset
@@ -100,7 +102,9 @@ defmodule SlackCoder.Services.PRService do
   end
   def failure_notification(cs), do: cs
 
+  def opened?(%Ecto.Changeset{data: %{closed_at: closed}}) when not is_nil(closed), do: false
   def opened?(%Ecto.Changeset{changes: %{closed_at: closed}}) when not is_nil(closed), do: false
+  def opened?(%Ecto.Changeset{data: %{merged_at: merged}}) when not is_nil(merged), do: false
   def opened?(%Ecto.Changeset{changes: %{merged_at: merged}}) when not is_nil(merged), do: false
   def opened?(_cs), do: true
 
@@ -136,13 +140,9 @@ defmodule SlackCoder.Services.PRService do
     end
   end
 
-  def broadcast(%PR{closed_at: closed, merged_at: merged} = pr) when not is_nil(closed) or not is_nil(merged) do
-    Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
-    pr
-  end
-  def broadcast(pr) do
-    pr_json = PageView.render("pull_request.json", pr: pr)
-    Endpoint.broadcast("prs:all", "pr:update", %{pr: pr_json, github: pr.github_user})
+  def broadcast(pr, []), do: pr # Without changes
+  def broadcast(%PR{id: id} = pr, [_ | _]) do # With changes
+    Absinthe.Subscription.publish(Endpoint, pr, [pull_request: to_string(id)])
     pr
   end
 

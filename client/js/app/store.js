@@ -7,7 +7,7 @@ import client from './client';
 import { routerMiddleware } from 'react-router-redux';
 import reducers from './reducers';
 
-const loggerMiddleware = createLogger({ predicate: (getState, action) => true });
+const loggerMiddleware = createLogger({ predicate: (getState, action) => true, collapsed: true });
 const historyObject = createHistory();
 const historyMiddleware = routerMiddleware(historyObject);
 

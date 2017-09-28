@@ -4,14 +4,6 @@ import { graphql } from 'react-apollo';
 import subscribePullRequests from '../../../mobile/shared/graphql/subscriptions/pullRequest';
 
 class PullRequests extends Component {
-  componentWillReceiveProps(nextProps) {
-    if (!this.subscription && !nextProps.loading && nextProps.mine && nextProps.monitors) {
-      (nextProps.mine.concat(nextProps.monitors)).map((pr) => {
-        this.props.subscribePullRequest({ id: pr.id });
-      });
-    }
-  }
-
   renderLoading() {
     return <img src="/images/spinner.gif" className="img-responsive loading-spinner" />;
   }
@@ -49,7 +41,7 @@ class PullRequests extends Component {
   }
 
   render() {
-    const { currentUser, mine, monitors } = this.props;
+    const { currentUser, mine, monitors, subscribe } = this.props;
     return (
       <div>
         <section className="panel panel-default">
@@ -59,7 +51,7 @@ class PullRequests extends Component {
             </span>
           </div>
           <div className="panel-body">
-            <PRList pullRequests={mine || []}>
+            <PRList pullRequests={mine || []} type={'mine'} subscribe={subscribe} >
               {this.renderMyEmpty()}
             </PRList>
           </div>
@@ -69,7 +61,7 @@ class PullRequests extends Component {
             <span className="h3">Team members I monitor</span>
           </div>
           <div className="panel-body">
-            <PRList pullRequests={monitors || []}>
+            <PRList pullRequests={monitors || []} type={'monitors'} subscribe={subscribe} >
               {this.renderMonitorEmpty()}
             </PRList>
           </div>

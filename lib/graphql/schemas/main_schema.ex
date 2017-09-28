@@ -47,8 +47,8 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
       resolve fn
         _, %{type: :mine} = args, %{context: %{current_user: current_user}} ->
           SlackCoder.GraphQL.Resolvers.PRResolver.list(current_user, :mine, args[:status] || :open)
-        _, %{type: :monitors}, %{context: %{current_user: _current_user}} ->
-          {:ok, []}
+        _, %{type: :monitors} = args, %{context: %{current_user: current_user}} ->
+          SlackCoder.GraphQL.Resolvers.PRResolver.list(current_user, :monitors, args[:status] || :open)
         _, _, _ ->
           {:error, %{message: "Must be signed in."}}
       end
@@ -121,8 +121,8 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
     field :pull_request, :pull_request do
       arg :id, non_null(:id)
 
-      config fn args, _ ->
-        {:ok, topic: args.id}
+      config fn %{id: id}, _ ->
+        {:ok, topic: id}
       end
     end
   end

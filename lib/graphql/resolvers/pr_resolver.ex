@@ -15,11 +15,19 @@ defmodule SlackCoder.GraphQL.Resolvers.PRResolver do
   def analysis_status(_), do: nil
 
   def list(current_user, :mine, :open) do
-    {:ok, SlackCoder.Github.Watchers.Supervisor.pull_requests()[String.to_atom(current_user.github)]}
+    {:ok, PR.by_user(current_user.id) |> PR.active() |> Repo.all()}
   end
 
   def list(current_user, :mine, :merged) do
     {:ok, PR.by_user(current_user.id) |> PR.merged() |> Repo.all()}
+  end
+
+  def list(%{monitors: monitors}, :monitors, :open) do
+    {:ok, PR.by_github(monitors) |> PR.active() |> Repo.all()}
+  end
+
+  def list(%{monitors: monitors}, :monitors, :merged) do
+    {:ok, PR.by_github(monitors) |> PR.merged() |> Repo.all()}
   end
 
   def pull_request(_, %{owner: owner, repository: repo, number: number}, _) do

@@ -39,7 +39,7 @@ defmodule SlackCoder.Models.PR do
   end
 
   @required_fields ~w(owner repo branch github_user title number html_url opened_at)a
-  @optional_fields ~w(latest_comment latest_comment_url notifications backoff merged_at closed_at mergeable
+  @optional_fields ~w(latest_comment latest_comment_url notifications backoff merged_at closed_at mergeable opened
                       github_user_avatar fork sha build_status analysis_status build_url analysis_url user_id)a
   @all_fields @required_fields ++ @optional_fields
   @doc """
@@ -70,7 +70,7 @@ defmodule SlackCoder.Models.PR do
   end
 
   def active(query \\ __MODULE__) do
-    from pr in query, where: is_nil(pr.closed_at) and is_nil(pr.merged_at)
+    from pr in query, where: pr.opened == true
   end
 
   def merged(query \\ __MODULE__) do
@@ -79,6 +79,12 @@ defmodule SlackCoder.Models.PR do
 
   def by_user(query \\ __MODULE__, user_id) do
     from pr in query, where: pr.user_id == ^user_id
+  end
+
+  def by_github(query \\ __MODULE__, github)
+  def by_github(query, github) when is_binary(github), do: by_github(query, [github])
+  def by_github(query, githubs) when is_list(githubs) do
+    from pr in query, where: pr.github_user in ^githubs
   end
 
   def by_number(query \\ __MODULE__, owner, repo, number) do

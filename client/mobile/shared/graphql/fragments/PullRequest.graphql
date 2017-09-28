@@ -10,6 +10,8 @@ fragment PR on PullRequest {
   htmlUrl
   owner
   repository
+  closedAt
+  mergedAt
   title
   user {
     avatarUrl
