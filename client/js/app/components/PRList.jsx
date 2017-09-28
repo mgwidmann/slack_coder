@@ -8,7 +8,7 @@ export default class PRList extends Component {
     return (
       <div>
         <div className="table table-striped">
-          <FlipMove easing={'linear'}>
+          <FlipMove appearAnimation='fade' enterAnimation="fade" leaveAnimation="fade">
             { pullRequests.map((pr) => { return <PRRow key={pr.id} pr={pr} type={type} subscribe={subscribe} /> }) }
           </FlipMove>
         </div>
