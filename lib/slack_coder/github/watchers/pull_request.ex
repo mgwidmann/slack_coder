@@ -1,12 +1,12 @@
 defmodule SlackCoder.Github.Watchers.PullRequest do
   use GenServer
+  use PatternTap
   import StubAlias
   import SlackCoder.Github.TimeHelper
-  alias SlackCoder.Models.PR
+  alias SlackCoder.Models.{PR, User}
   stub_alias SlackCoder.Services.UserService
   alias SlackCoder.Services.PRService
   alias SlackCoder.Repo
-  import Ecto.Query
   require Logger
 
   # @stale_check_interval 60_000
@@ -52,6 +52,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
            existing_pr ->
              existing_pr
          end
+    pr = Repo.preload(pr, :user)
     # :timer.send_interval @stale_check_interval, :stale_check
     SlackCoder.Github.ShaMapper.register(pr.sha)
     SlackCoder.Github.Watchers.MergeConflict.queue(pr)
@@ -91,7 +92,11 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
   end
 
   defp update_pr(raw_pr, old_pr) do
-    {:ok, new_pr} = old_pr |> PR.reg_changeset(extract_pr_data(raw_pr, old_pr)) |> PRService.save
+    {:ok, new_pr} = old_pr
+                    |> Repo.preload(:user)
+                    |> user(raw_pr["user"]["login"] || raw_pr[:github_user])
+                    |> PR.changeset(extract_pr_data(raw_pr, old_pr))
+                    |> PRService.save
     new_pr
   end
 
@@ -114,26 +119,30 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
       mergeable: not raw_pr["mergeable_state"] in ["dirty", "conflicting"],
       github_user: raw_pr["user"]["login"] || pr.github_user,
       github_user_avatar: raw_pr["user"]["avatar_url"] || pr.github_user_avatar,
-      sha: raw_pr["head"]["sha"] || pr.sha,
-      user_id: pr.user_id || user_id(raw_pr["user"]["login"]) || create_user_returning_id(raw_pr["user"]["login"])
+      sha: raw_pr["head"]["sha"] || pr.sha
     }
-    |> mergeable_unknown(raw_pr)
+    |> mergeable_unknown(raw_pr["user"]["login"])
     |> fork_data(raw_pr)
   end
 
-  defp user_id(github) do
+  defp user(%PR{user: %User{}} = pr, _github), do: pr
+  defp user(pr, github) do
     github
-    |> SlackCoder.Models.User.by_github()
-    |> select([u], u.id)
+    |> User.by_github()
     |> Repo.one
+    |> case do
+      nil ->
+        %{pr | user: github |> create_user()}
+      user ->
+        %{pr | user: user}
+    end
   end
 
-  defp create_user_returning_id(github) do
+  defp create_user(github) do
     github
     |> Tentacat.Users.find(SlackCoder.Github.client())
     |> UserService.find_or_create_user()
     |> elem(1)
-    |> Map.get(:id)
   end
 
   defp mergeable_unknown(changes, %{"mergeable_state" => "unknown"}) do

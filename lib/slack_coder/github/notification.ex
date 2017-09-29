@@ -18,6 +18,7 @@ defmodule SlackCoder.Github.Notification do
                     attachments: [
                       %{
                         author_name: "✖︎ MERGE CONFLICTS",
+                        author_icon: pr.user.avatar_url,
                         color: "#999999",
                         fallback: "✖︎ MERGE CONFLICTS #{pr.title}",
                         title: pr.title,
@@ -38,6 +39,7 @@ defmodule SlackCoder.Github.Notification do
                     attachments: [
                       %{
                         author_name: "👎 FAILURE",
+                        author_icon: pr.user.avatar_url,
                         color: "#FF0000",
                         fallback: "👎 FAILURE #{pr.title}",
                         title: pr.title,
@@ -87,6 +89,7 @@ defmodule SlackCoder.Github.Notification do
                 attachments: [
                   %{
                     author_name: failure_message,
+                    author_icon: pr.user.avatar_url,
                     color: "#FF0000",
                     fallback: failure_message,
                     title: pr.title,
@@ -144,6 +147,7 @@ defmodule SlackCoder.Github.Notification do
                       %{
                         fallback: "🎉 SUCCESS #{pr.title}",
                         author_name: "🎉 SUCCESS",
+                        author_icon: pr.user.avatar_url,
                         color: "#77DD33",
                         title: pr.title,
                         title_link: pr.html_url
@@ -163,6 +167,7 @@ defmodule SlackCoder.Github.Notification do
                     attachments: [
                       %{
                         fallback: "😈 MERGED #{pr.title}",
+                        author_icon: pr.user.avatar_url,
                         author_name: "😈 MERGED",
                         color: "#9a009a",
                         title: pr.title,
@@ -183,6 +188,7 @@ defmodule SlackCoder.Github.Notification do
                     attachments: [
                       %{
                         fallback: "😡 CLOSED #{pr.title}",
+                        author_icon: pr.user.avatar_url,
                         author_name: "😡 CLOSED",
                         color: "#FF4500",
                         title: pr.title,
@@ -205,6 +211,7 @@ defmodule SlackCoder.Github.Notification do
                       %{
                         fallback: "💩 STALE #{pr.title}",
                         author_name: "💩 STALE",
+                        author_icon: pr.user.avatar_url,
                         color: "#DDDDDD",
                         title: pr.title,
                         title_link: pr.html_url,
@@ -227,6 +234,7 @@ defmodule SlackCoder.Github.Notification do
                       %{
                         fallback: "✉️ ACTIVE #{pr.title}",
                         author_name: "✉️ ACTIVE",
+                        author_icon: pr.user.avatar_url,
                         color: "#000000",
                         title: pr.title,
                         title_link: pr.html_url
@@ -247,6 +255,7 @@ defmodule SlackCoder.Github.Notification do
                       %{
                         fallback: "👀 OPENED #{pr.title}",
                         author_name: "👀 OPENED",
+                        author_icon: pr.user.avatar_url,
                         color: "#0000FF",
                         title: pr.title,
                         title_link: pr.html_url
