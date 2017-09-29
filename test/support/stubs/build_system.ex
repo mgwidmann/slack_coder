@@ -14,7 +14,9 @@ defmodule SlackCoder.Stubs.BuildSystem do
           %Test{seed: 90872, type: :rspec, files: [{"./spec/some/file.rb", "32", "The test name"}]},
           %Test{seed: nil, type: :cucumber, files: [{"features/some.feature", "14", "The cucumber test"}]}
         ]
-      } |> SlackCoder.BuildSystem.record_failure_log("the really long failure log output...", pr)
+      }
+      |> SlackCoder.BuildSystem.LogParser.flatten()
+      |> SlackCoder.BuildSystem.record_failure_log("the really long failure log output...", pr)
     end
   end
   defmodule CircleCI do
@@ -32,7 +34,9 @@ defmodule SlackCoder.Stubs.BuildSystem do
           %Test{seed: 90872, type: :rspec, files: [{"./spec/some/file.rb", "32", "The test name"}]},
           %Test{seed: nil, type: :cucumber, files: [{"features/some.feature", "14", "The cucumber test"}]}
         ]
-      } |> SlackCoder.BuildSystem.record_failure_log("the really long failure log output...", pr)
+      }
+      |> SlackCoder.BuildSystem.LogParser.flatten()
+      |> SlackCoder.BuildSystem.record_failure_log("the really long failure log output...", pr)
     end
   end
   defmodule Semaphore do
@@ -50,7 +54,9 @@ defmodule SlackCoder.Stubs.BuildSystem do
           %Test{seed: 90872, type: :rspec, files: [{"./spec/some/file.rb", "32", "The test name"}]},
           %Test{seed: nil, type: :cucumber, files: [{"features/some.feature", "14", "The cucumber test"}]}
         ]
-      } |> SlackCoder.BuildSystem.record_failure_log("the really long failure log output...", pr)
+      }
+      |> SlackCoder.BuildSystem.LogParser.flatten()
+      |> SlackCoder.BuildSystem.record_failure_log("the really long failure log output...", pr)
     end
   end
 end

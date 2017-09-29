@@ -29,7 +29,9 @@ defmodule SlackCoder.BuildSystem.Travis do
     |> put_job_id(id)
     |> case do
       {job, body} ->
-        SlackCoder.BuildSystem.record_failure_log(job, body, pr)
+        job
+        |> LogParser.flatten()
+        |> SlackCoder.BuildSystem.record_failure_log(body, pr)
       _ -> nil
     end
   end

@@ -3,7 +3,7 @@ defmodule SlackCoder.BuildSystem.LogParser do
   Handles parsing of log files and returning a `SlackCoder.BuildSystem.Job` struct
   """
   use PatternTap
-  alias SlackCoder.BuildSystem.{Job, Job.Test}
+  alias SlackCoder.BuildSystem.{Job, Job.Test, Job.Test.File}
 
   @supported_systems ~w(rspec cucumber)a
   def parse(body) do
@@ -15,6 +15,16 @@ defmodule SlackCoder.BuildSystem.LogParser do
     %Job{
       tests: Enum.reject(tests, &match?(%Test{files: []}, &1))
     }
+  end
+
+  def flatten(%File{} = file), do: [file]
+  def flatten([%File{} | _] = files), do: files
+  def flatten(%Job{} = job), do: flatten([job])
+  def flatten([%Job{} | _]= jobs) do
+    for job <- jobs, test <- job.tests, file <- test.files do
+      %File{id: job.id, type: test.type, seed: test.seed, file: file, system: job.system, failure_log_id: job.failure_log_id}
+    end
+    |> Enum.uniq()
   end
 
   def test_for_rspec(results) do

@@ -7,6 +7,7 @@ defmodule SlackCoder.BuildSystem do
   stub_alias SlackCoder.BuildSystem.Semaphore
   alias SlackCoder.Models.RandomFailure.FailureLog
   alias SlackCoder.Repo
+  alias SlackCoder.BuildSystem.LogParser
   import Ecto.Query
   require Logger
 
@@ -17,6 +18,9 @@ defmodule SlackCoder.BuildSystem do
     defstruct [:id, :system, :tests, :failure_log_id]
     defmodule Test do
       defstruct [:type, :seed, :files]
+      defmodule File do
+        defstruct [:id, :type, :seed, :file, :system, :failure_log_id]
+      end
     end
   end
 
@@ -28,7 +32,8 @@ defmodule SlackCoder.BuildSystem do
         |> Enum.reject(&match?(%Build{id: nil}, &1))
         |> Enum.map(&(module.job_log(&1, pr)))
         |> Enum.filter(&(&1))
-        |> Enum.map(&(Map.put(&1, :system, system_for_module(module))))
+        |> Enum.map(fn f -> Enum.map(f, &Map.put(&1, :system, system_for_module(module))) end)
+        |> List.flatten()
       other ->
         if supported?(pr) do
           Logger.warn [IO.ANSI.green, "[", inspect(__MODULE__), "] ", IO.ANSI.default_color, "Unable to extract build_url: #{inspect other, pretty: true}"]
@@ -37,13 +42,21 @@ defmodule SlackCoder.BuildSystem do
     end
   end
 
-  def record_failure_log(%SlackCoder.BuildSystem.Job{id: id, tests: tests} = job, log, pr) when is_integer(id) and length(tests) > 0 do
-    ids_to_delete = for id <- FailureLog.by_pr(pr) |> FailureLog.with_external_id(id) |> select([q], q.id) |> Repo.all, Repo.one(FailureLog.without_random_failure(id)) != true, do: id
+  def record_failure_log(%Job.Test.File{} = file, log, pr), do: record_failure_log([file], log, pr) |> hd()
+  def record_failure_log(files, log, pr) when is_list(files) do
+    external_ids = for %Job.Test.File{id: id} <- files, is_integer(id), do: id
+    ids_to_delete = for id <- FailureLog.by_pr(pr) |> FailureLog.with_external_ids(external_ids) |> select([q], q.id) |> Repo.all, Repo.one(FailureLog.without_random_failure(id)) != true, do: id
     Repo.delete_all(from(f in FailureLog, where: f.id in ^ids_to_delete)) # Clean up old logs
-    %FailureLog{id: id} = Repo.insert!(FailureLog.changeset(%FailureLog{}, %{pr_id: pr.id, log: log, external_id: id, sha: pr.sha}))
-    %{job | failure_log_id: id}
+    for %Job.Test.File{id: id} = file <- files do
+      case Repo.one(FailureLog.with_external_ids(id) |> select([f], f.id)) do
+        nil ->
+          %FailureLog{id: id} = Repo.insert!(FailureLog.changeset(%FailureLog{}, %{pr_id: pr.id, log: log, external_id: id, sha: pr.sha}))
+          %{file | failure_log_id: id}
+        id ->
+          %{file | failure_log_id: id}
+      end
+    end
   end
-  def record_failure_log(_job, _log, _pr), do: nil
 
   def supported?(pr) do
     case build_id(pr) do
@@ -77,29 +90,18 @@ defmodule SlackCoder.BuildSystem do
     end
   end
 
-  def counts(%Job.Test{} = test), do: counts([test])
-  def counts([%Job.Test{} | _] = tests) do
-    Enum.reduce(tests, %{}, fn %Job.Test{type: type}, map ->
-      Map.put(map, type, (Map.get(map, type) || 0) + 1)
-    end)
-  end
-
   def counts([]), do: Map.new
 
-  def counts([%Job{} | _] = jobs) do
-    jobs
-    |> Enum.map(&(&1.tests))
-    |> List.flatten()
-    |> counts()
+  def counts([%Job.Test.File{} | _] = files) do
+    files
+    |> Enum.group_by(&(&1.type))
+    |> Enum.map(fn {type, list} -> {type, length(list)} end)
+    |> Enum.into(%{})
   end
 end
 
-defimpl String.Chars, for: SlackCoder.BuildSystem.Job do
-  def to_string(%SlackCoder.BuildSystem.Job{tests: tests}), do: Enum.join(tests, "\n") |> String.trim()
-end
-
-defimpl String.Chars, for: SlackCoder.BuildSystem.Job.Test do
-  def to_string(%SlackCoder.BuildSystem.Job.Test{type: :rspec, seed: seed, files: [_|_] = files}) do
+defimpl String.Chars, for: SlackCoder.BuildSystem.Job.Test.File do
+  def to_string(%SlackCoder.BuildSystem.Job.Test.File{type: :rspec, seed: seed, file: [_|_] = files}) do
     """
     bundle exec rspec#{executable_line(files)} --seed #{seed}
     """ |> String.trim()

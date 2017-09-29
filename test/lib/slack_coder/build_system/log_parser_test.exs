@@ -1,6 +1,6 @@
 defmodule SlackCoder.BuildSystem.LogParserTest do
   use ExUnit.Case
-  alias SlackCoder.BuildSystem.{LogParser, Job, Job.Test}
+  alias SlackCoder.BuildSystem.{LogParser, Job, Job.Test, Job.Test.File}
 
   describe "#parse" do
     test "finds the right seeds, files and type for each test" do
@@ -50,6 +50,24 @@ defmodule SlackCoder.BuildSystem.LogParserTest do
       [31mrspec ./spec/controllers/v1/some_spec.rb:54[0m [36m# The description[0m
       Blah blah blah
       """
+    end
+
+    test "flattens to removes duplicates" do
+      assert [
+          %File{
+            type: :rspec,
+            file: {"./spec/controllers/v1/some_spec.rb", "54", "The description[0m"}
+          }
+        ] = LogParser.flatten([
+        %Job{tests: [%Test{
+          type: :rspec,
+          files: [{"./spec/controllers/v1/some_spec.rb", "54", "The description[0m"}]
+        }]},
+        %Job{tests: [%Test{
+          type: :rspec,
+          files: [{"./spec/controllers/v1/some_spec.rb", "54", "The description[0m"}]
+        }]}
+      ])
     end
   end
 
