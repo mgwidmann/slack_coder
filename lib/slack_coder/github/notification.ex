@@ -3,7 +3,7 @@ defmodule SlackCoder.Github.Notification do
   import StubAlias
   stub_alias SlackCoder.Users.User
   stub_alias SlackCoder.Users.Supervisor, as: Users
-  alias SlackCoder.BuildSystem.Job.Test.File
+  alias SlackCoder.BuildSystem.File
   stub_alias SlackCoder.Github
   stub_alias SlackCoder.Slack
 

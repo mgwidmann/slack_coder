@@ -7,21 +7,14 @@ defmodule SlackCoder.BuildSystem do
   stub_alias SlackCoder.BuildSystem.Semaphore
   alias SlackCoder.Models.RandomFailure.FailureLog
   alias SlackCoder.Repo
-  alias SlackCoder.BuildSystem.LogParser
   import Ecto.Query
   require Logger
 
   defmodule Build do
     defstruct [:id, :repository_id, :result]
   end
-  defmodule Job do
-    defstruct [:id, :system, :tests, :failure_log_id]
-    defmodule Test do
-      defstruct [:type, :seed, :files]
-      defmodule File do
-        defstruct [:id, :type, :seed, :file, :system, :failure_log_id]
-      end
-    end
+  defmodule File do
+    defstruct [:id, :type, :seed, :file, :system, :failure_log_id]
   end
 
   def failed_jobs(pr) do
@@ -42,12 +35,12 @@ defmodule SlackCoder.BuildSystem do
     end
   end
 
-  def record_failure_log(%Job.Test.File{} = file, log, pr), do: record_failure_log([file], log, pr) |> hd()
+  def record_failure_log(%File{} = file, log, pr), do: record_failure_log([file], log, pr) |> hd()
   def record_failure_log(files, log, pr) when is_list(files) do
-    external_ids = for %Job.Test.File{id: id} <- files, is_integer(id), do: id
+    external_ids = for %File{id: id} <- files, is_integer(id), do: id
     ids_to_delete = for id <- FailureLog.by_pr(pr) |> FailureLog.with_external_ids(external_ids) |> select([q], q.id) |> Repo.all, Repo.one(FailureLog.without_random_failure(id)) != true, do: id
     Repo.delete_all(from(f in FailureLog, where: f.id in ^ids_to_delete)) # Clean up old logs
-    for %Job.Test.File{id: id} = file <- files do
+    for %File{id: id} = file <- files do
       case Repo.one(FailureLog.with_external_ids(id) |> select([f], f.id)) do
         nil ->
           %FailureLog{id: id} = Repo.insert!(FailureLog.changeset(%FailureLog{}, %{pr_id: pr.id, log: log, external_id: id, sha: pr.sha}))
@@ -92,28 +85,10 @@ defmodule SlackCoder.BuildSystem do
 
   def counts([]), do: Map.new
 
-  def counts([%Job.Test.File{} | _] = files) do
+  def counts([%File{} | _] = files) do
     files
     |> Enum.group_by(&(&1.type))
     |> Enum.map(fn {type, list} -> {type, length(list)} end)
     |> Enum.into(%{})
   end
-end
-
-defimpl String.Chars, for: SlackCoder.BuildSystem.Job.Test.File do
-  def to_string(%SlackCoder.BuildSystem.Job.Test.File{type: :rspec, seed: seed, file: [_|_] = files}) do
-    """
-    bundle exec rspec#{executable_line(files)} --seed #{seed}
-    """ |> String.trim()
-  end
-  def to_string(%SlackCoder.BuildSystem.Job.Test{type: :cucumber, files: [_|_] = files}) do
-    """
-    bundle exec cucumber#{executable_line(files)}
-    """ |> String.trim()
-  end
-  def to_string(_), do: nil
-
-  defp executable_line(list, acc \\ "")
-  defp executable_line([], acc), do: acc
-  defp executable_line([{file, line, _desc} | rest], acc), do: executable_line(rest, acc <> " " <> file <> ":" <> line)
 end

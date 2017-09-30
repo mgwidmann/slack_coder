@@ -1,45 +1,36 @@
 defmodule SlackCoder.BuildSystem.LogParser do
   @moduledoc """
-  Handles parsing of log files and returning a `SlackCoder.BuildSystem.Job` struct
+  Handles parsing of log files and returning a `SlackCoder.BuildSystem.File` struct
   """
   use PatternTap
-  alias SlackCoder.BuildSystem.{Job, Job.Test, Job.Test.File}
+  alias SlackCoder.BuildSystem.File
 
   @supported_systems ~w(rspec cucumber)a
   def parse(body) do
     results = filter_log(body)
 
-    tests = for system <- @supported_systems do
-              apply(__MODULE__, :"test_for_#{system}", [results])
-            end
-    %Job{
-      tests: Enum.reject(tests, &match?(%Test{files: []}, &1))
-    }
-  end
-
-  def flatten(%File{} = file), do: [file]
-  def flatten([%File{} | _] = files), do: files
-  def flatten(%Job{} = job), do: flatten([job])
-  def flatten([%Job{} | _]= jobs) do
-    for job <- jobs, test <- job.tests, file <- test.files do
-      %File{id: job.id, type: test.type, seed: test.seed, file: file, system: job.system, failure_log_id: job.failure_log_id}
+    for system <- @supported_systems do
+      apply(__MODULE__, :"test_for_#{system}", [results])
     end
+    |> List.flatten()
     |> Enum.uniq()
   end
 
   def test_for_rspec(results) do
-    %Test{
-      type: :rspec,
-      seed: find_rspec_seed(results),
-      files: find_rspec_failures(results)
-    }
+    seed = find_rspec_seed(results)
+    results
+    |> find_rspec_failures()
+    |> Enum.map(fn file ->
+      %File{type: :rspec, seed: seed, file: file}
+    end)
   end
 
   def test_for_cucumber(results) do
-    %Test{
-      type: :cucumber,
-      files: find_cucumber_failures(results)
-    }
+    results
+    |> find_cucumber_failures()
+    |> Enum.map(fn file ->
+      %File{type: :cucumber, file: file}
+    end)
   end
 
   @seed_regex ~r/Randomized with seed (?<seed>\d+)/
