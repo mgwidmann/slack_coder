@@ -1,0 +1,254 @@
+yarn test v0.23.4
+$ node_modules/.bin/jest --env=jsdom --colors --verbose
+[0m[7m[1m[31m FAIL [39m[22m[27m[0m [2mclient/test/myapp/redux/actions/[22m[1mCommonActions.test.js[22m
+[1m[31m  [1mâ— [1mACTIONS: CommonActions â€º #fetchUser â€º succeeds â€º fetching user [39m[22m
+
+    [2mexpect([22m[31mreceived[39m[2m).toEqual([22m[32mexpected[39m[2m)[22m
+
+    Expected value to equal:
+      [32m[{"currentUser": true, "type": "SET_CURRENT_USER"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}, {"UserId": 3, "type": "BLAH_BLAH"}][39m
+    Received:
+      [31m[{"loggedIn": true, "type": "SET_LOGGED_IN"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}, {"UserId": 3, "type": "BLAH_BLAH"}][39m
+
+    Difference:
+
+    [32m- Expected[39m
+    [31m+ Received[39m
+
+    [33m@@ -1,9 +1,9 @@
+    [39m[2m Array [[22m
+    [2m   Object {[22m
+    [32m-    "currentUser": true,[39m
+    [32m-    "type": "SET_CURRENT_USER",[39m
+    [31m+    "loggedIn": true,[39m
+    [31m+    "type": "SET_LOGGED_IN",[39m
+    [2m   },[22m
+    [2m   Object {[22m
+[2m
+      [2mat Object.<anonymous> ([2m[0m[36mclient/test/myapp/Common/redux/actions/CommonActions.test.js[39m[0m[2m:61:36)[2m
+      [2mat Promise.resolve.then.el ([2m[0m[36mnode_modules/p-map/index.js[39m[0m[2m:42:16)[2m[22m
+
+[1m[31m  [1mâ— [1mACTIONS: CommonActions â€º #fetchUser â€º succeeds â€º fetching user[39m[22m
+
+    [2mexpect([22m[31mreceived[39m[2m).toEqual([22m[32mexpected[39m[2m)[22m
+
+    Expected value to equal:
+      [32m[{"currentUser": true, "type": "SET_CURRENT_USER"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}, {"UserId": 3, "type": "BLAH_BLAH"}][39m
+    Received:
+      [31m[{"loggedIn": true, "type": "SET_LOGGED_IN"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}, {"UserId": 3, "type": "BLAH_BLAH"}][39m
+
+    Difference:
+
+    [32m- Expected[39m
+    [31m+ Received[39m
+
+    [33m@@ -1,9 +1,9 @@
+    [39m[2m Array [[22m
+    [2m   Object {[22m
+    [32m-    "currentUser": true,[39m
+    [32m-    "type": "SET_CURRENT_USER",[39m
+    [31m+    "loggedIn": true,[39m
+    [31m+    "type": "SET_LOGGED_IN",[39m
+    [2m   },[22m
+    [2m   Object {[22m
+[2m
+      [2mat Object.<anonymous> ([2m[0m[36mclient/test/myapp/Common/redux/actions/CommonActions.test.js[39m[0m[2m:99:36)[2m
+      [2mat Promise.resolve.then.el ([2m[0m[36mnode_modules/p-map/index.js[39m[0m[2m:42:16)[2m[22m
+
+[1m[31m  [1mâ— [1mACTIONS: CommonActions â€º #fetchUser â€º succeeds â€º fetching non user[39m[22m
+
+    [2mexpect([22m[31mreceived[39m[2m).toEqual([22m[32mexpected[39m[2m)[22m
+
+    Expected value to equal:
+      [32m[{"currentUser": true, "type": "SET_CURRENT_USER"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}][39m
+    Received:
+      [31m[{"loggedIn": true, "type": "SET_LOGGED_IN"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}][39m
+
+    Difference:
+
+    [32m- Expected[39m
+    [31m+ Received[39m
+
+    [33m@@ -1,9 +1,9 @@
+    [39m[2m Array [[22m
+    [2m   Object {[22m
+    [32m-    "currentUser": true,[39m
+    [32m-    "type": "SET_CURRENT_USER",[39m
+    [31m+    "loggedIn": true,[39m
+    [31m+    "type": "SET_LOGGED_IN",[39m
+    [2m   },[22m
+    [2m   Object {[22m
+[2m
+      [2mat Object.<anonymous> ([2m[0m[36mclient/test/myapp/Common/redux/actions/CommonActions.test.js[39m[0m[2m:129:36)[2m
+      [2mat Promise.resolve.then.el ([2m[0m[36mnode_modules/p-map/index.js[39m[0m[2m:42:16)[2m[22m
+
+[1m[31m  [1mâ— [1mACTIONS: CommonActions â€º #fetchUser â€º fails â€º user not logged in[39m[22m
+
+    [2mexpect([22m[31mreceived[39m[2m).toEqual([22m[32mexpected[39m[2m)[22m
+
+    Expected value to equal:
+      [32m[{"currentUser": false, "type": "SET_CURRENT_USER"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}][39m
+    Received:
+      [31m[{"loggedIn": false, "type": "SET_LOGGED_IN"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}][39m
+
+    Difference:
+
+    [32m- Expected[39m
+    [31m+ Received[39m
+
+    [33m@@ -1,9 +1,9 @@
+    [39m[2m Array [[22m
+    [2m   Object {[22m
+    [32m-    "currentUser": false,[39m
+    [32m-    "type": "SET_CURRENT_USER",[39m
+    [31m+    "loggedIn": false,[39m
+    [31m+    "type": "SET_LOGGED_IN",[39m
+    [2m   },[22m
+    [2m   Object {[22m
+[2m
+      [2mat Object.<anonymous> ([2m[0m[36mclient/test/myapp/Common/redux/actions/CommonActions.test.js[39m[0m[2m:169:36)[2m
+      [2mat Promise.resolve.then.el ([2m[0m[36mnode_modules/p-map/index.js[39m[0m[2m:42:16)[2m[22m
+
+  ACTIONS: CommonActions
+    #fetchUser
+      succeeds
+        [31mâœ•[39m [2mfetching user  (42ms)[22m
+        [31mâœ•[39m [2mfetching user (8ms)[22m
+        [31mâœ•[39m [2mfetching non user (8ms)[22m
+      fails
+        [31mâœ•[39m [2muser not logged in (5ms)[22m
+
+[999D[K[1mSummary of all failing tests[22m
+[0m[7m[1m[31m FAIL [39m[22m[27m[0m [2mclient/test/myapp/Common/redux/actions/[22m[1mCommonActions.test.js[22m
+[1m[31m  [1mâ— [1mACTIONS: CommonActions â€º #fetchUser â€º succeeds â€º fetching user [39m[22m
+
+    [2mexpect([22m[31mreceived[39m[2m).toEqual([22m[32mexpected[39m[2m)[22m
+
+    Expected value to equal:
+      [32m[{"currentUser": true, "type": "SET_CURRENT_USER"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}, {"UserId": 3, "type": "BLAH_BLAH"}][39m
+    Received:
+      [31m[{"loggedIn": true, "type": "SET_LOGGED_IN"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}, {"UserId": 3, "type": "BLAH_BLAH"}][39m
+
+    Difference:
+
+    [32m- Expected[39m
+    [31m+ Received[39m
+
+    [33m@@ -1,9 +1,9 @@
+    [39m[2m Array [[22m
+    [2m   Object {[22m
+    [32m-    "currentUser": true,[39m
+    [32m-    "type": "SET_CURRENT_USER",[39m
+    [31m+    "loggedIn": true,[39m
+    [31m+    "type": "SET_LOGGED_IN",[39m
+    [2m   },[22m
+    [2m   Object {[22m
+[2m
+      [2mat Object.<anonymous> ([2m[0m[36mclient/test/myapp/Common/redux/actions/CommonActions.test.js[39m[0m[2m:61:36)[2m
+      [2mat Promise.resolve.then.el ([2m[0m[36mnode_modules/p-map/index.js[39m[0m[2m:42:16)[2m[22m
+
+[1m[31m  [1mâ— [1mACTIONS: CommonActions â€º #fetchUser â€º succeeds â€º fetching user[39m[22m
+
+    [2mexpect([22m[31mreceived[39m[2m).toEqual([22m[32mexpected[39m[2m)[22m
+
+    Expected value to equal:
+      [32m[{"currentUser": true, "type": "SET_CURRENT_USER"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}, {"UserId": 3, "type": "BLAH_BLAH"}][39m
+    Received:
+      [31m[{"loggedIn": true, "type": "SET_LOGGED_IN"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}, {"UserId": 3, "type": "BLAH_BLAH"}][39m
+
+    Difference:
+
+    [32m- Expected[39m
+    [31m+ Received[39m
+
+    [33m@@ -1,9 +1,9 @@
+    [39m[2m Array [[22m
+    [2m   Object {[22m
+    [32m-    "currentUser": true,[39m
+    [32m-    "type": "SET_CURRENT_USER",[39m
+    [31m+    "loggedIn": true,[39m
+    [31m+    "type": "SET_LOGGED_IN",[39m
+    [2m   },[22m
+    [2m   Object {[22m
+[2m
+      [2mat Object.<anonymous> ([2m[0m[36mclient/test/myapp/Common/redux/actions/CommonActions.test.js[39m[0m[2m:99:36)[2m
+      [2mat Promise.resolve.then.el ([2m[0m[36mnode_modules/p-map/index.js[39m[0m[2m:42:16)[2m[22m
+
+[1m[31m  [1mâ— [1mACTIONS: CommonActions â€º #fetchUser â€º succeeds â€º fetching non user[39m[22m
+
+    [2mexpect([22m[31mreceived[39m[2m).toEqual([22m[32mexpected[39m[2m)[22m
+
+    Expected value to equal:
+      [32m[{"currentUser": true, "type": "SET_CURRENT_USER"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}][39m
+    Received:
+      [31m[{"loggedIn": true, "type": "SET_LOGGED_IN"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}][39m
+
+    Difference:
+
+    [32m- Expected[39m
+    [31m+ Received[39m
+
+    [33m@@ -1,9 +1,9 @@
+    [39m[2m Array [[22m
+    [2m   Object {[22m
+    [32m-    "currentUser": true,[39m
+    [32m-    "type": "SET_CURRENT_USER",[39m
+    [31m+    "loggedIn": true,[39m
+    [31m+    "type": "SET_LOGGED_IN",[39m
+    [2m   },[22m
+    [2m   Object {[22m
+[2m
+      [2mat Object.<anonymous> ([2m[0m[36mclient/test/myapp/Common/redux/actions/CommonActions.test.js[39m[0m[2m:129:36)[2m
+      [2mat Promise.resolve.then.el ([2m[0m[36mnode_modules/p-map/index.js[39m[0m[2m:42:16)[2m[22m
+
+[1m[31m  [1mâ— [1mACTIONS: CommonActions â€º #fetchUser â€º fails â€º user not logged in[39m[22m
+
+    [2mexpect([22m[31mreceived[39m[2m).toEqual([22m[32mexpected[39m[2m)[22m
+
+    Expected value to equal:
+      [32m[{"currentUser": false, "type": "SET_CURRENT_USER"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}][39m
+    Received:
+      [31m[{"loggedIn": false, "type": "SET_LOGGED_IN"}, {"type": "GET_USER"}, {"type": "SOMETHING_ELSE"}][39m
+
+    Difference:
+
+    [32m- Expected[39m
+    [31m+ Received[39m
+
+    [33m@@ -1,9 +1,9 @@
+    [39m[2m Array [[22m
+    [2m   Object {[22m
+    [32m-    "currentUser": false,[39m
+    [32m-    "type": "SET_CURRENT_USER",[39m
+    [31m+    "loggedIn": false,[39m
+    [31m+    "type": "SET_LOGGED_IN",[39m
+    [2m   },[22m
+    [2m   Object {[22m
+[2m
+      [2mat Object.<anonymous> ([2m[0m[36mclient/test/myapp/Common/redux/actions/CommonActions.test.js[39m[0m[2m:169:36)[2m
+      [2mat Promise.resolve.then.el ([2m[0m[36mnode_modules/p-map/index.js[39m[0m[2m:42:16)[2m[22m
+
+
+[1mTest Suites: [22m[1m[31m1 failed[39m[22m, [1m[32m26 passed[39m[22m, 27 total
+[1mTests:       [22m[1m[31m4 failed[39m[22m, [1m[32m112 passed[39m[22m, 116 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        22.428s
+[2mRan all test suites[22m[2m.[22m
+error Command failed with exit code 1.
+
+travis_time:end:13c01706:start=1506716070146949789,finish=1506716101117214619,duration=30970264830
+[0K
+[31;1mThe command "if [ $KNAPSACK_PRO_CI_NODE_INDEX -eq 0 ]; then yarn test; fi" exited with 1.[0m
+travis_fold:start:cache.2
+[0Kstore build cache
+$ bundle clean
+travis_time:start:01c49b4c
+[0K
+travis_time:end:01c49b4c:start=1506716101781218594,finish=1506716101788293077,duration=7074483
+[0Ktravis_time:start:0390344c
+[0K[32;1mnothing changed, not updating cache[0m
+
+travis_time:end:0390344c:start=1506716101796603886,finish=1506716107520600795,duration=5723996909
+[0Ktravis_fold:end:cache.2
+[0K
+Done. Your build exited with 1.
