@@ -3,7 +3,7 @@ defmodule SlackCoder.Github.Notification do
   import StubAlias
   stub_alias SlackCoder.Users.User
   stub_alias SlackCoder.Users.Supervisor, as: Users
-  alias SlackCoder.BuildSystem.{Job.Test}
+  alias SlackCoder.BuildSystem.File
   stub_alias SlackCoder.Github
   stub_alias SlackCoder.Slack
 
@@ -18,6 +18,7 @@ defmodule SlackCoder.Github.Notification do
                     attachments: [
                       %{
                         author_name: "✖︎ MERGE CONFLICTS",
+                        author_icon: pr.user.avatar_url,
                         color: "#999999",
                         fallback: "✖︎ MERGE CONFLICTS #{pr.title}",
                         title: pr.title,
@@ -38,6 +39,7 @@ defmodule SlackCoder.Github.Notification do
                     attachments: [
                       %{
                         author_name: "👎 FAILURE",
+                        author_icon: pr.user.avatar_url,
                         color: "#FF0000",
                         fallback: "👎 FAILURE #{pr.title}",
                         title: pr.title,
@@ -65,28 +67,40 @@ defmodule SlackCoder.Github.Notification do
   end
 
   defp failed_job_output([]), do: ""
-  defp failed_job_output(%Test{} = test) do
-    """
-    ```
-    #{test}
-    ```
-    """
-  end
+  defp failed_job_output(%File{} = file), do: failed_job_output([file])
   defp failed_job_output(failed_jobs) when is_list(failed_jobs) do
+    grouped = Enum.group_by(failed_jobs, &(&1.type))
     """
     ```
-    #{Enum.join(failed_jobs, "\n")}
+    #{Enum.map(grouped, &executable/1) |> Enum.join("\n")}
     ```
     """
   end
 
+  def executable({:rspec, files}) do
+    files
+    |> Enum.group_by(&(&1.seed))
+    |> Enum.map(fn {seed, files} ->
+      "bundle exec rspec#{files |> Enum.map(&(&1.file)) |> files_to_string()} --seed #{seed}"
+    end)
+  end
+  def executable({:cucumber, files}) do
+    "bundle exec cucumber#{files |> Enum.map(&(&1.file)) |> files_to_string()}"
+  end
+
+  defp files_to_string(list, acc \\ "")
+  defp files_to_string([], acc), do: acc
+  defp files_to_string([{file, "[" <> _ = line, _desc} | rest], acc), do: files_to_string(rest, acc <> " " <> file <> line)
+  defp files_to_string([{file, line, _desc} | rest], acc), do: files_to_string(rest, acc <> " " <> file <> ":" <> line)
+
   def random_failure(pr) do
-    failed_count = pr.last_failed_jobs |> Enum.map(&(&1.tests)) |> List.flatten() |> length()
+    failed_count = pr.last_failed_jobs |> length()
     failure_message = "🚀 #{failed_count} RANDOM NUCLEAR #{plural_failures(failed_count)} DETECTED"
     message = %{
                 attachments: [
                   %{
                     author_name: failure_message,
+                    author_icon: pr.user.avatar_url,
                     color: "#FF0000",
                     fallback: failure_message,
                     title: pr.title,
@@ -100,29 +114,26 @@ defmodule SlackCoder.Github.Notification do
   defp plural_failures(count) when count >= 2, do: "FAILURES"
   defp plural_failures(_count), do: "FAILURE"
 
+  defp view_log_action(nil), do: ""
   defp view_log_action(failure_log_id) do
     "<#{SlackCoder.Router.Helpers.random_failure_url(SlackCoder.Endpoint, :log, failure_log_id)}|View Log>"
   end
 
   @max_blames 19
   defp blame_attachments(pr) do
-    for job <- pr.last_failed_jobs,
-      %Test{files: files} = test <- job.tests,
-      {file, line, _description} = file_descriptor <- files,
-      Enum.find_index(pr.last_failed_jobs, &(&1 == job)) + 1 +
-      Enum.find_index(job.tests, &(&1 == test)) + 1 +
-      Enum.find_index(files, &(&1 == file_descriptor)) + 1 <= @max_blames do
+    for %File{file: file_descriptor, failure_log_id: failure_log_id} = file <- pr.last_failed_jobs |> Enum.take(@max_blames) do
+      {file_name, line, _description} = file_descriptor
       case Integer.parse(line) do
         {line, ""} ->
-          case Github.blame(pr.owner, pr.repo, pr.last_failed_sha, file, line) do
+          case Github.blame(pr.owner, pr.repo, pr.last_failed_sha, file_name, line) do
             %{"avatarUrl" => avatar, "user" => %{"name" => name}} ->
               %{
-                author_name: "#{name} wrote test #{file}:#{line}",
+                author_name: "#{name} wrote test #{file_name}:#{line}",
                 author_icon: avatar,
                 color: "#FF0000",
                 text: """
-                #{failed_job_output(test)}
-                #{view_log_action(job.failure_log_id)}
+                #{failed_job_output(file)}
+                #{view_log_action(failure_log_id)}
                 """,
                 mrkdwn_in: ["text"]
           		}
@@ -143,6 +154,7 @@ defmodule SlackCoder.Github.Notification do
                       %{
                         fallback: "🎉 SUCCESS #{pr.title}",
                         author_name: "🎉 SUCCESS",
+                        author_icon: pr.user.avatar_url,
                         color: "#77DD33",
                         title: pr.title,
                         title_link: pr.html_url
@@ -162,6 +174,7 @@ defmodule SlackCoder.Github.Notification do
                     attachments: [
                       %{
                         fallback: "😈 MERGED #{pr.title}",
+                        author_icon: pr.user.avatar_url,
                         author_name: "😈 MERGED",
                         color: "#9a009a",
                         title: pr.title,
@@ -182,6 +195,7 @@ defmodule SlackCoder.Github.Notification do
                     attachments: [
                       %{
                         fallback: "😡 CLOSED #{pr.title}",
+                        author_icon: pr.user.avatar_url,
                         author_name: "😡 CLOSED",
                         color: "#FF4500",
                         title: pr.title,
@@ -204,6 +218,7 @@ defmodule SlackCoder.Github.Notification do
                       %{
                         fallback: "💩 STALE #{pr.title}",
                         author_name: "💩 STALE",
+                        author_icon: pr.user.avatar_url,
                         color: "#DDDDDD",
                         title: pr.title,
                         title_link: pr.html_url,
@@ -226,6 +241,7 @@ defmodule SlackCoder.Github.Notification do
                       %{
                         fallback: "✉️ ACTIVE #{pr.title}",
                         author_name: "✉️ ACTIVE",
+                        author_icon: pr.user.avatar_url,
                         color: "#000000",
                         title: pr.title,
                         title_link: pr.html_url
@@ -246,6 +262,7 @@ defmodule SlackCoder.Github.Notification do
                       %{
                         fallback: "👀 OPENED #{pr.title}",
                         author_name: "👀 OPENED",
+                        author_icon: pr.user.avatar_url,
                         color: "#0000FF",
                         title: pr.title,
                         title_link: pr.html_url

@@ -14,6 +14,7 @@ You'll have to [install the nanobox CLI](https://docs.nanobox.io/install/) tool 
 3. `nanobox dns add local slack-coder.dev` and follow instructions
 4. `nanobox evar add local MIX_ENV=dev`
 5. `nanobox run mix do ecto.create, ecto.migrate, run priv/repo/seeds.exs` to migrate your local database
+6. `nanobox info local` to get database access credentials
 
 Create a `config/dev.secret.exs` config file with the following contents and fill out values:
 

@@ -1,35 +1,36 @@
 defmodule SlackCoder.BuildSystem.LogParser do
   @moduledoc """
-  Handles parsing of log files and returning a `SlackCoder.BuildSystem.Job` struct
+  Handles parsing of log files and returning a `SlackCoder.BuildSystem.File` struct
   """
   use PatternTap
-  alias SlackCoder.BuildSystem.{Job, Job.Test}
+  alias SlackCoder.BuildSystem.File
 
   @supported_systems ~w(rspec cucumber)a
   def parse(body) do
     results = filter_log(body)
 
-    tests = for system <- @supported_systems do
-              apply(__MODULE__, :"test_for_#{system}", [results])
-            end
-    %Job{
-      tests: Enum.reject(tests, &match?(%Test{files: []}, &1))
-    }
+    for system <- @supported_systems do
+      apply(__MODULE__, :"test_for_#{system}", [results])
+    end
+    |> List.flatten()
+    |> Enum.uniq()
   end
 
   def test_for_rspec(results) do
-    %Test{
-      type: :rspec,
-      seed: find_rspec_seed(results),
-      files: find_rspec_failures(results)
-    }
+    seed = find_rspec_seed(results)
+    results
+    |> find_rspec_failures()
+    |> Enum.map(fn file ->
+      %File{type: :rspec, seed: seed, file: file}
+    end)
   end
 
   def test_for_cucumber(results) do
-    %Test{
-      type: :cucumber,
-      files: find_cucumber_failures(results)
-    }
+    results
+    |> find_cucumber_failures()
+    |> Enum.map(fn file ->
+      %File{type: :cucumber, file: file}
+    end)
   end
 
   @seed_regex ~r/Randomized with seed (?<seed>\d+)/
@@ -69,7 +70,9 @@ defmodule SlackCoder.BuildSystem.LogParser do
 
   defp keep?("Randomized with seed" <> _), do: true
   defp keep?(unquote(IO.ANSI.red) <> "rspec ./spec" <> _), do: true
+  defp keep?("rspec ./spec" <> _), do: true
   defp keep?(unquote(IO.ANSI.red) <> "cucumber features/" <> _), do: true
+  defp keep?("cucumber features/" <> _), do: true
   defp keep?(_line), do: false
 
   defp remove_colors(text), do: String.replace(text, ~r/\e\[.+?m/, "")
