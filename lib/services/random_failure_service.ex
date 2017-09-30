@@ -2,7 +2,7 @@ defmodule SlackCoder.Services.RandomFailureService do
   @moduledoc """
   """
   alias SlackCoder.Models.RandomFailure
-  alias SlackCoder.BuildSystem.{Job, Job.Test}
+  alias SlackCoder.BuildSystem.File
   alias SlackCoder.Repo
   alias SlackCoder.Models.PR
   require Logger
@@ -31,8 +31,7 @@ defmodule SlackCoder.Services.RandomFailureService do
     """
   end
   def save_random_failure(%PR{last_failed_jobs: [_ | _] = last_failed_jobs} = pr) do
-    create? = for %Job{system: system, tests: tests, failure_log_id: failure_log_id} <- last_failed_jobs,
-      %Test{seed: seed, files: files, type: type} <- tests, file <- files do
+    create? = for %File{system: system, seed: seed, file: file, type: type, failure_log_id: failure_log_id} <- last_failed_jobs do
       find_or_create_and_update!(file, failure_log_id, system, type, seed, pr)
     end |> Enum.any?(&(match?({:new, _}, &1)))
     if create?, do: SlackCoder.Github.Notification.random_failure(pr)

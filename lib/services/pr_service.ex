@@ -5,6 +5,7 @@ defmodule SlackCoder.Services.PRService do
   alias SlackCoder.Models.PR
   alias SlackCoder.PageView
   alias SlackCoder.Endpoint
+  alias SlackCoder.BuildSystem.LogParser
   import Ecto.Changeset, only: [put_change: 3, get_change: 2]
   import SlackCoder.Github.TimeHelper
   require Logger
@@ -185,7 +186,7 @@ defmodule SlackCoder.Services.PRService do
     case Ecto.assoc(pr, :failure_logs) |> Repo.all() do
       [] -> pr
       [log | _] = failure_logs ->
-        failed_jobs = Enum.map(failure_logs, &SlackCoder.BuildSystem.LogParser.parse(&1.log))
+        failed_jobs = Enum.map(failure_logs, &LogParser.parse(&1.log))
         failed_jobs = if pr.sha == log.sha do # Add together
                         Enum.uniq(pr.last_failed_jobs ++ failed_jobs)
                       else

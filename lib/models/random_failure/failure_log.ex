@@ -27,8 +27,9 @@ defmodule SlackCoder.Models.RandomFailure.FailureLog do
     from log in query, where: log.pr_id == ^id
   end
 
-  def with_external_id(query \\ __MODULE__, id) do
-    from log in query, where: log.external_id == ^id
+  def with_external_ids(query \\ __MODULE__, ids) do
+    ids = List.wrap(ids)
+    from log in query, where: log.external_id in ^ids
   end
 
   def without_random_failure(query \\ __MODULE__, id) do

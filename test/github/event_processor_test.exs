@@ -111,7 +111,7 @@ defmodule SlackCoder.Github.EventProcessorTest do
   describe "status" do
     alias SlackCoder.Github.Watchers.Supervisor, as: GithubSupervisor
     alias SlackCoder.Github.Watchers.PullRequest
-    alias SlackCoder.BuildSystem.Job
+    alias SlackCoder.BuildSystem.File
 
     @before_sha "theshabefore"
     setup do
@@ -142,7 +142,7 @@ defmodule SlackCoder.Github.EventProcessorTest do
 
       # Begin actual test
       EP.process(:status, Map.merge(Fixtures.PRs.status_failed(), %{"number" => pr.number, "sha" => @sha}))
-      assert %PR{build_status: "failure", last_failed_sha: @sha, last_failed_jobs: [%Job{}]} = PullRequest.fetch pid
+      assert %PR{build_status: "failure", last_failed_sha: @sha, last_failed_jobs: [%File{}, %File{}]} = PullRequest.fetch pid
       EP.process(:status, Map.merge(Fixtures.PRs.status_pending(), %{"number" => pr.number, "sha" => @sha}))
       assert %PR{build_status: "pending"} = PullRequest.fetch pid
       EP.process(:status, Map.merge(Fixtures.PRs.status_success(), %{"number" => pr.number, "sha" => @sha}))

@@ -29,7 +29,8 @@ defmodule SlackCoder.BuildSystem.Travis do
     |> put_job_id(id)
     |> case do
       {job, body} ->
-        SlackCoder.BuildSystem.record_failure_log(job, body, pr)
+        job
+        |> SlackCoder.BuildSystem.record_failure_log(body, pr)
       _ -> nil
     end
   end
@@ -58,6 +59,6 @@ defmodule SlackCoder.BuildSystem.Travis do
   end
 
   defp put_job_id({nil, _}, _id), do: nil
-  defp put_job_id({job, body}, id), do: {Map.put(job, :id, id), body}
+  defp put_job_id({files, body}, id), do: {Enum.map(files, &(Map.put(&1, :id, id))), body}
 
 end
