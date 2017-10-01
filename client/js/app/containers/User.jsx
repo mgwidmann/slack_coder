@@ -16,7 +16,7 @@ class User extends Component {
     }
     return (
       <div>
-        <LargeAvatar avatarUrl={user.avatarUrl} github={user.github} />
+        <LargeAvatar avatarUrl={user.avatarUrl} github={user.github} name={user.name} />
         <EditUser user={user} search={search} updateUser={updateUser} />
       </div>
     );
