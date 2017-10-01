@@ -1,20 +1,20 @@
 
 /* Customize container */
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 768px) and (max-width: 1299px) {
   .container {
-    max-width: 730px;
+    max-width: 1200px;
   }
 }
 
-@media screen and (min-width: 1300px) {
+@media screen and (min-width: 1300px) and (max-width: 1499px) {
   .container {
-    max-width: 1250px;
+    max-width: 1300px;
   }
 }
 
 @media screen and (min-width: 1500px) {
   .container {
-    max-width: 1350px;
+    max-width: 1400px;
   }
 }
 

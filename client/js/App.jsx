@@ -8,10 +8,12 @@ import Layout from './app/containers/Layout';
 import PullRequests from './app/containers/PullRequests';
 import MobileLogin from './app/containers/MobileLogin';
 import Users from './app/containers/Users';
+import User from './app/containers/User';
 import { store, history } from './app/store';
 import client from './app/client';
 import '../css/app.scss';
 import 'bootstrap';
+import 'react-select/dist/react-select.css';
 
 class App extends React.Component {
   render() {
@@ -25,6 +27,9 @@ class App extends React.Component {
             }} />
             <Route exact path="/users" render={() => {
               return <Users admin={store.getState().currentUser.admin} />
+            }} />
+            <Route exact path="/users/:id/edit" render={() => {
+              return <User admin={store.getState().currentUser.admin} />
             }} />
           </Layout>
         </ConnectedRouter>

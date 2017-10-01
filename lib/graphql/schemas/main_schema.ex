@@ -81,6 +81,8 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
       arg :page, :integer
       @desc "The number of items in a page, maximum 100"
       arg :page_size, :integer
+      @desc "Searches for a user."
+      arg :search, :string
       resolve &SlackCoder.GraphQL.Resolvers.UserResolver.list/3
     end
 

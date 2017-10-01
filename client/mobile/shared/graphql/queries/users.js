@@ -15,7 +15,7 @@ export default graphql(USERS_QUERY, {
         totalEntries,
         loading,
         gotoPage(page) {
-          fetchMore({
+          return fetchMore({
             variables: {
               page: page
             },

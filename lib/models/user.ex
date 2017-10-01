@@ -53,4 +53,11 @@ defmodule SlackCoder.Models.User do
     def unquote(:"by_#{field}")(name), do: to_string(name) |> unquote(:"by_#{field}")()
   end
 
+  def search(q) do
+    from u in __MODULE__,
+      where: like(u.github, ^("%#{q}%")) or
+             like(u.name, ^("%#{q}%")) or
+             like(u.slack, ^("%#{q}%"))
+  end
+
 end

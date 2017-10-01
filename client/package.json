@@ -19,6 +19,7 @@
     "react-flip-move": "^2.9.15",
     "react-redux": "^5.0.6",
     "react-router-redux": "next",
+    "react-select": "^1.0.0-rc.10",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.2.0"
   },

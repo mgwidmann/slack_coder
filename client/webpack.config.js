@@ -22,6 +22,7 @@ var config = {
       "react-apollo",
       "qrcode.react",
       "graphql-tag",
+      "react-select",
       "apollo-phoenix-websocket",
       "jquery",
       "phoenix",
@@ -67,6 +68,13 @@ var config = {
             plugins: ['transform-decorators-legacy', 'transform-class-properties', ["resolver", { "resolveDirs": [resolve(join(__dirname, 'js'))] }]]
           }
         }
+      },
+      {
+        test: /\.css$/,
+        use: [
+          { loader: "style-loader" },
+          { loader: "css-loader" }
+        ]
       },
       {
         test: /\.scss$/,

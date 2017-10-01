@@ -2,15 +2,12 @@ import React, { Component } from 'react';
 import PRList from '../components/PRList';
 import { graphql } from 'react-apollo';
 import subscribePullRequests from '../../../mobile/shared/graphql/subscriptions/pullRequest';
+import Loading from '../components/Loading';
 
 class PullRequests extends Component {
-  renderLoading() {
-    return <img src="/images/spinner.gif" className="img-responsive loading-spinner" />;
-  }
-
   renderMyEmpty() {
     if(this.props.loading) {
-      return this.renderLoading();
+      return <Loading/>;
     } else {
       return (
         <div className="text-center">
@@ -26,7 +23,7 @@ class PullRequests extends Component {
 
   renderMonitorEmpty() {
     if(this.props.loading) {
-      return this.renderLoading();
+      return <Loading/>;
     } else {
       return (
         <div className="text-center">
