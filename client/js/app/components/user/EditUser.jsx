@@ -1,8 +1,8 @@
 import React from 'react';
-import EditSlack from './EditSlack';
-import EditMonitors from './EditMonitors';
-import GeneralSettings from './GeneralSettings';
-import NotificationSettings from './NotificationSettings';
+import EditSlack from './edit/EditSlack';
+import EditMonitors from './edit/EditMonitors';
+import GeneralSettings from './edit/GeneralSettings';
+import NotificationSettings from './edit/NotificationSettings';
 
 export default ({ user, search }) => {
   return (

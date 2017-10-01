@@ -1,5 +1,5 @@
 import React from 'react';
-import UserSearch from './UserSearch';
+import UserSearch from '../UserSearch';
 
 export default ({ monitors, search }) => {
   return (
