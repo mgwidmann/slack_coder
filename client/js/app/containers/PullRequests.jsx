@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PRList from '../components/PRList';
 import { graphql } from 'react-apollo';
+import { withRouter } from 'react-router';
 import subscribePullRequests from '../../../mobile/shared/graphql/subscriptions/pullRequest';
 import Loading from '../components/Loading';
 
@@ -68,4 +69,4 @@ class PullRequests extends Component {
   }
 }
 
-export default subscribePullRequests(PullRequests);
+export default withRouter(subscribePullRequests(PullRequests));

@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 export default class Pagination extends Component {
   renderPage(page, gotoPage, pageText) {
     return (
       <li key={page} className={this.props.page == page ? 'active' : null}>
-        <a className="" href='javascript:void(0);' onClick={() => { gotoPage(page) }}>{pageText}</a>
+        <Link className="" to='#' onClick={() => { gotoPage(page) }}>{pageText}</Link>
       </li>
     );
   }

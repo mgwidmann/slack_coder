@@ -4,10 +4,14 @@ import Select from 'react-select';
 export default class UserSearch extends Component {
   constructor(props) {
     super(props);
-    this.state = { value: null };
+    this.state = { value: this.props.initial || [] };
   }
 
-  getUsers(input) {
+  getUsers() {
+    return this.state.value;
+  }
+
+  searchUsers(input) {
     if (!input) {
       return Promise.resolve({ options: [] });
     }
@@ -18,13 +22,13 @@ export default class UserSearch extends Component {
   }
 
   render() {
-    let { initial, multiple } = this.props;
-    let value = this.state.value || initial;
+    let { multiple } = this.props;
+    let value = this.state.value;
     return (
       <Select.Async
         value={value}
         onChange={(v) => this.setState({ value: v })}
-        loadOptions={::this.getUsers}
+        loadOptions={::this.searchUsers}
         valueKey="github"
         labelKey="name"
         multi={multiple}

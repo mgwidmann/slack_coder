@@ -24,6 +24,7 @@ defmodule SlackCoder.GraphQL.Schemas.User do
     @desc "This user has opted to not receive any notifications from the slack bot."
     field :muted, :boolean
 
+    @desc "General and notification settings."
     field :config, :user_config
 
     @desc "If this user is an administrator of SlackCoder"

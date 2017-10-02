@@ -23,5 +23,6 @@ defmodule SlackCoder.GraphQL.InputObjects.User do
     field :muted, :boolean
     field :github, :string
     field :config, :user_input_config
+    field :monitors, list_of(non_null(:string))
   end
 end

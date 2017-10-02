@@ -18,6 +18,7 @@ var config = {
       "redux-thunk",
       "redux-logger",
       "react-router-redux",
+      "react-router-dom",
       "history",
       "react-apollo",
       "qrcode.react",
