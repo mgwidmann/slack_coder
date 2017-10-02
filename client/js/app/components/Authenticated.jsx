@@ -1,20 +1,17 @@
 import React, { Component } from 'react';
+import { Redirect, withRouter } from 'react-router';
 
-export default class Authenticated extends React.Component {
+class Authenticated extends React.Component {
   render() {
-    let { currentUser } = this.props;
-    if (currentUser) {
+    let { currentUser, location, redirect, header } = this.props;
+    if (Object.keys(currentUser).length > 0 || location.pathname == '/login' && !header) {
       return this.props.children;
+    } else if (redirect === true) {
+      return <Redirect to="/login" />;
     } else {
-      return (
-        <div className="center sign-in">
-          <a className="btn btn-default btn-xxl" href="/auth/github">
-            <i className="fa fa-github"></i>
-            Sign in with GitHub
-            <i className="fa fa-angle-right"></i>
-          </a>
-        </div>
-      );
+      return null;
     }
   }
 }
+
+export default withRouter(Authenticated);

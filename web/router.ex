@@ -34,23 +34,21 @@ defmodule SlackCoder.Router do
   scope "/" do
     pipe_through :browser # Use the default browser stack
 
-    for path <- ["/", "/mobile/login", "/user/:id/edit"] do
+    for path <- ["/", "/mobile/login", "/users", "/login", "/user/:id/edit"] do
       get path, SlackCoder.PageController, :index
     end
 
     scope "/" do
       pipe_through :restricted
-      resources "/users", SlackCoder.UserController, only: [:index, :new, :create, :edit, :update]
 
+      # Moving to react soon
       get "/failure_logs/:id", SlackCoder.Web.RandomFailureController, :log
 
       scope "/admin" do
         pipe_through :admin
 
         scope "/", SlackCoder do
-          get "/users/external/:github", UserController, :external
-          post "/users/external/:github", UserController, :create_external
-
+          # Need to either port or remove
           get "/messages", UserController, :messages
         end
       end

@@ -69,9 +69,13 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
     field :user, type: :user do
       @desc "The primary identifier of the desired user."
       arg :id, :id
+      arg :current, :boolean
 
-      resolve fn _, %{id: id}, _ ->
-        {:ok, Repo.get(User, id)}
+      resolve fn
+        _, %{id: id}, _ ->
+          {:ok, Repo.get(User, id)}
+        _, %{current: true}, %{context: %{current_user: current_user}} ->
+          {:ok, current_user}
       end
     end
 

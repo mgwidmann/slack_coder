@@ -21,7 +21,7 @@
   </head>
 
   <body>
-    <div id="app"></div>
+    <%= render @view_module, @view_template, assigns %>
     <script src="<%= static_path(@conn, "/js/dependencies.bundle.js") %>"></script>
     <script src="<%= static_path(@conn, "/js/app.bundle.js") %>"></script>
   </body>

@@ -1,11 +1,48 @@
-<div class="row">
-  <div class="col-md-12">
-    <div class="error-template text-center">
-      <h1>Unauthorized!</h1>
-      <h2>401 Not Authorized</h2>
-      <div class="error-details">
-        You're not allowed access to that resource
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>Slack Coder</title>
+    <style>
+    .error-template {padding: 40px 15px;text-align: center;}
+    </style>
+    <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="header">
+      <div class="container">
+        <div class="col-md-3 hidden-xs">
+          <a class="logo" href="/"></a>
+        </div>
+        <div class="col-md-6 col-xs-12 text-center">
+          <h1>
+            Slack Coder
+          </h1>
+          <p class="lead">Monitoring your <strong>dead</strong> pull requests</p>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+
+    <div class="container" role="main">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="error-template text-center">
+            <h1>Unauthorized!</h1>
+            <h2>401 Not Authorized</h2>
+            <div class="error-details">
+              You're not allowed access to that resource
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- /container -->
+  </body>
+</html>

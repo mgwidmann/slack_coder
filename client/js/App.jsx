@@ -10,6 +10,7 @@ import MobileLogin from './app/containers/MobileLogin';
 import Users from './app/containers/Users';
 import User from './app/containers/User';
 import NotFound from './app/components/NotFound';
+import Login from './app/components/Login';
 import { store, history } from './app/store';
 import client from './app/client';
 import '../css/app.scss';
@@ -33,7 +34,8 @@ class App extends React.Component {
               <Route exact path="/users/:id/edit" render={() => {
                 return <User admin={store.getState().currentUser.admin} />;
               }} />
-              <Route component={NotFound}/>
+              <Route path="/login" component={Login} />
+              <Route component={NotFound} />
             </Switch>
           </Layout>
         </ConnectedRouter>

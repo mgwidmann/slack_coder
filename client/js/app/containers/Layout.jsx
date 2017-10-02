@@ -24,16 +24,13 @@ class Layout extends Component {
                 </h1>
                 <p className="lead">Monitoring your <strong>dead</strong> pull requests</p>
               </div>
-              {currentUser && (
+              <Authenticated currentUser={currentUser} header={true}>
                 <div>
                   <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
                     <span>
                       <img src={currentUser.avatar_url} className="img-xs img-circle"/>
-                      {currentUser.id ? (
-                        <Link to={`/users/${currentUser.id}/edit`}>{currentUser.github}</Link>
-                      ) : (
-                        null
-                      )}
+                      &nbsp;
+                      <Link to={`/users/${currentUser.id}/edit`}>{currentUser.name}</Link>
                     </span>
                     &nbsp;|&nbsp;
                     <Link to='/mobile/login'>Mobile</Link>
@@ -46,9 +43,9 @@ class Layout extends Component {
                     </Link>
                   </div>
                 </div>
-              )}
+              </Authenticated>
               <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
-                {currentUser && (
+                <Authenticated currentUser={currentUser} header={true}>
                   <span>
                     {/* Not <Link/> on purpose, needs to hit server */}
                     <a href="/tools/wobserver">
@@ -60,10 +57,10 @@ class Layout extends Component {
                       <i className="glyphicon glyphicon-remove"></i> Errors
                     </a>
                   </span>
-                )}
+                </Authenticated>
               </div>
               <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
-                {currentUser && (
+                <Authenticated currentUser={currentUser} header={true}>
                   <span>
                     {/* Not <Link/> on purpose, needs to hit server */}
                     <a href="/tools/graphiql">
@@ -71,7 +68,7 @@ class Layout extends Component {
                     </a>
                     &nbsp;|&nbsp;
                   </span>
-                )}
+                </Authenticated>
                 <span>
                   <a href={`https://github.com/mgwidmann/slack_coder/commit/${window.commitSha}`}>
                     <i className="glyphicon glyphicon-tag"></i> Version
@@ -82,7 +79,7 @@ class Layout extends Component {
           </div>
 
           <div className="container" role="main">
-            <Authenticated currentUser={currentUser}>
+            <Authenticated currentUser={currentUser} redirect={true}>
               <div>
                 {childrenWithProps}
               </div>
