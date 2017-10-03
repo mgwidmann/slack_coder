@@ -3,7 +3,6 @@ defmodule SlackCoder.GraphQL.Schemas.User do
   """
   use Absinthe.Schema.Notation
   use Absinthe.Ecto, repo: SlackCoder.Repo
-  import SlackCoder.GraphQL.Resolvers.DefaultResolvers
 
   object :user do
     @desc "The primary identifier for each user."

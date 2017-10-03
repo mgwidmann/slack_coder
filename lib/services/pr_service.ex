@@ -4,7 +4,6 @@ defmodule SlackCoder.Services.PRService do
   alias SlackCoder.Repo
   alias SlackCoder.Github.Notification
   alias SlackCoder.Models.PR
-  alias SlackCoder.PageView
   alias SlackCoder.Endpoint
   alias SlackCoder.BuildSystem.LogParser
   import Ecto.Changeset, only: [put_change: 3, get_change: 2]
