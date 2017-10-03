@@ -17,7 +17,7 @@ defmodule SlackCoder.Github.Watchers.Supervisor do
   end
 
   @worker_id_prefix "PR-"
-  defp worker_id(pr), do: "#{@worker_id_prefix}#{pr.number}"
+  defp worker_id(pr), do: "#{@worker_id_prefix}#{pr.repo}-#{pr.number}"
 
   def start_watcher(pr) do
     case Supervisor.start_child(__MODULE__, worker_for(pr)) do
