@@ -15,7 +15,7 @@ fragment PR on PullRequest {
   title
   user {
     avatarUrl
-    github
+    # github
     name
   }
 }

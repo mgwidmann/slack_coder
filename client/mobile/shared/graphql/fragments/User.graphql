@@ -1,4 +1,4 @@
-fragment FullUser on User {
+fragment BasicUser on User {
   id
   admin
   github

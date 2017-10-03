@@ -2,7 +2,7 @@
 
 query User {
   user(current: true) {
-    ... FullUser
+    ... BasicUser
     monitors {
       github
     }

@@ -8,12 +8,16 @@ defmodule SlackCoder.GraphQL.Resolvers.UserResolver do
   import Absinthe.Resolution.Helpers, only: [batch: 3]
 
   def list(_, %{search: q} = params, _) do
-    query = User.search(q)
+    query = User.search(q) |> ordered()
     {:ok, Repo.paginate(query, params)}
   end
 
   def list(_, params, _) do
-    {:ok, Repo.paginate(User, params)}
+    {:ok, ordered() |> Repo.paginate(params)}
+  end
+
+  defp ordered(query \\ User) do
+    query |> order_by([u], [asc: u.github])
   end
 
   def update(_, %{id: id, user: user_params}, _resolution) do

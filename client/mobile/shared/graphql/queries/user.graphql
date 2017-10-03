@@ -2,7 +2,7 @@
 
 query User($id: ID) {
   user(id: $id) {
-    ... FullUser
+    ... BasicUser
     config {
       closeSelf
       closeMonitors
