@@ -8,18 +8,18 @@ use Mix.Config
 # with brunch.io to recompile .js and .css sources.
 config :slack_coder, SlackCoder.Endpoint,
   http: [port: 4000],
-  debug_errors: false,
+  debug_errors: true,
   code_reloader: true,
   cache_static_lookup: false,
   check_origin: false,
   watchers: [node: ["node_modules/.bin/webpack", "--watch",
-               cd: Path.expand("../", __DIR__)]]
+               cd: Path.expand("./client")]]
 
 # Watch static and templates for browser reloading.
 config :slack_coder, SlackCoder.Endpoint,
   live_reload: [
     patterns: [
-      ~r{client/.*(js|css|png|jpeg|jpg|gif|svg)$},
+      ~r{client/.*(js|jsx|css|png|jpeg|jpg|gif|svg)$},
       ~r{lib/.*(ex)$},
       ~r{web/.*(ex)$},
       ~r{web/.*(eex)$}

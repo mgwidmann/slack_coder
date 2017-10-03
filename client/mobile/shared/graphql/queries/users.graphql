@@ -1,0 +1,19 @@
+#import '../fragments/User.graphql'
+
+query Users($page: Int, $pageSize: Int) {
+  users(page: $page, pageSize: $pageSize) {
+    pageSize
+    pageNumber
+    totalPages
+    totalEntries
+    entries {
+      ... on User {
+        id
+        avatarUrl
+        github
+        name
+        muted
+      }
+    }
+  }
+}

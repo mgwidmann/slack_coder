@@ -1,9 +1,9 @@
 defmodule SlackCoder.Services.PRService do
   use Timex
+  use PatternTap
   alias SlackCoder.Repo
   alias SlackCoder.Github.Notification
   alias SlackCoder.Models.PR
-  alias SlackCoder.PageView
   alias SlackCoder.Endpoint
   alias SlackCoder.BuildSystem.LogParser
   import Ecto.Changeset, only: [put_change: 3, get_change: 2]
@@ -13,6 +13,7 @@ defmodule SlackCoder.Services.PRService do
   def save(changeset) do
     changeset
     |> put_change(:opened, opened?(changeset))
+    |> destruct(changeset ~> changeset) # Update local variable
     |> random_failure()
     |> stale_notification()
     |> unstale_notification()
@@ -25,7 +26,7 @@ defmodule SlackCoder.Services.PRService do
     |> Repo.insert_or_update()
     |> case do
       {:ok, pr} ->
-        {:ok, pr |> check_failed() |> notifications() |> broadcast()}
+        {:ok, pr |> check_failed() |> notifications() |> broadcast(Map.to_list(changeset.changes), changeset.data.id == nil)}
       errored_changeset ->
         Logger.error "Unable to save PR: #{inspect errored_changeset}"
         errored_changeset
@@ -101,7 +102,9 @@ defmodule SlackCoder.Services.PRService do
   end
   def failure_notification(cs), do: cs
 
+  def opened?(%Ecto.Changeset{data: %{closed_at: closed}}) when not is_nil(closed), do: false
   def opened?(%Ecto.Changeset{changes: %{closed_at: closed}}) when not is_nil(closed), do: false
+  def opened?(%Ecto.Changeset{data: %{merged_at: merged}}) when not is_nil(merged), do: false
   def opened?(%Ecto.Changeset{changes: %{merged_at: merged}}) when not is_nil(merged), do: false
   def opened?(_cs), do: true
 
@@ -137,13 +140,13 @@ defmodule SlackCoder.Services.PRService do
     end
   end
 
-  def broadcast(%PR{closed_at: closed, merged_at: merged} = pr) when not is_nil(closed) or not is_nil(merged) do
-    Endpoint.broadcast("prs:all", "pr:remove", %{pr: pr.number})
+  def broadcast(pr, [], _), do: pr # Without changes
+  def broadcast(pr, [_ | _], true) do
+    Absinthe.Subscription.publish(Endpoint, pr, [new_pull_request: "new_pull_request"])
     pr
   end
-  def broadcast(pr) do
-    html = PageView.render("pull_request.html", pr: pr)
-    Endpoint.broadcast("prs:all", "pr:update", %{pr: pr.number, github: pr.github_user, html: Phoenix.HTML.safe_to_string(html)})
+  def broadcast(%PR{id: id} = pr, [_ | _], false) do # With changes existing PR
+    Absinthe.Subscription.publish(Endpoint, pr, [pull_request: to_string(id)])
     pr
   end
 
@@ -157,11 +160,13 @@ defmodule SlackCoder.Services.PRService do
       [] ->
         cond do
           attempted_once && SlackCoder.BuildSystem.supported?(pr) ->
-            Logger.warn """
-            Checking failed job data returned empty twice in a row.
+            if(Mix.env == :prod) do
+              Logger.warn """
+              Checking failed job data returned empty twice in a row.
 
-            #{inspect pr, pretty: true}
-            """
+              #{inspect pr, pretty: true}
+              """
+            end
             load_failed_from_db(pr)
           SlackCoder.BuildSystem.supported?(pr) ->
             check_failed(pr, true)

@@ -1,5 +1,6 @@
 defmodule SlackCoder.Endpoint do
   use Phoenix.Endpoint, otp_app: :slack_coder
+  use Absinthe.Phoenix.Endpoint
 
   socket "/socket", SlackCoder.UserSocket
   socket "/tools/errors/socket", Flames.UserSocket

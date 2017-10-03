@@ -1,0 +1,21 @@
+fragment PR on PullRequest {
+  id
+  analysisStatus
+  analysisUrl
+  backoff
+  branch
+  number
+  buildStatus
+  buildUrl
+  htmlUrl
+  owner
+  repository
+  closedAt
+  mergedAt
+  title
+  user {
+    id
+    avatarUrl
+    name
+  }
+}

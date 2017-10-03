@@ -1,0 +1,28 @@
+
+/* Customize container */
+@media screen and (min-width: 768px) and (max-width: 1299px) {
+  .container {
+    max-width: 1200px;
+  }
+}
+
+@media screen and (min-width: 1300px) and (max-width: 1499px) {
+  .container {
+    max-width: 1300px;
+  }
+}
+
+@media screen and (min-width: 1500px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+
+body {
+  .table {
+    margin-bottom: 0px;
+  }
+  .label-highlight {
+    background-color: #8B33B7; // Purple like merge conflicts
+  }
+}

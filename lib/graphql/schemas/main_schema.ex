@@ -41,24 +41,41 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
     @desc "Fetch a group of PRs"
     field :pull_requests, type: list_of(:pull_request) do
       @desc "The type of `PullRequest`s you'd like to fetch."
-      arg :type, :pull_request_type
+      arg :type, non_null(:pull_request_type)
       arg :status, :pull_request_status
 
       resolve fn
         _, %{type: :mine} = args, %{context: %{current_user: current_user}} ->
           SlackCoder.GraphQL.Resolvers.PRResolver.list(current_user, :mine, args[:status] || :open)
-        _, %{type: :monitors}, %{context: %{current_user: _current_user}} ->
-          {:ok, []}
+        _, %{type: :monitors} = args, %{context: %{current_user: current_user}} ->
+          SlackCoder.GraphQL.Resolvers.PRResolver.list(current_user, :monitors, args[:status] || :open)
+        _, _, _ ->
+          {:error, %{message: "Must be signed in."}}
       end
+    end
+
+    @desc "Fetch a single PR"
+    field :pull_request, type: :pull_request do
+      @desc "The primary key"
+      arg :id, :id
+      arg :owner, :string
+      arg :repository, :string
+      arg :number, :integer
+
+      resolve &SlackCoder.GraphQL.Resolvers.PRResolver.pull_request/3
     end
 
     @desc "Fetching an individual user of the system."
     field :user, type: :user do
       @desc "The primary identifier of the desired user."
       arg :id, :id
+      arg :current, :boolean
 
-      resolve fn _, %{id: id}, _ ->
-        {:ok, Repo.get(User, id)}
+      resolve fn
+        _, %{id: id}, _ ->
+          {:ok, Repo.get(User, id)}
+        _, %{current: true}, %{context: %{current_user: current_user}} ->
+          {:ok, current_user}
       end
     end
 
@@ -67,7 +84,9 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
       @desc "The page number"
       arg :page, :integer
       @desc "The number of items in a page, maximum 100"
-      arg :per_page, :integer
+      arg :page_size, :integer
+      @desc "Searches for a user."
+      arg :search, :string
       resolve &SlackCoder.GraphQL.Resolvers.UserResolver.list/3
     end
 
@@ -76,7 +95,7 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
       @desc "The page number"
       arg :page, :integer
       @desc "The number of items in a page, maximum 100"
-      arg :per_page, :integer
+      arg :page_size, :integer
       @desc "Sort by"
       arg :sort, :random_failure_sort_field
       @desc "Sort direction"
@@ -93,6 +112,30 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
 
       resolve &SlackCoder.GraphQL.Resolvers.UserResolver.update/3
     end
+
+    @desc "Refreshes the PR from github"
+    field :synchronize, type: :pull_request do
+      arg :owner, non_null(:string)
+      arg :repository, non_null(:string)
+      arg :number, non_null(:integer)
+
+      resolve &SlackCoder.GraphQL.Resolvers.PRResolver.synchronize/3
+    end
   end
 
+  subscription do
+    field :pull_request, :pull_request do
+      arg :id, non_null(:id)
+
+      config fn %{id: id}, _ ->
+        {:ok, topic: id}
+      end
+    end
+
+    field :new_pull_request, :pull_request do
+      config fn _, _ ->
+        {:ok, topic: "new_pull_request"}
+      end
+    end
+  end
 end

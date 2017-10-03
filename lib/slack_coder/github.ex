@@ -150,6 +150,8 @@ defmodule SlackCoder.Github do
     }
     EventProcessor.process(:pull_request, %{"action" => "opened", "number" => number, "pull_request" => pr})
 
+    Process.sleep(500) # Sleep to allow the front-end to subscribe before broadcasting status
+
     statuses
     |> Enum.each(fn %{"state" => state, "context" => context, "targetUrl" => target_url} ->
       EventProcessor.process(:status, %{"sha" => sha, "state" => String.downcase(state), "context" => context, "target_url" => target_url})

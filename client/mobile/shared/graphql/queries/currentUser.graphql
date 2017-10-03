@@ -1,0 +1,10 @@
+#import '../fragments/User.graphql'
+
+query User {
+  user(current: true) {
+    ... BasicUser
+    monitors {
+      github
+    }
+  }
+}

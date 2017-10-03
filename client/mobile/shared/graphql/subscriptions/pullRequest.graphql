@@ -1,0 +1,5 @@
+#import "../fragments/PullRequest.graphql"
+
+subscription PullRequest($id: ID!) {
+  pullRequest(id: $id) { ... PR }
+}

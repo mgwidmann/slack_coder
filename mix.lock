@@ -1,5 +1,6 @@
-%{"absinthe": {:hex, :absinthe, "1.4.0-rc.0", "17b8ed768e304c91427d35b4937ebe50b782bcf0c8d5adc4fff822c91b691ee4", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm"},
+%{"absinthe": {:hex, :absinthe, "1.4.0-rc.2", "d04df4e9f5ae7904086e1fcefe09e9216f506fad8f327ee6d2aaa398cc66846c", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm"},
   "absinthe_ecto": {:git, "https://github.com/mgwidmann/absinthe_ecto.git", "3b000b3cbe30b6d8f3b4493ad473d530bf7aaf33", [branch: "1.4.0-beta"]},
+  "absinthe_phoenix": {:git, "https://github.com/absinthe-graphql/absinthe_phoenix.git", "432697336c25e2da3f018c980194ebf203cc0c06", []},
   "absinthe_plug": {:git, "https://github.com/mgwidmann/absinthe_plug.git", "4de8c31a0b627a8d9365f99ebfea83e127f8a571", [branch: "default_headers_connection"]},
   "base64url": {:hex, :base64url, "0.0.1", "36a90125f5948e3afd7be97662a1504b934dd5dac78451ca6e9abf85a10286be", [:rebar], [], "hexpm"},
   "certifi": {:hex, :certifi, "2.0.0", "a0c0e475107135f76b8c1d5bc7efb33cd3815cb3cf3dea7aefdd174dabead064", [:rebar3], [], "hexpm"},

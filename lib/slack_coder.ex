@@ -12,6 +12,7 @@ defmodule SlackCoder do
       supervisor(Task.Supervisor, [[name: SlackCoder.TaskSupervisor]]),
       # Start the endpoint when the application starts
       supervisor(SlackCoder.Endpoint, []),
+      supervisor(Absinthe.Subscription, [SlackCoder.Endpoint]),
       # Start Users supervisor before slack client
       supervisor(SlackCoder.Users.Supervisor, []),
     ]

@@ -1,9 +1,7 @@
 defmodule SlackCoder.PageController do
   use SlackCoder.Web, :controller
 
-  def index(conn, params) do
-    conn = assign conn, :prs, SlackCoder.Github.Watchers.Supervisor.pull_requests
-    conn = assign conn, :user, params["user"]
+  def index(conn, _params) do
     render conn, "index.html"
   end
 

@@ -1,0 +1,10 @@
+query SearchUser($search: String) {
+  users(search: $search) {
+    entries {
+      ... on User {
+        name
+        github
+      }
+    }
+  }
+}
