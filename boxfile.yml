@@ -24,6 +24,7 @@ run.config:
 
   # run npm install
   extra_steps:
+    - cd client/mobile && yarn install # Not sure why this is necessary
     - cd client && yarn install
 
   extra_packages:
