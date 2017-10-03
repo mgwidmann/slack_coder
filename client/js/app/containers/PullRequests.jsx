@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
 import PRList from '../components/PRList';
-import { graphql } from 'react-apollo';
+import { compose } from 'react-apollo';
 import { withRouter } from 'react-router';
 import subscribePullRequests from '../../../mobile/shared/graphql/subscriptions/pullRequest';
 import Loading from '../components/Loading';
 
 class PullRequests extends Component {
+  componentDidMount() {
+    this.props.subscribeNew(this.props.currentUser);
+  }
+
   renderMyEmpty() {
     if(this.props.loading) {
       return <Loading/>;
@@ -69,4 +73,7 @@ class PullRequests extends Component {
   }
 }
 
-export default withRouter(subscribePullRequests(PullRequests));
+export default compose(
+  withRouter,
+  subscribePullRequests
+)(PullRequests);

@@ -14,8 +14,8 @@ fragment PR on PullRequest {
   mergedAt
   title
   user {
+    id
     avatarUrl
-    # github
     name
   }
 }

@@ -27,7 +27,7 @@ defmodule SlackCoder.Services.PRService do
     |> Repo.insert_or_update()
     |> case do
       {:ok, pr} ->
-        {:ok, pr |> check_failed() |> notifications() |> broadcast(Map.to_list(changeset.changes))}
+        {:ok, pr |> check_failed() |> notifications() |> broadcast(Map.to_list(changeset.changes), changeset.data.id == nil)}
       errored_changeset ->
         Logger.error "Unable to save PR: #{inspect errored_changeset}"
         errored_changeset
@@ -141,8 +141,12 @@ defmodule SlackCoder.Services.PRService do
     end
   end
 
-  def broadcast(pr, []), do: pr # Without changes
-  def broadcast(%PR{id: id} = pr, [_ | _]) do # With changes
+  def broadcast(pr, [], _), do: pr # Without changes
+  def broadcast(pr, [_ | _], true) do
+    Absinthe.Subscription.publish(Endpoint, pr, [new_pull_request: "new_pull_request"])
+    pr
+  end
+  def broadcast(%PR{id: id} = pr, [_ | _], false) do # With changes existing PR
     Absinthe.Subscription.publish(Endpoint, pr, [pull_request: to_string(id)])
     pr
   end

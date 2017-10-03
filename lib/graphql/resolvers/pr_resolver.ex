@@ -1,6 +1,7 @@
 defmodule SlackCoder.GraphQL.Resolvers.PRResolver do
   alias SlackCoder.Models.PR
   alias SlackCoder.Repo
+  import Ecto.Query
   alias SlackCoder.Github.Watchers.Supervisor, as: Github
   alias SlackCoder.Github.Watchers.PullRequest
 
@@ -23,11 +24,11 @@ defmodule SlackCoder.GraphQL.Resolvers.PRResolver do
   end
 
   def list(%{monitors: monitors}, :monitors, :open) do
-    {:ok, PR.by_github(monitors) |> PR.active() |> Repo.all()}
+    {:ok, PR.by_github(monitors) |> order_by([p], [desc: p.user_id]) |> PR.active() |> Repo.all()}
   end
 
   def list(%{monitors: monitors}, :monitors, :merged) do
-    {:ok, PR.by_github(monitors) |> PR.merged() |> Repo.all()}
+    {:ok, PR.by_github(monitors) |> order_by([p], [desc: p.user_id]) |> PR.merged() |> Repo.all()}
   end
 
   def pull_request(_, %{owner: owner, repository: repo, number: number}, _) do

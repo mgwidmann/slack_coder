@@ -1,15 +1,35 @@
 import { graphql } from 'react-apollo';
 import SUBSCRIBE_PULL_REQUEST from './pullRequest.graphql';
+import SUBSCRIBE_NEW_PULL_REQUEST from './newPullRequest.graphql';
 import PULL_REQUESTS_QUERY from '../queries/pullRequests.graphql';
 
 export default graphql(PULL_REQUESTS_QUERY, {
-  props: ({ data: { currentUser, mine, monitors, loading, subscribeToMore, error } }) => {
+  props: ({ data: { mine, monitors, loading, subscribeToMore, error } }) => {
     return {
-      currentUser,
+      // currentUser,
       mine,
       monitors,
       loading,
       error,
+      subscribeNew(currentUser) {
+        return subscribeToMore({
+          document: SUBSCRIBE_NEW_PULL_REQUEST,
+          updateQuery: (prev, { subscriptionData }) => {
+            if (!subscriptionData.data) {
+              return prev;
+            }
+            let newPullRequest = subscriptionData.data.newPullRequest;
+            let type = newPullRequest.user.id == currentUser.id ? 'mine' : 'monitors';
+            let result = Object.assign([], prev[type]);
+            let index = result.findIndex(p => p.user.id == newPullRequest.user.id);
+            result.splice(index, 0, newPullRequest);
+
+            let fullResult = Object.assign({}, prev);
+            fullResult[type] = result;
+            return fullResult;
+          }
+        });
+      },
       subscribe(pr, type) {
         return subscribeToMore({
           document: SUBSCRIBE_PULL_REQUEST,
@@ -17,7 +37,6 @@ export default graphql(PULL_REQUESTS_QUERY, {
             id: pr.id,
           },
           updateQuery: (prev, {subscriptionData}) => {
-            console.log("Update Query run");
             if (!subscriptionData.data) {
               return prev;
             }

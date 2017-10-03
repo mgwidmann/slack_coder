@@ -34,7 +34,7 @@ defmodule SlackCoder.Router do
   scope "/" do
     pipe_through :browser # Use the default browser stack
 
-    for path <- ["/", "/mobile/login", "/users", "/login", "/user/:id/edit"] do
+    for path <- ["/", "/mobile/login", "/users", "/login", "/users/:id/edit"] do
       get path, SlackCoder.PageController, :index
     end
 

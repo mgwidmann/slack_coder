@@ -9,22 +9,14 @@ import LargeAvatar from '../components/user/LargeAvatar';
 import EditUser from '../components/user/EditUser';
 
 class User extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { success: false };
-  }
-
   successfulSubmit() {
-    this.setState({ success: true });
+    this.props.history.push('/');
   }
 
   render() {
     let { user, loading, search, updateUser } = this.props;
     if (loading) {
       return <Loading />;
-    }
-    if (this.state.success) {
-      return <Redirect to="/" />;
     }
 
     return (

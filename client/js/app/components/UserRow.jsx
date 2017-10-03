@@ -1,32 +1,31 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-export default class UserRow extends Component {
-  render() {
-    let { user, editable } = this.props;
-    return (
-      <tr>
+const UserRow = ({ user, editable }) => {
+  return (
+    <tr>
+      <td>
+        <img src={user.avatarUrl} className="img-circle user-avatar" />
+      </td>
+      <td>
+        {user.name} ({user.github})
+      </td>
+      <td>
+        {user.muted ? (
+          <span className="label label-danger">MUTED</span>
+        ) : (
+          <span className="label label-success">UNMUTED</span>
+        )}
+      </td>
+      {editable ? (
         <td>
-          <img src={user.avatarUrl} className="img-circle user-avatar" />
+          <Link to={`/users/${user.id}/edit`}>
+            <i className='glyphicon glyphicon-pencil'></i>
+          </Link>
         </td>
-        <td>
-          {user.name} ({user.github})
-        </td>
-        <td>
-          {user.muted ? (
-            <span className="label label-danger">MUTED</span>
-          ) : (
-            <span className="label label-success">UNMUTED</span>
-          )}
-        </td>
-        {editable ? (
-          <td>
-            <a href={`/users/${user.id}/edit`}>
-              <i className='glyphicon glyphicon-pencil'></i>
-            </a>
-          </td>
-        ) : null}
-      </tr>
-
-    );
-  }
+      ) : null}
+    </tr>
+  );
 }
+
+export default UserRow;

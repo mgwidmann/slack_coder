@@ -131,5 +131,11 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
         {:ok, topic: id}
       end
     end
+
+    field :new_pull_request, :pull_request do
+      config fn _, _ ->
+        {:ok, topic: "new_pull_request"}
+      end
+    end
   end
 end
