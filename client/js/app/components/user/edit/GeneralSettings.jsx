@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-export default class GeneralSettings extends Component {
+class GeneralSettings extends Component {
   getSettings() {
     return {
       muted: this._muted.checked
@@ -23,3 +24,9 @@ export default class GeneralSettings extends Component {
     );
   }
 }
+
+GeneralSettings.propTypes = {
+  muted: PropTypes.bool.isRequired
+}
+
+export default GeneralSettings;

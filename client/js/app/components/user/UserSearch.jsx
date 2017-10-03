@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Select from 'react-select';
 
-export default class UserSearch extends Component {
+class UserSearch extends Component {
   constructor(props) {
     super(props);
     this.state = { value: this.props.initial || [] };
@@ -36,3 +37,14 @@ export default class UserSearch extends Component {
     )
   }
 }
+
+UserSearch.propTypes = {
+  initial: PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    github: PropTypes.string.isRequired
+  })),
+  multiple: PropTypes.bool,
+  search: PropTypes.func.isRequired
+}
+
+export default UserSearch;

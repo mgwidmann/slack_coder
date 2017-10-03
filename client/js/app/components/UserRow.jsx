@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 const UserRow = ({ user, editable }) => {
@@ -26,6 +27,13 @@ const UserRow = ({ user, editable }) => {
       ) : null}
     </tr>
   );
+}
+
+import userListType from '../../../mobile/shared/props/userList';
+
+UserRow.propTypes = {
+  user: userListType,
+  editable: PropTypes.bool.isRequired
 }
 
 export default UserRow;

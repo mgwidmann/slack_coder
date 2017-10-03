@@ -1,6 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-export default ({ avatarUrl, name, github }) => {
+const LargeAvatar = ({ avatarUrl, name, github }) => {
   return (
     <h2 className="center">
       <img src={avatarUrl} className="img-md img-circle"/>
@@ -12,3 +13,11 @@ export default ({ avatarUrl, name, github }) => {
     </h2>
   )
 };
+
+LargeAvatar.propTypes = {
+  avatarUrl: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  github: PropTypes.string.isRequired
+}
+
+export default LargeAvatar;

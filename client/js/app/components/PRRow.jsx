@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import SynchronizePRLink from './SynchronizePRLink';
 
-export default class PRRow extends Component {
+class PRRow extends Component {
   statusClass(status) {
     switch(status) {
       case 'FAILURE':
@@ -66,3 +67,14 @@ export default class PRRow extends Component {
     );
   }
 }
+
+import prType from '../../../mobile/shared/props/pr';
+
+PRRow.propTypes = {
+  type: PropTypes.string.isRequired,
+  pr: prType,
+  subscribe: PropTypes.func,
+  synchronize: PropTypes.func,
+};
+
+export default PRRow;

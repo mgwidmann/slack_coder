@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import PRList from '../components/PRList';
 import { compose } from 'react-apollo';
 import { withRouter } from 'react-router';
@@ -71,6 +72,12 @@ class PullRequests extends Component {
       </div>
     );
   }
+}
+
+import currentUserType from '../../../mobile/shared/props/currentUser';
+
+PullRequests.propTypes = {
+  currentUser: currentUserType
 }
 
 export default compose(

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import Setting from './Setting';
+import PropTypes from 'prop-types';
 
-export default class NotificationSettings extends Component {
+class NotificationSettings extends Component {
   getSettings() {
     let { type } = this.props;
     let returnValue = {};
@@ -60,3 +61,13 @@ export default class NotificationSettings extends Component {
     );
   }
 }
+
+import userConfigType from '../../../../../mobile/shared/props/userConfig';
+
+NotificationSettings.propTypes = {
+  title: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
+  config: userConfigType
+};
+
+export default NotificationSettings;

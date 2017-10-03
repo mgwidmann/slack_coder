@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 import { compose } from 'react-apollo';
 import userQuery from '../../../mobile/shared/graphql/queries/user';
@@ -26,6 +27,18 @@ class User extends Component {
       </div>
     );
   }
+}
+
+import editUserType from '../../../mobile/shared/props/editUser';
+
+User.propTypes = {
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired
+  }).isRequired,
+  user: editUserType,
+  loading: PropTypes.bool.isRequired,
+  search: PropTypes.func.isRequired,
+  updateUser: PropTypes.func.isRequired
 }
 
 export default compose(

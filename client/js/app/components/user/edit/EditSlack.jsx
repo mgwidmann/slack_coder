@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-export default class EditSlack extends Component {
+class EditSlack extends Component {
   getValue() {
     return this._slack.value;
   }
@@ -17,3 +18,10 @@ export default class EditSlack extends Component {
     )
   }
 }
+
+EditSlack.propTypes = {
+  slack: PropTypes.string,
+  github: PropTypes.string
+};
+
+export default EditSlack;

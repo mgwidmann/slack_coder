@@ -27,7 +27,7 @@ const Layout = (props) => {
               <div>
                 <div className="col-lg-3 col-md-5 col-sm-5 col-xs-12 text-right">
                   <span>
-                    <img src={currentUser.avatar_url} className="img-xs img-circle"/>
+                    <img src={currentUser.avatarUrl} className="img-xs img-circle"/>
                     &nbsp;
                     <Link to={`/users/${currentUser.id}/edit`}>{currentUser.name}</Link>
                   </span>

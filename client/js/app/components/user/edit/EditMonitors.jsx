@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import UserSearch from '../UserSearch';
 
-export default class EditMonitors extends Component {
+class EditMonitors extends Component {
   getUsers() {
     return this._monitors.getUsers();
   }
@@ -16,3 +17,10 @@ export default class EditMonitors extends Component {
     );
   }
 }
+
+EditMonitors.propTypes = {
+  monitors: UserSearch.propTypes.initial,
+  search: PropTypes.func.isRequired,
+}
+
+export default EditMonitors;

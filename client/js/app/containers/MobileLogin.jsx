@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import QRCode from 'qrcode.react';
 
 const MobileLogin = ({ token }) => {
@@ -9,6 +10,10 @@ const MobileLogin = ({ token }) => {
       <QRCode value={token} size={384} />
     </div>
   );
+}
+
+MobileLogin.propTypes = {
+  token: PropTypes.string.isRequired
 }
 
 export default MobileLogin;

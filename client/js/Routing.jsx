@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Route, Switch } from 'react-router';
 import Layout from './app/containers/Layout';
 import PullRequests from './app/containers/PullRequests';
@@ -8,7 +9,7 @@ import User from './app/containers/User';
 import NotFound from './app/components/NotFound';
 import Login from './app/components/Login';
 
-export default ({ store }) => {
+const Routing = ({ store }) => {
   return (
     <Layout>
       <Switch>
@@ -30,3 +31,11 @@ export default ({ store }) => {
     </Layout>
   );
 }
+
+Routing.propTypes = {
+  store: PropTypes.shape({
+    getState: PropTypes.func.isRequired
+  })
+}
+
+export default Routing;

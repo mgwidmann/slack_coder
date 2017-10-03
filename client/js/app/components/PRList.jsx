@@ -1,19 +1,28 @@
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import FlipMove from 'react-flip-move';
 import PRRow from '../components/PRRow';
 
-export default class PRList extends Component {
-  render() {
-    const { pullRequests, type, subscribe } = this.props;
-    return (
-      <div>
-        <div className="table table-striped">
-          <FlipMove appearAnimation='fade' enterAnimation="fade" leaveAnimation="fade">
-            { pullRequests.map((pr) => { return <PRRow key={pr.id} pr={pr} type={type} subscribe={subscribe} /> }) }
-          </FlipMove>
-        </div>
-        { pullRequests.length == 0 && this.props.children}
+const PRList = ({ pullRequests, type, subscribe, children }) => {
+  return (
+    <div>
+      <div className="table table-striped">
+        <FlipMove appearAnimation='fade' enterAnimation="fade" leaveAnimation="fade">
+          { pullRequests.map((pr) => { return <PRRow key={pr.id} pr={pr} type={type} subscribe={subscribe} /> }) }
+        </FlipMove>
       </div>
-    );
-  }
+      { pullRequests.length == 0 && children}
+    </div>
+  );
 }
+
+import prType from '../../../mobile/shared/props/pr';
+
+PRList.propTypes = {
+  pullRequests: PropTypes.arrayOf(prType),
+  type: PropTypes.string.isRequired,
+  subscribe: PropTypes.func.isRequired,
+  children: PropTypes.element.isRequired
+}
+
+export default PRList;

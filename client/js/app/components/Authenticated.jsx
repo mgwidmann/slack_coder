@@ -1,17 +1,23 @@
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { Redirect, withRouter } from 'react-router';
 
-class Authenticated extends React.Component {
-  render() {
-    let { currentUser, location, redirect, onlyAuthenticated } = this.props;
-    if (Object.keys(currentUser).length > 0 || location.pathname == '/login' && !onlyAuthenticated) {
-      return this.props.children;
-    } else if (redirect === true) {
-      return <Redirect to="/login" />;
-    } else {
-      return null;
-    }
+const Authenticated = ({ currentUser, location, redirect, onlyAuthenticated, children }) => {
+  if (Object.keys(currentUser).length > 0 || location.pathname == '/login' && !onlyAuthenticated) {
+    return children;
+  } else if (redirect === true) {
+    return <Redirect to="/login" />;
+  } else {
+    return null;
   }
+}
+
+Authenticated.propTypes = {
+  currentUser: PropTypes.object,
+  location: PropTypes.shape({ pathname: PropTypes.string.isRequired }),
+  redirect: PropTypes.bool,
+  onlyAuthenticated: PropTypes.bool,
+  children: PropTypes.element.isRequired
 }
 
 export default withRouter(Authenticated);

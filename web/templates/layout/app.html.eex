@@ -15,7 +15,7 @@
       <% token = SlackCoder.Guardian.Plug.current_token(@conn) %>
       window.token = <%= raw if(token, do: inspect(token), else: "null") %>;
       <% current_user = SlackCoder.Guardian.Plug.current_resource(@conn) %>
-      window.currentUser = <%= raw if(current_user, do: SlackCoder.UserView.render("user.json", user: current_user) |> Poison.encode!(), else: "null") %>;
+      window.currentUser = <%= raw if(current_user, do: SlackCoder.UserView.render("graphql_user.json", user: current_user) |> Poison.encode!(), else: "null") %>;
       window.commitSha = <%= raw inspect git_commit() %>;
     </script>
   </head>

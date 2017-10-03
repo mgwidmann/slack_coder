@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import UserRow from '../components/UserRow';
 import Pagination from '../components/Pagination';
 
@@ -24,6 +25,17 @@ const UsersList = ({ loading, users, admin, pageNumber, totalPages, gotoPage }) 
       </div>
     </section>
   );
+}
+
+import userListType from '../../../mobile/shared/props/userList';
+
+UsersList.propTypes = {
+  users: PropTypes.arrayOf(userListType),
+  loading: PropTypes.bool.isRequired,
+  pageNumber: PropTypes.number,
+  totalPages: PropTypes.number,
+  gotoPage: PropTypes.func,
+  admin: PropTypes.bool.isRequired
 }
 
 export default UsersList;

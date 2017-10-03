@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-export default class Setting extends Component {
+class Setting extends Component {
   getValue() {
     return this._setting.checked;
   }
@@ -16,3 +17,11 @@ export default class Setting extends Component {
     );
   }
 }
+
+Setting.propTypes = {
+  setting: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  value: PropTypes.bool.isRequired
+};
+
+export default Setting;
