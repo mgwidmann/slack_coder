@@ -12,7 +12,7 @@ defmodule SlackCoder.Services.PRService do
 
   def save(changeset) do
     changeset
-    |> put_change(:opened, opened?(changeset))
+    |> check_opened()
     |> destruct(changeset ~> changeset) # Update local variable
     |> random_failure()
     |> stale_notification()
@@ -101,6 +101,11 @@ defmodule SlackCoder.Services.PRService do
     |> put_change(:notifications, [:failure | cs.changes[:notifications] || cs.data.notifications])
   end
   def failure_notification(cs), do: cs
+
+  def check_opened(cs) do
+    cs
+    |> put_change(:opened, opened?(cs))
+  end
 
   def opened?(%Ecto.Changeset{data: %{closed_at: closed}}) when not is_nil(closed), do: false
   def opened?(%Ecto.Changeset{changes: %{closed_at: closed}}) when not is_nil(closed), do: false
