@@ -59,6 +59,14 @@ body {
   justify-content: center;
 }
 
+.center-vertical {
+  flex-direction: column;
+}
+
+.extra-large {
+  font-size: 6rem;
+}
+
 img.loading-spinner {
   height: 250px;
   margin: auto;
