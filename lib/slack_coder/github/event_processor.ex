@@ -18,16 +18,24 @@ defmodule SlackCoder.Github.EventProcessor do
   @doc """
   Processes a Github event synchronously. See `proccess_async/2` for more info.
   """
-  def process(event, parameters)
+  def process(event, parameters) do
+    if do_process(event, parameters) in [nil, false] do
+      Logger.warn """
+      Processing event #{event} returned `nil` with parameters:
+      #{inspect parameters, pretty: true}
+      """
+      false
+    else
+      true
+    end
+  end
+
   # Would like to be able to reset a PR here but there doesn't seem to be enough info
   # to determine what PR the push belonged to without querying Github's API.
-
-  def process(:push, %{"before" => old_sha, "after" => "0000000000000000000000000000000000000000", "deleted" => true}) do
-    Logger.debug "EventProcessor received deleted push event."
+  defp do_process(:push, %{"before" => old_sha, "after" => "0000000000000000000000000000000000000000", "deleted" => true}) do
     ShaMapper.remove(old_sha)
   end
-  def process(:push, %{"before" => old_sha, "after" => new_sha}) do
-    Logger.debug "EventProcessor received push event"
+  defp do_process(:push, %{"before" => old_sha, "after" => new_sha}) do
     ShaMapper.update(old_sha, new_sha)
 
     ShaMapper.find(new_sha)
@@ -36,9 +44,8 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   # A user has made a comment on the PR itself (not related to any code).
-  def process(:issue_comment, %{"issue" => %{"number" => _pr}} = _pull_request) do
-    Logger.debug "EventProcessor received issue_comment event"
-
+  defp do_process(:issue_comment, %{"issue" => %{"number" => _pr}} = _pull_request) do
+    :ok
     # TODO: Get working again
     # owner = pull_request["base"]["repo"]["owner"]["login"]
     # repo = pull_request["base"]["repo"]["name"]
@@ -49,9 +56,8 @@ defmodule SlackCoder.Github.EventProcessor do
 
   # A user has made a comment on code belonging to a PR. When a user makes a comment on a commit not related to a PR,
   # the `find_watcher/1` call will return `nil` and subsequent function calls will just do nothing.
-  def process(:commit_comment, _params) do
-    Logger.debug "EventProcessor received commit_comment event"
-
+  defp do_process(:commit_comment, _params) do
+    :ok
     # TODO: Get working again
     # owner = pull_request["base"]["repo"]["owner"]["login"]
     # repo = pull_request["base"]["repo"]["name"]
@@ -61,15 +67,13 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   # Issues have been changed/created. Ignoring this.
-  def process(:issues, _params) do
-    # Logger.debug "EventProcessor received issues event: #{inspect params, pretty: true}"
+  defp do_process(:issues, _params) do
+    :ok
   end
 
   # A pull request has been opened or reopened. Need to start the watcher synchronously, then send it data
   # to update it to the most recent PR information.
-  def process(:pull_request, %{"action" => opened, "number" => number, "pull_request" => pull_request}) when opened in ["opened", "reopened"] do
-    Logger.debug "EventProcessor received #{opened} event"
-
+  defp do_process(:pull_request, %{"action" => opened, "number" => number, "pull_request" => pull_request}) when opened in ["opened", "reopened"] do
     # Handling a modified version of the pull_request object which comes from SlackCoder.Github
     owner = pull_request["base"]["repo"]["owner"]["login"] || pull_request[:owner]
     repo = pull_request["base"]["repo"]["name"] || pull_request[:repo]
@@ -86,9 +90,7 @@ defmodule SlackCoder.Github.EventProcessor do
   # Handles a pull request being closed. Need to find the watcher, synchronously update it so the information is persisted
   # and then stop the watcher. This will ensure that either the `closed_at` or `merged_at` fields are set and when the
   # system is restarted it will not start a watcher for that PR anymore.
-  def process(:pull_request, %{"action" => "closed", "number" => number} = params) do
-    Logger.debug "EventProcessor received closed event"
-
+  defp do_process(:pull_request, %{"action" => "closed", "number" => number} = params) do
     owner = params["pull_request"]["base"]["repo"]["owner"]["login"]
     repo = params["pull_request"]["base"]["repo"]["name"]
 
@@ -100,14 +102,14 @@ defmodule SlackCoder.Github.EventProcessor do
 
   # When a pull request information is changed, this is called in order to update it asynchronously.
   @synchronize ~w(edited synchronize)
-  def process(:pull_request, %{"action" => action, "before" => old_sha, "after" => new_sha} = params) when action in @synchronize do
+  defp do_process(:pull_request, %{"action" => action, "before" => old_sha, "after" => new_sha} = params) when action in @synchronize do
     ShaMapper.update(old_sha, new_sha)
 
     Logger.debug "EventProcessor received pull_request synchronize event"
-    process(:pull_request, params |> Map.drop(~w(before after)))
+    do_process(:pull_request, params |> Map.drop(~w(before after)))
   end
 
-  def process(:pull_request, %{"action" => action, "number" => pr} = params) when action in @synchronize do
+  defp do_process(:pull_request, %{"action" => action, "number" => pr} = params) when action in @synchronize do
     owner = params["pull_request"]["base"]["repo"]["owner"]["login"]
     repo = params["pull_request"]["base"]["repo"]["name"]
     pid = %PR{owner: owner, repo: repo, number: pr}
@@ -122,17 +124,15 @@ defmodule SlackCoder.Github.EventProcessor do
 
   # TODO: Implement `review_requested`
   @unprocessed ~w(unlabeled labeled assigned unassigned review_requested)
-  def process(:pull_request, %{"action" => action}) when action in @unprocessed, do: true
+  defp do_process(:pull_request, %{"action" => action}) when action in @unprocessed, do: :ok
 
-  def process(:pull_request, %{"action" => other} = _params) do
+  defp do_process(:pull_request, %{"action" => other} = _params) do
     Logger.warn "Ignoring :pull_request event #{other}"
     false
   end
 
   # A comment was added to a pull request
-  def process(:pull_request_review_comment, params) do
-    Logger.debug "EventProcessor received pull_request_review_comment event"
-
+  defp do_process(:pull_request_review_comment, params) do
     %PR{number: pr_number(params)}
     |> Github.find_watcher()
     |> PullRequest.unstale()
@@ -140,79 +140,87 @@ defmodule SlackCoder.Github.EventProcessor do
 
   # Build has changed status for a CI system
   @ci_systems ~w(default ci/circleci continuous-integration/travis-ci/pr continuous-integration/travis-ci/push semaphoreci)
-  def process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha}) when ci_system in @ci_systems do
-    Logger.debug "EventProcessor received build status event of state #{state}"
-
+  defp do_process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha}) when ci_system in @ci_systems do
     ShaMapper.find(sha)
     |> PullRequest.status(:build, sha, url, state)
   end
 
   @ignored_contexts ~w(ci/bitrise codeclimate/diff-coverage codeclimate/total-coverage codecov/project codecov/patch)
   for context <- @ignored_contexts do
-    def process(:status, %{"context" => unquote(context) <> _}) do
+    defp do_process(:status, %{"context" => unquote(context) <> _}) do
       # Ignore
+      :ok
     end
   end
 
   # Build has change status for an Analysis system
   @analysis_systems ~w(codeclimate)
-  def process(:status, %{"context" => analysis_system, "state" => state, "target_url" => url, "sha" => sha}) when analysis_system in @analysis_systems do
-    Logger.debug "EventProcessor received analysis status event of state #{state}"
-
+  defp do_process(:status, %{"context" => analysis_system, "state" => state, "target_url" => url, "sha" => sha}) when analysis_system in @analysis_systems do
     ShaMapper.find(sha)
     |> PullRequest.status(:analysis, sha, url, state)
   end
 
   # Nothing to do for pings, already responded with a 200 so just exit
-  def process(:ping, _params) do
+  defp do_process(:ping, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:project_card, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:pull_request_review, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:create, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:release, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:delete, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:team, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:team_add, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:fork, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:milestone, _params) do
     # Ignore
   end
 
-  def process(:project_card, _params) do
+  defp do_process(:organization, _params) do
     # Ignore
+    :ok
   end
 
-  def process(:pull_request_review, _params) do
+  defp do_process(:membership, _params) do
     # Ignore
+    :ok
   end
 
-  def process(:create, _params) do
-    # Ignore
-  end
-
-  def process(:release, _params) do
-    # Ignore
-  end
-
-  def process(:delete, _params) do
-    # Ignore
-  end
-
-  def process(:team, _params) do
-    # Ignore
-  end
-
-  def process(:team_add, _params) do
-    # Ignore
-  end
-
-  def process(:fork, _params) do
-    # Ignore
-  end
-
-  def process(:milestone, _params) do
-    # Ignore
-  end
-
-  def process(:organization, _params) do
-    # Ignore
-  end
-
-  def process(:membership, _params) do
-    # Ignore
-  end
-
-  def process(unknown_event, params) do
+  defp do_process(unknown_event, params) do
     Logger.warn "EventProcessor received unknown event #{inspect unknown_event} with params #{inspect params, pretty: true}"
   end
 
