@@ -40,7 +40,7 @@ function configureStore(initialState) {
 
 let initialStore = {
   // On window or undefined
-  currentUser: currentUser,
+  currentUser: currentUser || {},
   token: token
 };
 
