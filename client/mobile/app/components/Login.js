@@ -15,7 +15,7 @@ class Login extends Component {
   }
 
   _loadInitialState = async () => {
-    const value = null;//await AsyncStorage.getItem('@SlackCoder:token');
+    const value = await AsyncStorage.getItem('@SlackCoder:token');
     this.props.setToken(value || '');
     if (value === null) {
       const { status } = await Permissions.askAsync(Permissions.CAMERA);
