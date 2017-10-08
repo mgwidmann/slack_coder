@@ -1,11 +1,10 @@
 import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import { createLogger } from 'redux-logger';
+import client from './client';
 import reducers from './reducers';
-import client from '../shared/graphql/client';
-import networkInterface from '../shared/graphql/networkInterface';
 
-const loggerMiddleware = createLogger({ predicate: (getState, action) => true });
+const loggerMiddleware = createLogger({ predicate: (getState, action) => true, collapsed: true });
 
 function configureStore(initialState) {
   const enhancer = compose(
@@ -13,24 +12,12 @@ function configureStore(initialState) {
       thunkMiddleware,
       loggerMiddleware,
       client.middleware()
-    )
+    ),
+    (typeof window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined') ? window.__REDUX_DEVTOOLS_EXTENSION__() : f => f
   );
-  // const finalReducers = combineReducers({ ...reducers, router: routerReducer });
   return createStore(reducers, initialState, enhancer);
 }
 
 let initialStore = {};
 
-export const store = configureStore(initialStore);
-
-networkInterface.use([{
-  applyMiddleware(req, next) {
-    if (!req.options.headers) {
-      req.options.headers = {};  // Create the header object if needed.
-    }
-    const token = store.getState().token;
-    req.options.headers.authorization = token ? `Bearer ${token}` : null;
-
-    next();
-  }
-}]);
+export default configureStore(initialStore);

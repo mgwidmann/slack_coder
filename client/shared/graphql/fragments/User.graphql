@@ -1,0 +1,10 @@
+fragment BasicUser on User {
+  id
+  admin
+  github
+  slack
+  avatarUrl
+  htmlUrl
+  muted
+  name
+}

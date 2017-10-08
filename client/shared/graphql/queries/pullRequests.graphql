@@ -1,0 +1,6 @@
+#import "../fragments/PullRequest.graphql"
+
+query {
+  mine: pullRequests(type: MINE) { ... PR }
+  monitors: pullRequests(type: MONITORS) { ... PR }
+}

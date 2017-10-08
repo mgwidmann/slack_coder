@@ -1,0 +1,25 @@
+#import '../fragments/User.graphql'
+
+query User($id: ID) {
+  user(id: $id) {
+    ... BasicUser
+    config {
+      closeSelf
+      closeMonitors
+      conflictSelf
+      conflictMonitors
+      failSelf
+      failMonitors
+      mergeSelf
+      mergeMonitors
+      openSelf
+      openMonitors
+      passSelf
+      passMonitors
+    }
+    monitors {
+      name
+      github
+    }
+  }
+}

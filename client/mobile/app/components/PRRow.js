@@ -12,8 +12,8 @@ export default class PRView extends Component {
   }
 
   activateRow() {
-    const { dispatch, pr, tab } = this.props;
-    dispatch(toggleExpandPR(pr, tab));
+    // const { dispatch, pr, tab } = this.props;
+    // dispatch(toggleExpandPR(pr, tab));
   }
 
   render() {

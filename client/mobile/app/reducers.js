@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
 import immutable from '../shared/reducers/immutable';
-import client from '../shared/graphql/client';
+import client from './client';
 
 const reducers = combineReducers({
   graphql: client.reducer(),

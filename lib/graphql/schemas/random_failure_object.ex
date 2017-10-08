@@ -61,5 +61,7 @@ defmodule SlackCoder.GraphQL.Schemas.RandomFailure do
     field :external_id
     @desc "The URL to the captured log file within the slack bot."
     field :log_url, :string, resolve: as(&RandomFailureResolver.log_url/1)
+
+
   end
 end
