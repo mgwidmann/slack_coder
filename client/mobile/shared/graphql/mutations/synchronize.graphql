@@ -1,7 +1,0 @@
-#import "../fragments/PullRequest.graphql"
-
-mutation SynchronizePR($owner: String!, $repo: String!, $number: Int!){
-	synchronize(number: $number, owner: $owner, repository: $repo) {
-    ... PR
-  }
-}
