@@ -2,5 +2,4 @@
 
 query {
   mine: pullRequests(type: MINE) { ... PR }
-  monitors: pullRequests(type: MONITORS) { ... PR }
 }

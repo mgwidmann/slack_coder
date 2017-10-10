@@ -1,10 +1,9 @@
 import {Socket} from "phoenix";
 
-export default (token) => {
-  let socket = new Socket("ws://192.168.1.176:4000/socket", { params: { token: token } });
+export default (uri, options) => {
+  let socket = new Socket(uri, { params: { token: options.token } });
   socket.connect();
-  socket.onOpen( ev => console.log("OPEN", ev) )
-  socket.onError( ev => console.log("ERROR", ev) )
+  socket.onError( ev => console.log("WEBSOCET ERROR:", ev) )
 
   return socket;
 }

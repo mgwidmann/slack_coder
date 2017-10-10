@@ -1,5 +1,5 @@
 import configureClient from '../shared/graphql/client';
-import networkInterface from '../shared/graphql/apiNetworkInterface';
+import websocketNetworkInterface from '../shared/graphql/websocketNetworkInterface';
+import createSocket from './socket';
 
-// Configure default client w/ api network interface so it won't make any requests
-export default configureClient(networkInterface);
+export default configureClient(websocketNetworkInterface('ws://192.168.1.176:4000/socket', createSocket));

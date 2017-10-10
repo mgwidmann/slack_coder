@@ -1,8 +1,10 @@
 import { createNetworkInterface } from 'apollo-phoenix-websocket';
 
-export default (socket) => {
+export default (uri, createSocket) => {
   return createNetworkInterface({
-    uri: '/this-does-not-matter',
-    Socket: () => { return socket; }
+    uri: uri,
+    Socket: (uri, options) => {
+      return createSocket(uri, options)
+    }
   });
 }

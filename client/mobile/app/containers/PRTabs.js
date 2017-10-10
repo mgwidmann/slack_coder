@@ -7,7 +7,7 @@ import mainStyles from '../styles/main';
 import PRView from '../components/PRView';
 
 
-const PRTabs = ({ mine, monitors, subscribeNew, subscribe }) => {
+const PRTabs = ({ mine, monitors, subscribeNew, subscribe, togglePRRow, expandedPr }) => {
   return (
     <ScrollableTabView
       tabBarPosition="bottom"
@@ -16,8 +16,8 @@ const PRTabs = ({ mine, monitors, subscribeNew, subscribe }) => {
       tabBarActiveTextColor={FOREGROUND_COLOR}
       tabBarUnderlineStyle={mainStyles.tabBarUnderline}
       >
-      <PRView tabLabel='Main' tab='main' prs={mine || []} />
-      <PRView tabLabel='Monitors' tab='monitors' prs={monitors || []} />
+      <PRView tabLabel='Main' tab='main' prs={mine || []} togglePRRow={togglePRRow} expandedPr={expandedPr} />
+      <PRView tabLabel='Monitors' tab='monitors' prs={monitors || []} togglePRRow={togglePRRow} expandedPr={expandedPr} />
       {/* <PRView tabLabel='Hidden' dispatch={dispatch} tab={'hidden'} prs={pullRequests.hidden || []} /> */}
     </ScrollableTabView>
   )

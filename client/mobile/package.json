@@ -10,12 +10,13 @@
   },
   "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
   "scripts": {
-    "start": "react-native-scripts start",
+    "start": "yarn run copy-shared && react-native-scripts start",
     "eject": "react-native-scripts eject",
-    "android": "react-native-scripts android",
-    "ios": "react-native-scripts ios",
-    "test": "node node_modules/jest/bin/jest.js --watch",
-    "postinstall": "cp -R ../shared ."
+    "android": "yarn run copy-shared && react-native-scripts android",
+    "ios": "yarn run copy-shared && react-native-scripts ios",
+    "test": "yarn run copy-shared && node node_modules/jest/bin/jest.js --watch",
+    "copy-shared": "cp -R ../shared .",
+    "postinstall": "yarn run copy-shared"
   },
   "jest": {
     "preset": "jest-expo"

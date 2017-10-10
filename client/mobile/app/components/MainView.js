@@ -4,10 +4,10 @@ import Loading from './Loading';
 import Login from './Login';
 import PRTabs from '../containers/PRTabs';
 
-const MainView = ({ loggedIn, loading, error, setToken }) => {
+const MainView = ({ loggedIn, loading, error, setToken, togglePRRow, expandedPr }) => {
   // Cannot use null/undefined to determine difference between unknown and no value
   if (loggedIn && !loading && !error) {
-    return <PRTabs />;
+    return <PRTabs togglePRRow={togglePRRow} expandedPr={expandedPr} />;
   } else if (error) {
     return <Loading animate={false} />;
   } else if (loading) {

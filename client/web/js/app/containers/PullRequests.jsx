@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import PRList from '../components/PRList';
 import { compose } from 'react-apollo';
 import { withRouter } from 'react-router';
-import subscribePullRequests from '../../../shared/graphql/subscriptions/pullRequest';
+import subscribeMinePullRequests from '../../../shared/graphql/subscriptions/minePullRequest';
+import subscribeMonitorsPullRequests from '../../../shared/graphql/subscriptions/monitorsPullRequest';
 import Loading from '../components/Loading';
 
 class PullRequests extends Component {
@@ -12,7 +13,7 @@ class PullRequests extends Component {
   }
 
   renderMyEmpty() {
-    if(this.props.loading) {
+    if(this.props.mineLoading) {
       return <Loading/>;
     } else {
       return (
@@ -28,7 +29,7 @@ class PullRequests extends Component {
   }
 
   renderMonitorEmpty() {
-    if(this.props.loading) {
+    if(this.props.monitorsLoading) {
       return <Loading/>;
     } else {
       return (
@@ -82,5 +83,6 @@ PullRequests.propTypes = {
 
 export default compose(
   withRouter,
-  subscribePullRequests
+  subscribeMinePullRequests,
+  subscribeMonitorsPullRequests
 )(PullRequests);
