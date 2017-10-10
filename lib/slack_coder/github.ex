@@ -157,6 +157,9 @@ defmodule SlackCoder.Github do
       EventProcessor.process(:status, %{"sha" => sha, "state" => String.downcase(state), "context" => context, "target_url" => target_url})
     end)
   end
+  defp pr_response(response) do
+    Logger.warn("Did not have all data expected. Skipping \n#{inspect response, pretty: true}")
+  end
 
   @blame_query """
   query BlameUser($owner: String!, $name: String!, $commit: GitObjectID!, $file: String!) {

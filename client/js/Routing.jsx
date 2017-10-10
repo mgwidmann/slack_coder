@@ -8,6 +8,7 @@ import Users from './app/containers/Users';
 import User from './app/containers/User';
 import NotFound from './app/components/NotFound';
 import Login from './app/components/Login';
+import FailedTests from './app/components/FailedTests';
 
 const Routing = ({ store }) => {
   return (
@@ -24,6 +25,9 @@ const Routing = ({ store }) => {
         }} />
         <Route exact path="/users/:id/edit" render={() => {
           return <User admin={store.getState().currentUser.admin} />;
+        }} />
+        <Route exact path="/failed_tests/:id" render={() => {
+          return <FailedTests />;
         }} />
         <Route path="/login" component={Login} />
         <Route component={NotFound} />
