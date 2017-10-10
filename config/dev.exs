@@ -32,7 +32,7 @@ config :logger,
 # Do not include metadata nor timestamps in development logs
 config :logger, :console,
   format: "[$level] $message\n",
-  level: :info
+  level: :debug
 
 config :logger,
   truncate: :infinity

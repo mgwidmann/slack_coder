@@ -4,6 +4,8 @@ defmodule SlackCoder.GraphQL.Resolvers.RandomFailureResolver do
   alias SlackCoder.Models.RandomFailure.FailureLog
   import Ecto.Query
 
+  @priority_timeframe 60 # Minute
+
   def list(_, params, _) do
     failures = RandomFailure
                |> order_clause(params)
@@ -19,6 +21,10 @@ defmodule SlackCoder.GraphQL.Resolvers.RandomFailureResolver do
     dir = params[:dir] || :desc
     order_by(query, [q], [{^dir, q.updated_at}])
   end
+  defp order_clause(query, %{sort: :priority} = params) do
+    dir = params[:dir] || :desc
+    order_by(query, [q], [{^dir, fragment("POWER(EXTRACT(epoch from (? - ?))/? + 1, ?)", q.updated_at, q.inserted_at, type(^@priority_timeframe, :integer), q.count)}])
+  end
   defp order_clause(query, _params), do: query
 
   def log_url(%FailureLog{id: id}) do
@@ -27,6 +33,12 @@ defmodule SlackCoder.GraphQL.Resolvers.RandomFailureResolver do
 
   def run_command(%RandomFailure{type: type, file: file, line: line, seed: seed}) do
     "#{command_for_type(type)} #{file}:#{line}#{seed_for_type(type, seed)}"
+  end
+
+  def priority_score(%RandomFailure{inserted_at: inserted, updated_at: updated, count: count}) do
+    unix_updated = (DateTime.from_naive!(updated, "Etc/UTC") |> DateTime.to_unix()) / @priority_timeframe
+    unix_inserted = (DateTime.from_naive!(inserted, "Etc/UTC") |> DateTime.to_unix()) / @priority_timeframe
+    :math.pow(unix_updated - unix_inserted + 1, count)
   end
 
   for t <- ~w(rspec cucumber)a do
