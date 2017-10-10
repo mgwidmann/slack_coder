@@ -228,8 +228,7 @@ defmodule SlackCoder.Github.EventProcessor do
     Logger.warn "EventProcessor received unknown event #{inspect unknown_event} with params #{inspect params, pretty: true}"
   end
 
-  def pr(%{"pull_request" => %{"number" => number, "base" => %{"repo" => %{"owner" => %{"login" => owner}}, "name" => repo}}}) do
+  def pr(%{"pull_request" => %{"number" => number, "base" => %{"repo" => %{"owner" => %{"login" => owner}, "name" => repo}}}}) do
     %PR{owner: owner, repo: repo, number: number}
   end
-  def pr(_), do: nil
 end
