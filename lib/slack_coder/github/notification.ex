@@ -46,16 +46,29 @@ defmodule SlackCoder.Github.Notification do
                         title_link: pr.html_url,
                         text: """
                         <#{pr.build_url}|Travis Build>
-                        #{failed_job_output(pr.last_failed_jobs)}
                         """,
                         mrkdwn_in: ["text"],
                         footer: "#{footer_text SlackCoder.BuildSystem.counts(pr.last_failed_jobs)}"
-                      }
+                      } | failures(pr)
                     ]
                   }
         notify(slack_users, :fail, message_for, message, pr)
         pr
       _ -> pr
+    end
+  end
+
+  @max_failures 19
+  defp failures(pr) do
+    for file = %File{failure_log_id: failure_log_id} <- Enum.uniq_by(pr.last_failed_jobs, &(&1.file)) |> Enum.take(@max_failures) do
+      %{
+        color: "#FF0000",
+        text: """
+        #{failed_job_output(file)}
+        #{view_log_action(failure_log_id)}
+        """,
+        mrkdwn_in: ["text"],
+      }
     end
   end
 
@@ -83,6 +96,7 @@ defmodule SlackCoder.Github.Notification do
     |> Enum.map(fn {seed, files} ->
       "bundle exec rspec#{files |> Enum.map(&(&1.file)) |> files_to_string()} --seed #{seed}"
     end)
+    |> Enum.join("\n")
   end
   def executable({:cucumber, files}) do
     "bundle exec cucumber#{files |> Enum.map(&(&1.file)) |> files_to_string()}"
@@ -93,9 +107,9 @@ defmodule SlackCoder.Github.Notification do
   defp files_to_string([{file, "[" <> _ = line, _desc} | rest], acc), do: files_to_string(rest, acc <> " " <> file <> line)
   defp files_to_string([{file, line, _desc} | rest], acc), do: files_to_string(rest, acc <> " " <> file <> ":" <> line)
 
-  def random_failure(pr) do
+  def random_failure(pr, previously_resolved) do
     failed_count = pr.last_failed_jobs |> length()
-    failure_message = "🚀 #{failed_count} RANDOM NUCLEAR #{plural_failures(failed_count)} DETECTED"
+    failure_message = "🚀 #{failed_count} RANDOM NUCLEAR #{plural_failures(failed_count)} DETECTED #{if(previously_resolved, do: "(Previously Resolved)")}"
     message = %{
                 attachments: [
                   %{
@@ -121,7 +135,7 @@ defmodule SlackCoder.Github.Notification do
 
   @max_blames 19
   defp blame_attachments(pr) do
-    for %File{file: file_descriptor, failure_log_id: failure_log_id} = file <- pr.last_failed_jobs |> Enum.take(@max_blames) do
+    for %File{file: file_descriptor, failure_log_id: failure_log_id} = file <- Enum.uniq_by(pr.last_failed_jobs, &(&1.file)) |> Enum.take(@max_blames) do
       {file_name, line, _description} = file_descriptor
       case Integer.parse(line) do
         {line, ""} ->

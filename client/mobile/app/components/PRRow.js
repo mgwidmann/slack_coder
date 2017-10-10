@@ -3,37 +3,23 @@ import { Text, View, TouchableHighlight, StyleSheet } from 'react-native';
 import Title from './pr/Title';
 import StatusText from './pr/StatusText';
 import RepoText from './pr/RepoText';
-import { toggleExpandPR } from '../../shared/actions/pullRequest';
 
-export default class PRView extends Component {
-  constructor(props) {
-    super(props);
-    this.activateRow = this.activateRow.bind(this);
-  }
-
-  activateRow() {
-    const { dispatch, pr, tab } = this.props;
-    dispatch(toggleExpandPR(pr, tab));
-  }
-
-  render() {
-    const { pr } = this.props;
-    return (
-      <View>
-        <TouchableHighlight style={styles.rowView} onPress={this.activateRow} activeOpacity={0.9} underlayColor={'#EEE'}>
-          <View style={styles.titleView}>
-            <Title image={pr.avatar} title={pr.title} />
-            <StatusText status={pr.status} link={pr.buildUrl}>
-              <RepoText repo={pr.repo} />
-            </StatusText>
-          </View>
-        </TouchableHighlight>
-        <View style={[{display: pr.expand ? 'flex' : 'none'}, styles.hiddenView]}>
-          <Text>Shows up when clicked</Text>
+export default ({ pr, togglePRRow, expandedPr }) => {
+  return (
+    <View>
+      <TouchableHighlight style={styles.rowView} onPress={() => togglePRRow(pr) } activeOpacity={0.9} underlayColor={'#EEE'}>
+        <View style={styles.titleView}>
+          <Title image={pr.user && pr.user.avatarUrl} title={pr.title} />
+          <StatusText status={pr.buildStatus} link={pr.buildUrl}>
+            <RepoText repo={pr.repo} />
+          </StatusText>
         </View>
+      </TouchableHighlight>
+      <View style={[{display: expandedPr == pr.id ? 'flex' : 'none'}, styles.hiddenView]}>
+        <Text>Shows up when clicked</Text>
       </View>
-    );
-  }
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

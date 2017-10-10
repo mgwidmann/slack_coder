@@ -32,7 +32,7 @@ defmodule SlackCoder.GraphQL.Schemas.RandomFailure do
     @desc "The test file in which the failure occurred."
     field :file, :string
     @desc "The line number in which the failure occurred."
-    field :line, :integer
+    field :line, :string
     @desc "The first seed in which the failure occurred."
     field :seed, :integer
     @desc "The number of times this failure has occurred."
@@ -47,6 +47,13 @@ defmodule SlackCoder.GraphQL.Schemas.RandomFailure do
     field :run_command, :string, resolve: as(&RandomFailureResolver.run_command/1)
     @desc "The log information for this failed job."
     field :log, :log, resolve: assoc(:failure_log)
+    @desc """
+    Priority score is defined as the length of time between the first occurance
+    and the most recent (minutes between `updatedAt` - `insertedAt`) to the power of `count`. This means
+    the `count` has a significant impact on priority score, however since the open timeframe
+    serves as a base it will make a big impact on those with similar `count` values.
+    """
+    field :priority_score, :integer, resolve: as(&RandomFailureResolver.priority_score/1)
 
     timestamps()
   end

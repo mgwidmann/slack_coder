@@ -3,6 +3,7 @@ defmodule SlackCoder.Github do
   use PatternTap
   alias SlackCoder.Github.EventProcessor
   alias SlackCoder.Services.UserService
+  alias SlackCoder.Github.ShaMapper
   import SlackCoder.Github.TimeHelper
 
   def client do
@@ -148,6 +149,8 @@ defmodule SlackCoder.Github do
       github_user_avatar: user_avatar_url,
       sha: sha
     }
+    pid = Process.whereis(:"pr-#{repository}-#{number}")
+    ShaMapper.register_pid(sha, pid) # Ensure sha mapper is up to date
     EventProcessor.process(:pull_request, %{"action" => "opened", "number" => number, "pull_request" => pr})
 
     Process.sleep(500) # Sleep to allow the front-end to subscribe before broadcasting status

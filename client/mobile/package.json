@@ -3,28 +3,32 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
+    "babel-plugin-inline-import-graphql-ast": "^2.0.1",
     "jest-expo": "~20.0.0",
     "react-native-scripts": "1.3.1",
     "react-test-renderer": "16.0.0-alpha.12"
   },
   "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
   "scripts": {
-    "start": "react-native-scripts start",
+    "start": "yarn run copy-shared && react-native-scripts start",
     "eject": "react-native-scripts eject",
-    "android": "react-native-scripts android",
-    "ios": "react-native-scripts ios",
-    "test": "node node_modules/jest/bin/jest.js --watch"
+    "android": "yarn run copy-shared && react-native-scripts android",
+    "ios": "yarn run copy-shared && react-native-scripts ios",
+    "test": "yarn run copy-shared && node node_modules/jest/bin/jest.js --watch",
+    "copy-shared": "cp -R ../shared .",
+    "postinstall": "yarn run copy-shared"
   },
   "jest": {
     "preset": "jest-expo"
   },
   "dependencies": {
-    "expo": "^20.0.0",
+    "apollo-phoenix-websocket": "^0.6.2",
+    "expo": "^21.0.2",
     "graphql-tag": "^2.4.2",
     "react": "16.0.0-alpha.12",
-    "react-apollo": "^1.4.15",
-    "react-native": "^0.47.0",
-    "react-native-scrollable-tab-view": "^0.6.7",
+    "react-apollo": "^1.4.16",
+    "react-native": "0.48.4",
+    "react-native-scrollable-tab-view": "^0.8.0",
     "react-native-spinkit": "^1.1.1",
     "react-redux": "^5.0.6",
     "redux-logger": "^3.0.6",

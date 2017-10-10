@@ -32,7 +32,7 @@ export default class StatusText extends Component {
     return (
       <View style={styles.statusView}>
         <TouchableHighlight onPress={this.openLink} style={[{backgroundColor: this.statusColor()}, styles.button]}>
-          <Text style={styles.statusText}>{status}</Text>
+          <Text style={styles.statusText}>{status || 'UNKNOWN'}</Text>
         </TouchableHighlight>
         {this.props.children}
       </View>

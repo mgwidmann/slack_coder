@@ -6,7 +6,7 @@ export default class Title extends Component {
     const { image, title } = this.props;
     return (
       <View style={styles.titleView}>
-        <Image source={{uri: image}} style={styles.avatar} />
+        {image && (<Image source={{uri: image}} style={styles.avatar} />)}
         <Text style={styles.title} numberOfLines={3}>
           {title}
         </Text>

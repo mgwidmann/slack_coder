@@ -1,35 +1,17 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import PRRow from './PRRow';
-import { gql, graphql } from 'react-apollo';
 
-export default class PRView extends Component {
-  constructor(props) {
-    super(props);
-    this.renderPR = this.renderPR.bind(this);
+const PRView = ({ tab, prs, togglePRRow, expandedPr }) => {
+  const renderPR = (pr) => {
+    return <PRRow key={pr.id} pr={pr} tab={tab} togglePRRow={togglePRRow} expandedPr={expandedPr} />;
   }
 
-  renderPR(pr) {
-    const { tab, dispatch } = this.props;
-    return <PRRow key={pr.id} pr={pr} dispatch={dispatch} tab={tab} />;
-  }
-
-  render () {
-    return (
-      <ScrollView>
-        {this.props.prs.map(this.renderPR)}
-      </ScrollView>
-    )
-  }
+  return (
+    <ScrollView>
+      {prs.map(renderPR)}
+    </ScrollView>
+  );
 }
 
-const styles = StyleSheet.create({
-});
-
-// export default graphql(gql`
-//   query PRs {
-//     pullRequests {
-//       id
-//     }
-//   }
-// `)(PRView);
+export default PRView;

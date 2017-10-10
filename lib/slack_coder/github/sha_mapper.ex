@@ -23,15 +23,17 @@ defmodule SlackCoder.Github.ShaMapper do
   end
 
   def handle_info({:DOWN, _ref, :process, pid, :normal}, sha_to_pid) do
-    {sha, ^pid} = sha_to_pid |> Enum.find(&match?({_sha, ^pid}, &1))
-    {:noreply, Map.delete(sha_to_pid, sha)}
+    {:noreply, cleanup(sha_to_pid, pid)}
   end
   # Ignore any other messages
   def handle_info(_, state), do: {:noreply, state}
 
   def handle_call({:register, sha}, {pid, _ref}, sha_to_pid) do
-    Process.monitor(pid) # Watch what happens with this PID and be notified when it exits
-    {:reply, :ok, Map.put(sha_to_pid, sha, pid)}
+    handle_register(sha_to_pid, sha, pid)
+  end
+
+  def handle_call({:register, sha, pid}, _from, sha_to_pid) do
+    handle_register(sha_to_pid, sha, pid)
   end
 
   def handle_call({:find, sha}, _from, sha_to_pid) do
@@ -58,12 +60,30 @@ defmodule SlackCoder.Github.ShaMapper do
     {:noreply, if(pid, do: sha_to_pid |> Map.delete(old_sha) |> Map.put(new_sha, pid), else: sha_to_pid)}
   end
 
+  def handle_register(sha_to_pid, sha, pid) do
+    sha_to_pid = cleanup(sha_to_pid, pid)
+    Process.monitor(pid) # Watch what happens with this PID and be notified when it exits
+    {:reply, :ok, Map.put(sha_to_pid, sha, pid)}
+  end
+
+  def cleanup(sha_to_pid, pid) when is_pid(pid) do
+    sha_to_pid
+    |> Enum.reject(&match?({_sha, ^pid}, &1))
+    |> Enum.into(%{})
+  end
+
   @doc """
   Registers a PR against a starting commit SHA
   """
   def register(sha_mapper \\ @registered_name, sha) do
     GenServer.call(sha_mapper, {:register, sha})
   end
+
+  def register_pid(sha_mapper \\ @registered_name, sha, pid)
+  def register_pid(sha_mapper, sha, pid) when is_pid(pid) do
+    GenServer.call(sha_mapper, {:register, sha, pid})
+  end
+  def register_pid(_sha_mapper, _sha, nil), do: nil
 
   @doc """
   Updates the mapping of the old PR to its latest SHA

@@ -27,8 +27,15 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
 
   @desc "Only used for querying, never returned"
   enum :random_failure_sort_field do
-    value :count, description: ""
-    value :recent, description: ""
+    value :count, description: "Sort by the highest occurance"
+    value :recent, description: "Sort by the most recent failure"
+    value :priority, description: """
+    Sorts by the failures that are highest priority. Priority is defined as the
+    length of time between the first occurance and the most recent (minutes between `updatedAt` - `insertedAt`)
+    to the power of `count`. This means the `count` value has a significant impact on priority
+    score, however since the open timeframe serves as a base it will make a big impact
+    on those with similar `count` values. To see the priority score calculated, select the field `priorityScore`.
+    """
   end
 
   @desc "Direction used for sorting. Query only, never returned."
@@ -120,6 +127,12 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
       arg :number, non_null(:integer)
 
       resolve &SlackCoder.GraphQL.Resolvers.PRResolver.synchronize/3
+    end
+
+    field :resolve_failure, type: :failure do
+      arg :id, non_null(:id)
+
+      resolve &SlackCoder.GraphQL.Resolvers.RandomFailureResolver.resolve/3
     end
   end
 

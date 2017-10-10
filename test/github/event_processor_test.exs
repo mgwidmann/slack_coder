@@ -81,8 +81,8 @@ defmodule SlackCoder.Github.EventProcessorTest do
       EP.process(:pull_request, params)
       updated_pr = SlackCoder.Github.Watchers.PullRequest.fetch(pid)
       refute updated_pr.mergeable
-      number = updated_pr.number
-      user = updated_pr.github_user
+      # number = updated_pr.number
+      # user = updated_pr.github_user
       # assert_broadcast("pr:update", %{pr: ^number, github: ^user, html: "<tr id=" <> _})
       Ecto.Adapters.SQL.Sandbox.checkin(Repo)
     end
@@ -92,8 +92,8 @@ defmodule SlackCoder.Github.EventProcessorTest do
       EP.process(:pull_request, params)
       updated_pr = SlackCoder.Github.Watchers.PullRequest.fetch(pid)
       assert updated_pr.mergeable
-      number = updated_pr.number
-      user = updated_pr.github_user
+      # number = updated_pr.number
+      # user = updated_pr.github_user
       # assert_broadcast("pr:update", %{pr: ^number, github: ^user, html: "<tr id=" <> _})
       Ecto.Adapters.SQL.Sandbox.checkin(Repo)
     end
@@ -153,8 +153,6 @@ defmodule SlackCoder.Github.EventProcessorTest do
       [rspec_failure, cucumber_failure] = Repo.all(from(f in RandomFailure, where: f.pr == ^number, order_by: [asc: :id]))
       %FailureLog{id: rspec_failure_log_id} = rspec_log = Repo.one(Ecto.assoc(rspec_failure, :failure_log))
       %FailureLog{id: cucumber_failure_log_id} = cucumber_log = Repo.one(Ecto.assoc(cucumber_failure, :failure_log))
-      %RandomFailure{id: id} = rspec_failure
-      %RandomFailure{id: id} = cucumber_failure
       pr_id = pr.id
 
       assert %RandomFailure{

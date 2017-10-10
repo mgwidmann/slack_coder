@@ -12,10 +12,10 @@ defmodule SlackCoder.Services.RandomFailureService do
     |> Repo.insert_or_update()
     |> case do
       {:ok, random_failure} ->
-        if changeset.data.id do
+        if changeset.data.id && !changeset.data.resolved do
           {:ok, random_failure} # All is good
         else
-          {:new, random_failure}
+          {:announce, changeset.data.resolved, random_failure}
         end
       errored_changeset ->
         Logger.error("Unable to save random failure\n\tchangeset: #{inspect changeset}\n\trandom failure: #{inspect changeset.data}")
@@ -31,10 +31,11 @@ defmodule SlackCoder.Services.RandomFailureService do
     """
   end
   def save_random_failure(%PR{last_failed_jobs: [_ | _] = last_failed_jobs} = pr) do
-    create? = for %File{system: system, seed: seed, file: file, type: type, failure_log_id: failure_log_id} <- last_failed_jobs do
+    results = for %File{system: system, seed: seed, file: file, type: type, failure_log_id: failure_log_id} <- last_failed_jobs do
       find_or_create_and_update!(file, failure_log_id, system, type, seed, pr)
-    end |> Enum.any?(&(match?({:new, _}, &1)))
-    if create?, do: SlackCoder.Github.Notification.random_failure(pr)
+    end |> Enum.filter(&(match?({:announce, _, _}, &1)))
+    previously_resolved = results |> Enum.map(&(elem(&1, 1))) |> Enum.any?
+    if results != [], do: SlackCoder.Github.Notification.random_failure(pr, previously_resolved)
   end
 
   defp find_or_create_and_update!([], _id, _system, _type, _seed, _pr), do: nil
@@ -63,7 +64,8 @@ defmodule SlackCoder.Services.RandomFailureService do
       seed: seed,
       count: 1,
       system: system,
-      type: to_string(type)
+      type: to_string(type),
+      resolved: false
     }
   end
 
