@@ -136,7 +136,8 @@ defmodule SlackCoder.Github.EventProcessor do
 
   # A comment was added to a pull request
   defp do_process(:pull_request_review_comment, params) do
-    %PR{number: pr_number(params)}
+    params
+    |> pr()
     |> Github.find_watcher()
     |> PullRequest.unstale()
   end
@@ -227,9 +228,8 @@ defmodule SlackCoder.Github.EventProcessor do
     Logger.warn "EventProcessor received unknown event #{inspect unknown_event} with params #{inspect params, pretty: true}"
   end
 
-  def pr_number(%{"pull_request" => %{"number" => number}}) do
-    number
+  def pr(%{"pull_request" => %{"number" => number, "base" => %{"repo" => %{"owner" => %{"login" => owner}}, "name" => repo}}}) do
+    %PR{owner: owner, repo: repo, number: number}
   end
-
-  def pr_number(_), do: nil
+  def pr(_), do: nil
 end
