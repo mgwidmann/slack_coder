@@ -47,7 +47,7 @@ defmodule SlackCoder.GraphQL.Resolvers.RandomFailureResolver do
   end
   defp command_for_type(type), do: type
 
-  for t <- ~w(rspec cucumber)a do
+  for t <- ~w(rspec)a do
     defp seed_for_type(unquote(t), seed), do: " --seed #{seed}"
   end
   defp seed_for_type(_, _), do: nil

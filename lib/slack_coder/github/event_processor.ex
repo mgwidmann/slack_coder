@@ -21,7 +21,7 @@ defmodule SlackCoder.Github.EventProcessor do
   def process(event, parameters) do
     if do_process(event, parameters) in [nil, false] do
       Logger.warn """
-      Processing event #{event} returned `nil` with parameters:
+      Processing event #{event} returned `nil` or `false` with parameters:
       #{inspect parameters, pretty: true}
       """
       false
@@ -34,6 +34,7 @@ defmodule SlackCoder.Github.EventProcessor do
   # to determine what PR the push belonged to without querying Github's API.
   defp do_process(:push, %{"before" => old_sha, "after" => "0000000000000000000000000000000000000000", "deleted" => true}) do
     ShaMapper.remove(old_sha)
+    :ok # Even if it isnt found this is ok
   end
   defp do_process(:push, %{"before" => old_sha, "after" => new_sha}) do
     ShaMapper.update(old_sha, new_sha)
@@ -41,6 +42,8 @@ defmodule SlackCoder.Github.EventProcessor do
     ShaMapper.find(new_sha)
     |> PullRequest.fetch()
     |> MergeConflict.queue()
+
+    :ok # Pushes can happen even if they're not related to a PR
   end
 
   # A user has made a comment on the PR itself (not related to any code).
@@ -224,12 +227,8 @@ defmodule SlackCoder.Github.EventProcessor do
     Logger.warn "EventProcessor received unknown event #{inspect unknown_event} with params #{inspect params, pretty: true}"
   end
 
-  def pr_number(%{"comment" => %{"pull_request_url" => url}}) do
-    # Github does not deliver the PR number as an individual field...
-    case Regex.scan(~r/\/pulls\/(\d+)$/, url || "") do
-      [[_, pr]] -> pr
-      _ -> nil
-    end
+  def pr_number(%{"pull_request" => %{"number" => number}}) do
+    number
   end
 
   def pr_number(_), do: nil

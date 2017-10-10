@@ -63,9 +63,15 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     {:ok, pr} = pr |> PR.reg_changeset(%{build_status: state, build_url: url}) |> PRService.save
     {:noreply, {pr, callouts}}
   end
+  def handle_cast({:build, _old_sha, _url, _state}, {%PR{sha: _current_sha} = pr, callouts}) do
+    {:noreply, {pr, callouts}}
+  end
 
   def handle_cast({:analysis, sha, url, state}, {%PR{sha: sha} = pr, callouts}) do
     {:ok, pr} = pr |> PR.reg_changeset(%{analysis_status: state, analysis_url: url}) |> PRService.save
+    {:noreply, {pr, callouts}}
+  end
+  def handle_cast({:analysis, _old_sha, _url, _state}, {%PR{sha: _current_sha} = pr, callouts}) do
     {:noreply, {pr, callouts}}
   end
 
