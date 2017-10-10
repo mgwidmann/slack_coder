@@ -16,8 +16,8 @@ defmodule SlackCoder.Github.Watchers.Supervisor do
     worker(SlackCoder.Github.Watchers.PullRequest, [pr], id: worker_id(pr), restart: :transient)
   end
 
-  @worker_id_prefix "PR-"
-  defp worker_id(pr), do: "#{@worker_id_prefix}-#{pr.number}"
+  @worker_id_prefix "PR"
+  defp worker_id(pr), do: "#{@worker_id_prefix}-#{pr.repo}-#{pr.number}"
 
   def start_watcher(pr) do
     case Supervisor.start_child(__MODULE__, worker_for(pr)) do
@@ -47,8 +47,9 @@ defmodule SlackCoder.Github.Watchers.Supervisor do
 
   def find_watcher(pr) do
     number = pr.number |> to_string
+    repo = pr.repo
     child = Supervisor.which_children(__MODULE__)
-            |> Enum.find(&(match?({@worker_id_prefix <> ^number, _, _, _}, &1)))
+            |> Enum.find(&(elem(&1, 0) == @worker_id_prefix <> "-" <> repo <> "-" <> number))
     case child do
       nil -> nil
       {_, worker, _, _} -> worker
