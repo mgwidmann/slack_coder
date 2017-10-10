@@ -12,7 +12,7 @@ export default (subscribeToMore) => {
           return prev;
         }
         let pullRequest = subscriptionData.data.pullRequest;
-        let index = prev[type].findIndex(p => p.id == pullRequest.id);
+        let index = (prev[type] || []).findIndex(p => p.id == pullRequest.id);
         if (index === -1) {
           return prev;
         }

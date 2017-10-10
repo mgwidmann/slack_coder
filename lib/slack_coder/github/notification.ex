@@ -58,13 +58,12 @@ defmodule SlackCoder.Github.Notification do
     end
   end
 
-  @max_failures 19
   defp failures(pr) do
-    for file = %File{failure_log_id: failure_log_id} <- Enum.uniq_by(pr.last_failed_jobs, &(&1.file)) |> Enum.take(@max_failures) do
+    for {failure_log_id, files} <- pr.last_failed_jobs |> Enum.uniq_by(&(&1.file)) |> Enum.group_by(&(&1.failure_log_id)) do
       %{
         color: "#FF0000",
         text: """
-        #{failed_job_output(file)}
+        #{failed_job_output(files)}
         #{view_log_action(failure_log_id)}
         """,
         mrkdwn_in: ["text"],
@@ -82,7 +81,7 @@ defmodule SlackCoder.Github.Notification do
   defp failed_job_output([]), do: ""
   defp failed_job_output(%File{} = file), do: failed_job_output([file])
   defp failed_job_output(failed_jobs) when is_list(failed_jobs) do
-    grouped = Enum.group_by(failed_jobs, &(&1.type))
+    grouped = failed_jobs |> List.flatten() |> Enum.group_by(&(&1.type))
     """
     ```
     #{Enum.map(grouped, &executable/1) |> Enum.join("\n")}
