@@ -25,7 +25,7 @@ defmodule SlackCoder.GraphQL.Resolvers.DefaultResolvers do
     inserted_at = Keyword.get(names, :inserted_at, :inserted_at)
     resolve_inserted_at = Keyword.get(resolve, :inserted_at, :inserted_at)
     updated_at = Keyword.get(names, :updated_at, :updated_at)
-    resolve_updated_at = Keyword.get(resolve, :inserted_at, :inserted_at)
+    resolve_updated_at = Keyword.get(resolve, :updated_at, :updated_at)
     quote do
       @desc "Timestamp indicating when this data was first added to the database."
       field unquote(inserted_at), :datetime, resolve: as(unquote(resolve_inserted_at))
