@@ -8,6 +8,7 @@ defmodule SlackCoder.GraphQL.Resolvers.RandomFailureResolver do
 
   def list(_, params, _) do
     failures = RandomFailure
+               |> RandomFailure.unresolved()
                |> order_clause(params)
                |> Repo.paginate(params)
     {:ok, failures}
@@ -51,4 +52,9 @@ defmodule SlackCoder.GraphQL.Resolvers.RandomFailureResolver do
   end
   defp seed_for_type(_, _), do: nil
 
+  def resolve(_, %{id: id}, _) do
+    failure = Repo.get!(RandomFailure, id)
+    changeset = RandomFailure.changeset(failure, %{resolved: true})
+    Repo.update(changeset)
+  end
 end

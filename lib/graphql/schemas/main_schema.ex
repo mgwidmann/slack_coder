@@ -128,6 +128,12 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
 
       resolve &SlackCoder.GraphQL.Resolvers.PRResolver.synchronize/3
     end
+
+    field :resolve_failure, type: :failure do
+      arg :id, non_null(:id)
+
+      resolve &SlackCoder.GraphQL.Resolvers.RandomFailureResolver.resolve/3
+    end
   end
 
   subscription do
