@@ -61,6 +61,7 @@ defmodule SlackCoder.Github do
       }
       name
       pullRequest(number: $number) {
+        baseRefName
         createdAt
         mergedAt
         closed
@@ -108,6 +109,7 @@ defmodule SlackCoder.Github do
       },
       "name" => repository,
       "pullRequest" => %{
+        "baseRefName" => base_branch,
         "createdAt" => created_at,
         "mergedAt" => merged_at,
         "closed" => closed?,
@@ -138,6 +140,7 @@ defmodule SlackCoder.Github do
       owner: owner,
       repo: repository,
       branch: branch,
+      base_branch: base_branch,
       opened_at: date_for(created_at),
       closed_at: if(closed?, do: Timex.now, else: nil),
       merged_at: date_for(merged_at),

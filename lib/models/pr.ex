@@ -5,6 +5,7 @@ defmodule SlackCoder.Models.PR do
     field :owner, :string
     field :repo, :string
     field :branch, :string
+    field :base_branch, :string, default: "master"
     field :fork, :boolean
     # Stale PR checking
     field :latest_comment, Timex.Ecto.DateTime
@@ -38,7 +39,7 @@ defmodule SlackCoder.Models.PR do
     timestamps()
   end
 
-  @required_fields ~w(owner repo branch github_user title number html_url opened_at)a
+  @required_fields ~w(owner repo branch github_user title number html_url opened_at base_branch)a
   @optional_fields ~w(latest_comment latest_comment_url notifications backoff merged_at closed_at mergeable opened
                       github_user_avatar fork sha build_status analysis_status build_url analysis_url user_id)a
   @all_fields @required_fields ++ @optional_fields

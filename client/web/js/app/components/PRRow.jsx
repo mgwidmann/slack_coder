@@ -40,6 +40,8 @@ class PRRow extends Component {
             {pr.user && pr.user.name}
             <br/>
             <a href={`https://github.com/${pr.owner}/${pr.repository}/`}>{pr.repository}</a>
+            :
+            <a href={`https://github.com/${pr.owner}/${pr.repository}/tree/${pr.baseBranch}`}>{pr.baseBranch}</a>
           </div>
           <div className="col-sm-2 hidden-xs branch-container">
             {pr.branch}

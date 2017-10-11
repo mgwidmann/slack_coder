@@ -16,6 +16,8 @@ defmodule SlackCoder.GraphQL.Schemas.PR do
     field :repository, non_null(:string), resolve: as(:repo)
     @desc "The name of the branch of the pull request submitter."
     field :branch, non_null(:string)
+    @desc "The name of the branch where the pull request is to be merged into."
+    field :base_branch, non_null(:string), resolve: as(&(&1.base_branch || "master"))
     @desc "If the branch of the pull request submitter is from a fork or not."
     field :fork, non_null(:boolean), resolve: force_boolean(:fork)
 

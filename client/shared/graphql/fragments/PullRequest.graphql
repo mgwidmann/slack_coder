@@ -3,6 +3,7 @@ fragment PR on PullRequest {
   analysisStatus
   analysisUrl
   backoff
+  baseBranch
   branch
   number
   buildStatus

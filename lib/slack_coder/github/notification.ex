@@ -191,7 +191,8 @@ defmodule SlackCoder.Github.Notification do
                         author_name: "😈 MERGED",
                         color: "#9a009a",
                         title: pr.title,
-                        title_link: pr.html_url
+                        title_link: pr.html_url,
+                        footer: "Merged into #{pr.owner}#{pr.repo}:#{pr.base_branch}"
                       }
                     ]
                   }

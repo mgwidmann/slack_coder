@@ -116,6 +116,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
       owner: raw_pr["base"]["repo"]["owner"]["login"] || pr.owner,
       repo: raw_pr["base"]["repo"]["name"] || pr.repo,
       branch: raw_pr["head"]["ref"] || pr.branch,
+      base_branch: raw_pr["base"]["ref"] || pr.base_branch,
       opened_at: date_for(raw_pr["created_at"]) || pr.opened_at,
       closed_at: date_for(raw_pr["closed_at"]) || pr.closed_at,
       merged_at: date_for(raw_pr["merged_at"]) || pr.merged_at,
