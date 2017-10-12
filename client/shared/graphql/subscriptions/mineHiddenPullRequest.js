@@ -1,6 +1,6 @@
 import { graphql } from 'react-apollo';
 import createSubscribePR from './subscribePR';
-import PULL_REQUESTS_QUERY from '../queries/minePullRequests.graphql';
+import PULL_REQUESTS_QUERY from '../queries/mineHiddenPullRequests.graphql';
 
 export default graphql(PULL_REQUESTS_QUERY, {
   props: ({ data: { mine, loading, subscribeToMore, error } }) => {
@@ -8,7 +8,7 @@ export default graphql(PULL_REQUESTS_QUERY, {
       pullRequests: mine,
       loading,
       error,
-      subscribe: createSubscribePR(subscribeToMore, 'mine')
+      subscribe: createSubscribePR(subscribeToMore, 'mine', true)
     };
   }
 })

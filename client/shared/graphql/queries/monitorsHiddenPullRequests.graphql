@@ -1,0 +1,5 @@
+#import "../fragments/PullRequest.graphql"
+
+query {
+  monitors: pullRequests(type: MONITORS, status: HIDDEN) { ... PR }
+}

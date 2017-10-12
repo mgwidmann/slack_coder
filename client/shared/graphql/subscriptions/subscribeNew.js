@@ -1,9 +1,9 @@
+import { graphql } from 'react-apollo';
 import SUBSCRIBE_NEW_PULL_REQUEST from './newPullRequest.graphql';
 
-export default (subscribeToMore) => {
-  return (currentUser) => {
-    return subscribeToMore({
-      document: SUBSCRIBE_NEW_PULL_REQUEST,
+export default graphql(SUBSCRIBE_NEW_PULL_REQUEST, {
+  options: ({ currentUser }) => {
+    return {
       updateQuery: (prev, { subscriptionData }) => {
         if (!subscriptionData.data) {
           return prev;
@@ -18,6 +18,6 @@ export default (subscribeToMore) => {
         fullResult[type] = result;
         return fullResult;
       }
-    });
+    }
   }
-}
+});

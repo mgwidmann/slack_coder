@@ -16,6 +16,7 @@
     "qrcode.react": "^0.7.1",
     "react": "^16.0.0",
     "react-apollo": "^1.4.16",
+    "react-bootstrap": "^0.31.3",
     "react-dom": "^16.0.0",
     "react-flip-move": "^2.9.15",
     "react-redux": "^5.0.6",

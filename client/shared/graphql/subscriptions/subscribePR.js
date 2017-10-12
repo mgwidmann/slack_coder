@@ -1,6 +1,6 @@
 import SUBSCRIBE_PULL_REQUEST from './pullRequest.graphql';
 
-export default (subscribeToMore, type) => {
+export default (subscribeToMore, type, hidden = false) => {
   return (pr) => {
     return subscribeToMore({
       document: SUBSCRIBE_PULL_REQUEST,
@@ -17,7 +17,7 @@ export default (subscribeToMore, type) => {
           return prev;
         }
         let result = Object.assign([], prev[type])
-        if (pullRequest.closedAt || pullRequest.mergedAt || (pullRequest.hidden && type !== 'hidden' || !pullRequest.hidden && type === 'hidden')) {
+        if (pullRequest.closedAt || pullRequest.mergedAt || pullRequest.hidden !== hidden) {
           result.splice(index, 1)
         } else {
           result.splice(index, 1, pullRequest);
