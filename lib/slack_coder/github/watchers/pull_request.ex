@@ -106,12 +106,7 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     new_pr
   end
 
-  # When coming in with atom keys, data matches perfectly
-  def extract_pr_data(%{owner: _owner} = attrs, _pr) do
-    attrs
-  end
-
-  def extract_pr_data(raw_pr, pr) do
+  def extract_pr_data(%{"base" => _} = raw_pr, pr) do
     %{
       owner: raw_pr["base"]["repo"]["owner"]["login"] || pr.owner,
       repo: raw_pr["base"]["repo"]["name"] || pr.repo,
@@ -130,6 +125,11 @@ defmodule SlackCoder.Github.Watchers.PullRequest do
     }
     |> mergeable_unknown(raw_pr["user"]["login"])
     |> fork_data(raw_pr)
+  end
+
+  # Assume else when coming in with atom keys, data matches perfectly
+  def extract_pr_data(attrs, _pr) do
+    attrs
   end
 
   defp user(%PR{user: %User{}} = pr, _github), do: pr
