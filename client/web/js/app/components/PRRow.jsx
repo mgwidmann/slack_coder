@@ -29,7 +29,7 @@ class PRRow extends Component {
   }
 
   render() {
-    const { pr, synchronize } = this.props;
+    const { pr } = this.props;
     return (
       <div className="col-xs-12 pull-request-row">
         <div className="row">
@@ -75,8 +75,8 @@ import prType from '../../../shared/props/pr';
 PRRow.propTypes = {
   type: PropTypes.string.isRequired,
   pr: prType,
-  subscribe: PropTypes.func,
-  synchronize: PropTypes.func,
+  subscribeMine: PropTypes.func,
+  subscribeMonitors: PropTypes.func
 };
 
 export default PRRow;

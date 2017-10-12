@@ -1,7 +1,7 @@
 import SUBSCRIBE_PULL_REQUEST from './pullRequest.graphql';
 
-export default (subscribeToMore) => {
-  return (pr, type) => {
+export default (subscribeToMore, type) => {
+  return (pr) => {
     return subscribeToMore({
       document: SUBSCRIBE_PULL_REQUEST,
       variables: {

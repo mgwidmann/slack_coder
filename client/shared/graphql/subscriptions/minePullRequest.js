@@ -10,7 +10,7 @@ export default graphql(PULL_REQUESTS_QUERY, {
       mineLoading: loading,
       error,
       subscribeNew: createSubscribeNew(subscribeToMore),
-      subscribe: createSubscribePR(subscribeToMore)
+      subscribeMine: createSubscribePR(subscribeToMore, 'mine')
     };
   }
 })

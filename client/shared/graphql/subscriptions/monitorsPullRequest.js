@@ -10,7 +10,7 @@ export default graphql(PULL_REQUESTS_QUERY, {
       monitorsLoading: loading,
       error,
       subscribeNew: createSubscribeNew(subscribeToMore),
-      subscribe: createSubscribePR(subscribeToMore)
+      subscribeMonitors: createSubscribePR(subscribeToMore, 'monitors')
     };
   }
 })

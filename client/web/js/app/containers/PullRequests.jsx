@@ -45,7 +45,7 @@ class PullRequests extends Component {
   }
 
   render() {
-    const { currentUser, mine, monitors, subscribe } = this.props;
+    const { currentUser, mine, monitors, subscribeMine, subscribeMonitors } = this.props;
     return (
       <div>
         <section className="panel panel-default">
@@ -55,7 +55,7 @@ class PullRequests extends Component {
             </span>
           </div>
           <div className="panel-body pull-request-pannel">
-            <PRList pullRequests={mine || []} type={'mine'} subscribe={subscribe} >
+            <PRList pullRequests={mine || []} type={'mine'} subscribe={subscribeMine} >
               {this.renderMyEmpty()}
             </PRList>
           </div>
@@ -65,7 +65,7 @@ class PullRequests extends Component {
             <span className="h3">Team members I monitor</span>
           </div>
           <div className="panel-body pull-request-pannel">
-            <PRList pullRequests={monitors || []} type={'monitors'} subscribe={subscribe} >
+            <PRList pullRequests={monitors || []} type={'monitors'} subscribe={subscribeMonitors} >
               {this.renderMonitorEmpty()}
             </PRList>
           </div>
