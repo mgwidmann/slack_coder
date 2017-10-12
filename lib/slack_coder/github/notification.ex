@@ -22,7 +22,8 @@ defmodule SlackCoder.Github.Notification do
                         color: "#999999",
                         fallback: "✖︎ MERGE CONFLICTS #{pr.title}",
                         title: pr.title,
-                        title_link: pr.html_url
+                        title_link: pr.html_url,
+                        footer: "#{pr.owner}/#{pr.repo}:#{pr.base_branch}"
                       }
                     ]
                   }
@@ -48,7 +49,7 @@ defmodule SlackCoder.Github.Notification do
                         <#{pr.build_url}|Travis Build>
                         """,
                         mrkdwn_in: ["text"],
-                        footer: "#{footer_text SlackCoder.BuildSystem.counts(pr.last_failed_jobs)}"
+                        footer: "#{footer_text SlackCoder.BuildSystem.counts(pr.last_failed_jobs)} #{pr.owner}/#{pr.repo}:#{pr.base_branch}"
                       } | failures(pr)
                     ]
                   }
@@ -118,7 +119,7 @@ defmodule SlackCoder.Github.Notification do
                     fallback: failure_message,
                     title: pr.title,
                     title_link: pr.html_url,
-                    footer: "#{footer_text SlackCoder.BuildSystem.counts(pr.last_failed_jobs)}"
+                    footer: "#{footer_text SlackCoder.BuildSystem.counts(pr.last_failed_jobs)} #{pr.owner}/#{pr.repo}:#{pr.base_branch}"
                   } | blame_attachments(pr)]
               }
     Slack.send_to_channel(Application.get_env(:slack_coder, :random_failure_channel), message)
@@ -170,7 +171,8 @@ defmodule SlackCoder.Github.Notification do
                         author_icon: pr.user.avatar_url,
                         color: "#77DD33",
                         title: pr.title,
-                        title_link: pr.html_url
+                        title_link: pr.html_url,
+                        footer: "#{pr.owner}/#{pr.repo}:#{pr.base_branch}"
                       }
                     ]
                   }
@@ -192,7 +194,7 @@ defmodule SlackCoder.Github.Notification do
                         color: "#9a009a",
                         title: pr.title,
                         title_link: pr.html_url,
-                        footer: "Merged into #{pr.owner}#{pr.repo}:#{pr.base_branch}"
+                        footer: "#{pr.owner}/#{pr.repo}:#{pr.base_branch}"
                       }
                     ]
                   }
@@ -213,7 +215,8 @@ defmodule SlackCoder.Github.Notification do
                         author_name: "😡 CLOSED",
                         color: "#FF4500",
                         title: pr.title,
-                        title_link: pr.html_url
+                        title_link: pr.html_url,
+                        footer: "#{pr.owner}/#{pr.repo}:#{pr.base_branch}"
                       }
                     ]
                   }
@@ -237,7 +240,8 @@ defmodule SlackCoder.Github.Notification do
                         title: pr.title,
                         title_link: pr.html_url,
                         text: "Stale for *#{stale_hours}* hours",
-                        mrkdwn_in: ["text"]
+                        mrkdwn_in: ["text"],
+                        footer: "#{pr.owner}/#{pr.repo}:#{pr.base_branch}"
                       }
                     ]
                   }
@@ -258,7 +262,8 @@ defmodule SlackCoder.Github.Notification do
                         author_icon: pr.user.avatar_url,
                         color: "#000000",
                         title: pr.title,
-                        title_link: pr.html_url
+                        title_link: pr.html_url,
+                        footer: "#{pr.owner}/#{pr.repo}:#{pr.base_branch}"
                       }
                     ]
                   }
@@ -279,7 +284,8 @@ defmodule SlackCoder.Github.Notification do
                         author_icon: pr.user.avatar_url,
                         color: "#0000FF",
                         title: pr.title,
-                        title_link: pr.html_url
+                        title_link: pr.html_url,
+                        footer: "#{pr.owner}/#{pr.repo}:#{pr.base_branch}"
                       }
                     ]
                   }

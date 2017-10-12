@@ -28,7 +28,7 @@ defmodule SlackCoder.Services.PRService do
       {:ok, pr} ->
         {:ok, pr |> check_failed() |> notifications() |> broadcast(Map.to_list(changeset.changes), changeset.data.id == nil)}
       errored_changeset ->
-        Logger.error "Unable to save PR: #{inspect errored_changeset}"
+        Logger.error "Unable to save PR: #{inspect errored_changeset}\n#{inspect changeset.data}"
         errored_changeset
     end
   end
