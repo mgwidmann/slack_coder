@@ -17,7 +17,7 @@ export default (subscribeToMore, type) => {
           return prev;
         }
         let result = Object.assign([], prev[type])
-        if (pullRequest.closedAt || pullRequest.mergedAt) {
+        if (pullRequest.closedAt || pullRequest.mergedAt || (pullRequest.hidden && type !== 'hidden' || !pullRequest.hidden && type === 'hidden')) {
           result.splice(index, 1)
         } else {
           result.splice(index, 1, pullRequest);

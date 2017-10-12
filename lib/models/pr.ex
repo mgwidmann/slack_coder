@@ -7,6 +7,7 @@ defmodule SlackCoder.Models.PR do
     field :branch, :string
     field :base_branch, :string, default: "master"
     field :fork, :boolean
+    field :hidden, :boolean
     # Stale PR checking
     field :latest_comment, Timex.Ecto.DateTime
     field :latest_comment_url, :string
@@ -41,7 +42,7 @@ defmodule SlackCoder.Models.PR do
 
   @required_fields ~w(owner repo branch github_user title number html_url opened_at base_branch)a
   @optional_fields ~w(latest_comment latest_comment_url notifications backoff merged_at closed_at mergeable opened
-                      github_user_avatar fork sha build_status analysis_status build_url analysis_url user_id)a
+                      github_user_avatar fork sha build_status analysis_status build_url analysis_url user_id hidden)a
   @all_fields @required_fields ++ @optional_fields
   @doc """
   Creates a changeset based on the `model` and `params`.
@@ -82,6 +83,14 @@ defmodule SlackCoder.Models.PR do
 
   def by_number(query \\ __MODULE__, owner, repo, number) do
     from pr in query, where: pr.owner == ^owner and pr.repo == ^repo and pr.number == ^number
+  end
+
+  def visible(query \\ __MODULE__) do
+    from pr in query, where: pr.hidden == false
+  end
+
+  def hidden(query \\ __MODULE__) do
+    from pr in query, where: pr.hidden == true
   end
 
 end

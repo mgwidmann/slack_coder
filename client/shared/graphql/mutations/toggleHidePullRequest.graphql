@@ -1,0 +1,7 @@
+#import "../fragments/PullRequest.graphql"
+
+mutation ToggleHidePR($id: ID!){
+	toggleHidePullRequest(id: $id) {
+    ... PR
+  }
+}

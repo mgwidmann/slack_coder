@@ -20,6 +20,8 @@ defmodule SlackCoder.GraphQL.Schemas.PR do
     field :base_branch, non_null(:string), resolve: as(&(&1.base_branch || "master"))
     @desc "If the branch of the pull request submitter is from a fork or not."
     field :fork, non_null(:boolean), resolve: force_boolean(:fork)
+    @desc "If the pull request is hidden from the main view and accessible via the hidden tab."
+    field :hidden, non_null(:boolean)
 
     # Stale PR tracking
     @desc "The timestamp of the last comment on the `PullRequest`."

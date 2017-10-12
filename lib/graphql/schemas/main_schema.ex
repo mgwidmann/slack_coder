@@ -22,6 +22,7 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
 
   enum :pull_request_status do
     value :open, description: "The PR is currently open."
+    value :hidden, description: "The PR has been hidden from view the main dashboard view."
     value :merged, description: "The PR has been merged."
   end
 
@@ -127,6 +128,13 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
       arg :number, non_null(:integer)
 
       resolve &SlackCoder.GraphQL.Resolvers.PRResolver.synchronize/3
+    end
+
+    @desc "Hides or unhides a pull request from the main dashboard view."
+    field :toggle_hide_pull_request, type: :pull_request do
+      arg :id, non_null(:id)
+
+      resolve &SlackCoder.GraphQL.Resolvers.PRResolver.toggle_hide_pull_request/3
     end
 
     field :resolve_failure, type: :failure do

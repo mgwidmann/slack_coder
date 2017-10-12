@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import SynchronizePRLink from './SynchronizePRLink';
+import ToggleHidePRLink from './ToggleHidePRLink';
 
 class PRRow extends Component {
   statusClass(status) {
@@ -63,6 +64,8 @@ class PRRow extends Component {
               )}
             </span>
             <SynchronizePRLink owner={pr.owner} repository={pr.repository} number={pr.number} />
+            &nbsp;
+            <ToggleHidePRLink id={pr.id} hidden={pr.hidden} />
           </div>
         </div>
       </div>

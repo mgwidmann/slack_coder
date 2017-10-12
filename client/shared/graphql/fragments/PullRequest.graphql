@@ -14,6 +14,7 @@ fragment PR on PullRequest {
   closedAt
   mergedAt
   title
+  hidden
   user {
     id
     avatarUrl
