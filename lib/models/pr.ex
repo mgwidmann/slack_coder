@@ -7,7 +7,7 @@ defmodule SlackCoder.Models.PR do
     field :branch, :string
     field :base_branch, :string, default: "master"
     field :fork, :boolean
-    field :hidden, :boolean
+    field :hidden, :boolean, default: false
     # Stale PR checking
     field :latest_comment, Timex.Ecto.DateTime
     field :latest_comment_url, :string

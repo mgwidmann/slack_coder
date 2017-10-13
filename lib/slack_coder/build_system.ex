@@ -37,9 +37,6 @@ defmodule SlackCoder.BuildSystem do
 
   def record_failure_log(%File{} = file, log, pr), do: record_failure_log([file], log, pr) |> hd()
   def record_failure_log(files, log, pr) when is_list(files) do
-    external_ids = for %File{id: id} <- files, is_integer(id), do: id
-    ids_to_delete = for id <- FailureLog.by_pr(pr) |> FailureLog.with_external_ids(external_ids) |> select([q], q.id) |> Repo.all, Repo.one(FailureLog.without_random_failure(id)) != true, do: id
-    Repo.delete_all(from(f in FailureLog, where: f.id in ^ids_to_delete)) # Clean up old logs
     for %File{id: id} = file <- files do
       case Repo.one(FailureLog.with_external_ids(id) |> select([f], f.id)) do
         nil ->
@@ -87,6 +84,7 @@ defmodule SlackCoder.BuildSystem do
 
   def counts([%File{} | _] = files) do
     files
+    |> List.flatten()
     |> Enum.group_by(&(&1.type))
     |> Enum.map(fn {type, list} -> {type, length(list)} end)
     |> Enum.into(%{})

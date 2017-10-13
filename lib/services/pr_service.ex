@@ -165,13 +165,13 @@ defmodule SlackCoder.Services.PRService do
       [] ->
         cond do
           attempted_once && SlackCoder.BuildSystem.supported?(pr) ->
-            if(Mix.env == :prod) do
-              Logger.warn """
-              Checking failed job data returned empty twice in a row.
-
-              #{inspect pr, pretty: true}
-              """
-            end
+            # if(Mix.env == :prod) do
+            #   Logger.warn """
+            #   Checking failed job data returned empty twice in a row.
+            #
+            #   #{inspect pr, pretty: true}
+            #   """
+            # end
             load_failed_from_db(pr)
           SlackCoder.BuildSystem.supported?(pr) ->
             check_failed(pr, true)
@@ -196,7 +196,11 @@ defmodule SlackCoder.Services.PRService do
     case Ecto.assoc(pr, :failure_logs) |> Repo.all() do
       [] -> pr
       [log | _] = failure_logs ->
-        failed_jobs = Enum.map(failure_logs, &LogParser.parse(&1.log))
+        failed_jobs = Enum.map(failure_logs, fn log ->
+                        LogParser.parse(log.log)
+                        |> Enum.map(&(%{ &1 | failure_log_id: log.id }))
+                      end)
+                      |> List.flatten()
         failed_jobs = if pr.sha == log.sha do # Add together
                         Enum.uniq(pr.last_failed_jobs ++ failed_jobs)
                       else

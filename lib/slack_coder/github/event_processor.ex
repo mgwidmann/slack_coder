@@ -137,10 +137,17 @@ defmodule SlackCoder.Github.EventProcessor do
 
   # A comment was added to a pull request
   defp do_process(:pull_request_review_comment, params) do
-    params
-    |> pr()
-    |> Github.find_watcher()
-    |> PullRequest.unstale()
+    pr = pr(params)
+    pid = Github.find_watcher(pr)
+    if pid do
+      PullRequest.unstale(pid)
+    else
+      case Repo.one(PR.by_number(pr.owner, pr.repo, pr.number)) do
+        nil -> nil
+        %PR{opened: false} -> :ok
+        %PR{} = pr -> Logger.warn("PR Review comment added to open PR but worker not found: \n#{inspect pr}")
+      end
+    end
   end
 
   # Build has changed status for a CI system
@@ -148,6 +155,8 @@ defmodule SlackCoder.Github.EventProcessor do
   defp do_process(:status, %{"context" => ci_system, "state" => state, "target_url" => url, "sha" => sha}) when ci_system in @ci_systems do
     ShaMapper.find(sha)
     |> PullRequest.status(:build, sha, url, state)
+
+    :ok # Branch builds not tied to a PR will hit here, no need process
   end
 
   @ignored_contexts ~w(ci/bitrise codeclimate/diff-coverage codeclimate/total-coverage codecov/project codecov/patch)
@@ -221,6 +230,21 @@ defmodule SlackCoder.Github.EventProcessor do
   end
 
   defp do_process(:membership, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:member, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:repository, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:gollum, _params) do
     # Ignore
     :ok
   end
