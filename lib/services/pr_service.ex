@@ -179,11 +179,11 @@ defmodule SlackCoder.Services.PRService do
             load_failed_from_db(pr)
         end
       failed_jobs ->
-        failed_jobs = if pr.sha == pr.last_failed_sha do # Add together
-                        Enum.uniq(pr.last_failed_jobs ++ failed_jobs)
-                      else
-                        failed_jobs
-                      end
+          # failed_jobs = if pr.sha == pr.last_failed_sha do # Add together
+          #                 Enum.uniq(pr.last_failed_jobs ++ failed_jobs)
+          #               else
+          #                 failed_jobs
+          #               end
         %PR{pr | last_failed_jobs: failed_jobs, last_failed_sha: pr.sha}
     end
   end
@@ -201,11 +201,11 @@ defmodule SlackCoder.Services.PRService do
                         |> Enum.map(&(%{ &1 | failure_log_id: log.id }))
                       end)
                       |> List.flatten()
-        failed_jobs = if pr.sha == log.sha do # Add together
-                        Enum.uniq(pr.last_failed_jobs ++ failed_jobs)
-                      else
-                        failed_jobs
-                      end
+        # failed_jobs = if pr.sha == log.sha do # Add together
+        #                 Enum.uniq(pr.last_failed_jobs ++ failed_jobs)
+        #               else
+        #                 failed_jobs
+        #               end
         %{pr | last_failed_jobs: failed_jobs, last_failed_sha: log.sha}
     end
   end
