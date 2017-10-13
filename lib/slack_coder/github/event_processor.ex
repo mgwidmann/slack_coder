@@ -142,7 +142,7 @@ defmodule SlackCoder.Github.EventProcessor do
     if pid do
       PullRequest.unstale(pid)
     else
-      case Repo.one(PR.by_number(pr.owner, pr.repo, pr.number)) do
+      case SlackCoder.Repo.one(PR.by_number(pr.owner, pr.repo, pr.number)) do
         nil -> nil
         %PR{opened: false} -> :ok
         %PR{} = pr -> Logger.warn("PR Review comment added to open PR but worker not found: \n#{inspect pr}")

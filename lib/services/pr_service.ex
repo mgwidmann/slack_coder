@@ -3,7 +3,7 @@ defmodule SlackCoder.Services.PRService do
   use PatternTap
   alias SlackCoder.Repo
   alias SlackCoder.Github.Notification
-  alias SlackCoder.Models.PR
+  alias SlackCoder.Models.{PR, RandomFailure.FailureLog}
   alias SlackCoder.Endpoint
   alias SlackCoder.BuildSystem.LogParser
   import Ecto.Changeset, only: [put_change: 3, get_change: 2]
@@ -193,7 +193,7 @@ defmodule SlackCoder.Services.PRService do
   def check_failed(pr, _attempted_once), do: pr
 
   defp load_failed_from_db(pr) do
-    case Ecto.assoc(pr, :failure_logs) |> Repo.all() do
+    case Ecto.assoc(pr, :failure_logs) |> FailureLog.for_sha(pr.sha) |> Repo.all() do
       [] -> pr
       [log | _] = failure_logs ->
         failed_jobs = Enum.map(failure_logs, fn log ->

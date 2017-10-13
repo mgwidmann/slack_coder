@@ -5,6 +5,7 @@ defmodule SlackCoder.Github.Supervisor do
   def start_link() do
     children = [
       worker(SlackCoder.Github.ShaMapper, []),
+      worker(SlackCoder.Github.FailureLogCleaner, []),
       supervisor(SlackCoder.Github.Watchers.Supervisor, [])
     ]
 
