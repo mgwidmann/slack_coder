@@ -46,10 +46,9 @@ defmodule SlackCoder.Github.Watchers.Supervisor do
   end
 
   def find_watcher(pr) do
-    number = pr.number |> to_string
-    repo = pr.repo
+    worker_identifier = worker_id(pr)
     child = Supervisor.which_children(__MODULE__)
-            |> Enum.find(&(elem(&1, 0) == @worker_id_prefix <> "-" <> repo <> "-" <> number))
+            |> Enum.find(&(elem(&1, 0) == worker_identifier))
     case child do
       nil -> nil
       {_, worker, _, _} -> worker

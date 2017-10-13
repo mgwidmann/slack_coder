@@ -55,9 +55,9 @@ defmodule SlackCoder.Models.User do
 
   def search(q) do
     from u in __MODULE__,
-      where: like(u.github, ^("%#{q}%")) or
-             like(u.name, ^("%#{q}%")) or
-             like(u.slack, ^("%#{q}%"))
+      where: ilike(u.github, ^("%#{q}%")) or
+             ilike(u.name, ^("%#{q}%")) or
+             ilike(u.slack, ^("%#{q}%"))
   end
 
 end

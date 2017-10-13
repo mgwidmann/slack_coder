@@ -112,9 +112,10 @@ defmodule SlackCoder.Github.EventProcessor do
     do_process(:pull_request, params |> Map.drop(~w(before after)))
   end
 
-  defp do_process(:pull_request, %{"action" => action, "number" => pr} = params) when action in @synchronize do
-    owner = params["pull_request"]["base"]["repo"]["owner"]["login"]
-    repo = params["pull_request"]["base"]["repo"]["name"]
+  defp do_process(:pull_request, %{"action" => action, "number" => pr, "pull_request" => pull_request}) when action in @synchronize do
+    owner = pull_request["base"]["repo"]["owner"]["login"]
+    repo = pull_request["base"]["repo"]["name"]
+
     pid = %PR{owner: owner, repo: repo, number: pr}
           |> Github.find_or_start_watcher()
     pid
@@ -122,7 +123,7 @@ defmodule SlackCoder.Github.EventProcessor do
     |> MergeConflict.queue()
 
     pid
-    |> PullRequest.update(params["pull_request"])
+    |> PullRequest.update(pull_request)
   end
 
   # TODO: Implement `review_requested`

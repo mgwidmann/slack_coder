@@ -35,9 +35,10 @@ defmodule SlackCoder.Github.EventProcessorTest do
         Ecto.Adapters.SQL.Sandbox.mode(SlackCoder.Repo, :auto)
       end
       :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
-      pr = Repo.insert! %PR{github_user: "github_user", number: round(:rand.uniform() * 10_000), mergeable: true, sha: "before_sha", title: "t", owner: "o", repo: "r", branch: "b", opened_at: DateTime.utc_now, html_url: "u"}
+      pr = Repo.insert! %PR{github_user: "github_user", number: round(:rand.uniform() * 10_000), mergeable: true, sha: "before_sha", title: "t", owner: "owner", repo: "repo", branch: "b", opened_at: DateTime.utc_now, html_url: "u"}
       pid = GithubSupervisor.start_watcher(pr)
       Ecto.Adapters.SQL.Sandbox.allow(Repo, self(), pid)
+      Process.sleep(20) # Allow init phase to run
       # @endpoint.subscribe("prs:all")
       on_exit fn ->
         GithubSupervisor.stop_watcher(pr)
@@ -63,11 +64,17 @@ defmodule SlackCoder.Github.EventProcessorTest do
     end
 
     test "processes a synchronize action", %{pr: pr} do
-      assert EP.process(:pull_request, %{"action" => "synchronize", "number" => pr.number, "before" => "before_sha", "after" => "after_sha"})
+      assert EP.process(:pull_request, %{"action" => "synchronize", "number" => pr.number, "before" => "before_sha", "after" => "after_sha", "pull_request" => Map.put(@pr_params, "number", pr.number)})
     end
 
     test "title is changed", %{pr: pr} do
-      assert EP.process(:pull_request, Map.merge(Fixtures.PRs.title_changed(), %{"number" => pr.number}))
+      params = Fixtures.PRs.title_changed()
+               |> put_in(~w(number), pr.number)
+               |> put_in(~w(pull_request head sha), pr.sha)
+               |> put_in(~w(pull_request base repo owner login), pr.owner)
+               |> put_in(~w(pull_request base repo name), pr.repo)
+               |> put_in(~w(pull_request number), pr.number)
+      assert EP.process(:pull_request, params)
     end
 
     @pr_merge_conflict %{
@@ -136,16 +143,18 @@ defmodule SlackCoder.Github.EventProcessorTest do
                                             "after" => @sha
                                           })
                                           |> put_in(~w(pull_request head sha), @sha)
+                                          |> put_in(~w(pull_request base repo owner login), pr.owner)
+                                          |> put_in(~w(pull_request base repo name), pr.repo)
                                           |> put_in(~w(pull_request number), pr.number))
       # For realism, the status will change to pending while running the tests
-      EP.process(:status, Map.merge(Fixtures.PRs.status_pending(), %{"number" => pr.number, "sha" => @sha}))
+      EP.process(:status, Map.merge(Fixtures.PRs.status_pending(), %{"number" => pr.number, "sha" => @sha, "target_url" => "https://travis-ci.com/#{pr.owner}/#{pr.repo}/builds/4"}))
 
       # Begin actual test
-      EP.process(:status, Map.merge(Fixtures.PRs.status_failed(), %{"number" => pr.number, "sha" => @sha}))
+      EP.process(:status, Map.merge(Fixtures.PRs.status_failed(), %{"number" => pr.number, "sha" => @sha, "target_url" => "https://travis-ci.com/#{pr.owner}/#{pr.repo}/builds/4"}))
       assert %PR{build_status: "failure", last_failed_sha: @sha, last_failed_jobs: [%File{}, %File{}]} = PullRequest.fetch pid
-      EP.process(:status, Map.merge(Fixtures.PRs.status_pending(), %{"number" => pr.number, "sha" => @sha}))
+      EP.process(:status, Map.merge(Fixtures.PRs.status_pending(), %{"number" => pr.number, "sha" => @sha, "target_url" => "https://travis-ci.com/#{pr.owner}/#{pr.repo}/builds/4"}))
       assert %PR{build_status: "pending"} = PullRequest.fetch pid
-      EP.process(:status, Map.merge(Fixtures.PRs.status_success(), %{"number" => pr.number, "sha" => @sha}))
+      EP.process(:status, Map.merge(Fixtures.PRs.status_success(), %{"number" => pr.number, "sha" => @sha, "target_url" => "https://travis-ci.com/#{pr.owner}/#{pr.repo}/builds/4"}))
       assert %PR{build_status: "success"} = PullRequest.fetch pid
 
       Process.sleep(100) # Wait for random failure service to finish processing
