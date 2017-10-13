@@ -22,7 +22,7 @@ defmodule SlackCoder.Github.FailureLogCleaner do
   def clean_logs() do
     import Ecto.Query
     random_failure_ids = from(r in RandomFailure, where: not is_nil(r.failure_log_id), select: r.failure_log_id, distinct: true) |> Repo.all
-    log_ids = from(log in FailureLog, join: pr in PR, on: pr.id == log.pr_id and pr.sha != log.sha, where: not log.id in ^random_failure_ids, select: log.id)
+    log_ids = from(log in FailureLog, join: pr in PR, on: pr.id == log.pr_id and pr.sha != log.sha, where: not log.id in ^random_failure_ids, select: log.id) |> Repo.all
     Repo.delete_all(from log in FailureLog, where: log.id in ^log_ids)
   end
 end
