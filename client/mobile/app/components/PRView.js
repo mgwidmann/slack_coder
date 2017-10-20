@@ -14,7 +14,7 @@ const PRView = ({ tab, pullRequests, loading, togglePRRow, expandedPr, children 
 
   if (loading) {
     return <Loading />;
-  } else if (true) {
+  } else if (pullRequests.length == 0) {
     return children;
   } else {
     return (
