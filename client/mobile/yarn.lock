@@ -3692,6 +3692,10 @@ react-devtools-core@^2.5.0:
   dependencies:
     prop-types "^15.5.10"
 
+react-native-config@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/react-native-config/-/react-native-config-0.9.0.tgz#5a82874a2f75a44c3c421e03d8910228f17cea35"
+
 react-native-permissions@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/react-native-permissions/-/react-native-permissions-1.0.1.tgz#b45c369763c4e298ba52ff9392ca807cbcdd6424"

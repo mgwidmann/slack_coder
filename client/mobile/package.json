@@ -26,6 +26,7 @@
     "react-apollo": "^1.4.16",
     "react-native": "0.48.4",
     "react-native-camera": "https://github.com/lwansbrough/react-native-camera.git",
+    "react-native-config": "^0.9.0",
     "react-native-permissions": "^1.0.1",
     "react-native-qrcode-scanner": "^0.0.22",
     "react-native-scrollable-tab-view": "^0.8.0",
