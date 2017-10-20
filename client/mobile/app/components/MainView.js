@@ -2,7 +2,7 @@ import React from 'react';
 
 import Loading from './Loading';
 import Login from './Login';
-import PRTabs from '../containers/PRTabs';
+import PRTabs from './PRTabs';
 
 const MainView = ({ loggedIn, loading, error, setToken, togglePRRow, expandedPr }) => {
   // Cannot use null/undefined to determine difference between unknown and no value

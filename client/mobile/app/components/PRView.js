@@ -1,17 +1,29 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ListView } from 'react-native';
 import PRRow from './PRRow';
+import Loading from './Loading';
 
-const PRView = ({ tab, prs, togglePRRow, expandedPr }) => {
+const dataSource = new ListView.DataSource({
+  rowHasChanged: (r1, r2) => r1 != r2
+});
+
+const PRView = ({ tab, pullRequests, loading, togglePRRow, expandedPr, children }) => {
   const renderPR = (pr) => {
     return <PRRow key={pr.id} pr={pr} tab={tab} togglePRRow={togglePRRow} expandedPr={expandedPr} />;
   }
 
-  return (
-    <ScrollView>
-      {prs.map(renderPR)}
-    </ScrollView>
-  );
+  if (loading) {
+    return <Loading />;
+  } else if (true) {
+    return children;
+  } else {
+    return (
+      <ListView
+        dataSource={dataSource.cloneWithRows(pullRequests)}
+        renderRow={renderPR}
+      />
+    )
+  }
 }
 
 export default PRView;

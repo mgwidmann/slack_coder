@@ -1,7 +1,7 @@
 defmodule SlackCoder.Github.FailureLogCleaner do
   use GenServer
   alias SlackCoder.Repo
-  alias SlackCoder.Models.{RandomFailure, RandomFailure.FailureLog}
+  alias SlackCoder.Models.{PR, RandomFailure, RandomFailure.FailureLog}
 
   def start_link() do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)

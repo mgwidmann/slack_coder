@@ -1,6 +1,7 @@
 # App artifacts
 /db
 /_build
+/.elixir_ls
 /deps
 erl_crash.dump
 *.ez

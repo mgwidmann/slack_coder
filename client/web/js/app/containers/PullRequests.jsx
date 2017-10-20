@@ -10,9 +10,9 @@ class PullRequests extends Component {
     return (
       <div className="text-center">
         <h2>
-          Looks like you have no Pull Requests!
+          Looks like you have no pull requests!
           <br/>
-          <small>You should start coding some Elixir!</small>
+          <small>You should start coding some Elixir! 💻</small>
         </h2>
       </div>
     );
