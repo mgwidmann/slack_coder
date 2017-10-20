@@ -3686,6 +3686,22 @@ react-devtools-core@^2.5.0:
     shell-quote "^1.6.1"
     ws "^2.0.3"
 
+"react-native-camera@https://github.com/lwansbrough/react-native-camera.git":
+  version "0.10.0"
+  resolved "https://github.com/lwansbrough/react-native-camera.git#52b11f2d32e1319c79f8960a151fe412de4ca1f6"
+  dependencies:
+    prop-types "^15.5.10"
+
+react-native-permissions@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-permissions/-/react-native-permissions-1.0.1.tgz#b45c369763c4e298ba52ff9392ca807cbcdd6424"
+
+react-native-qrcode-scanner@^0.0.22:
+  version "0.0.22"
+  resolved "https://registry.yarnpkg.com/react-native-qrcode-scanner/-/react-native-qrcode-scanner-0.0.22.tgz#b045d6ba6413bd379008e6e5aff047e6fbaa95ae"
+  dependencies:
+    prop-types "^15.5.10"
+
 react-native-scrollable-tab-view@^0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/react-native-scrollable-tab-view/-/react-native-scrollable-tab-view-0.8.0.tgz#5cb1fcfce07bf530a3c81ab51fc5071144edac5c"

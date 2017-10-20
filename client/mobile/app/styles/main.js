@@ -17,16 +17,17 @@ export default tabStyles = StyleSheet.create({
   },
   loginText: {
     fontSize: 36,
+    textAlign: 'center'
   },
   logo: {
+    width: 125,
+    height: 125,
+  },
+  devTokenInput: {
+    height: 40,
     width: 250,
-    height: 250,
-  },
-  logoWithScanner: {
-    marginTop: 300,
-  },
-  scanner: {
-    width: '100%',
-    height: 300
+    backgroundColor: 'white',
+    borderColor: 'gray',
+    borderWidth: 1
   }
 });

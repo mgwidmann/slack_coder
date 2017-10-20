@@ -52,5 +52,7 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>SlackCoder uses a QR code scanner to log you in.</string>
 </dict>
 </plist>

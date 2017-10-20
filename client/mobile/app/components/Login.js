@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { AsyncStorage, StyleSheet, View, Image, Text, TextInput } from 'react-native';
-import { BarCodeScanner, Permissions } from 'expo';
+import { AsyncStorage, StyleSheet, View, Image, Text, TextInput, Button } from 'react-native';
+import QRCodeScanner from 'react-native-qrcode-scanner';
+import Permissions from 'react-native-permissions';
 
 import mainStyles from '../styles/main';
 
@@ -20,8 +21,9 @@ class Login extends Component {
       this.setState({ hasCameraPermission: true });
     } else {
       if (value === null) {
-        const { status } = await Permissions.askAsync(Permissions.CAMERA);
-        this.setState({ hasCameraPermission: status === 'granted' });
+        Permissions.request('camera').then((status) => {
+          this.setState({ hasCameraPermission: status === 'authorized' });
+        });
       }
     }
   }
@@ -37,27 +39,31 @@ class Login extends Component {
     if (hasCameraPermission === true) {
       return (
         <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer]}>
-          {__DEV__ &&
-            <TextInput
-              style={{ height: 40, width: '75%', backgroundColor: 'white', borderColor: 'gray', borderWidth: 1 }}
-              onChangeText={(token) => { this._handleBarCodeRead({ data: token }); }}
-            />
-          }
-          <Image source={require('../assets/botlogo.png')} style={[mainStyles.logo, mainStyles.logoWithScanner]} />
-          <Text style={mainStyles.loginText}>Scan to log in</Text>
-          {!__DEV__ &&
-            <BarCodeScanner
-              onBarCodeRead={this._handleBarCodeRead}
-              style={[StyleSheet.absoluteFill, mainStyles.scanner]}
-            />
-          }
-        </View>
-      );
-    } else if (hasCameraPermission === false) {
-      return (
-        <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer]}>
-          <Text style={mainStyles.loginText}>No access to camera</Text>
-          <Button onPress={this._loadInitialState} title={'Request Access'} />
+          <QRCodeScanner
+            onRead={this._handleBarCodeRead}
+            showMarker={true}
+            /* containerStyle={[StyleSheet.absoluteFill, mainStyles.scanner]} */
+            topContent={(
+              <Image source={require('../assets/botlogo.png')} style={[mainStyles.logo]} />
+            )}
+            bottomContent={(
+              <View>
+                <Text style={mainStyles.loginText}>Scan to log in</Text>  
+                {__DEV__ &&
+                  <TextInput
+                    style={mainStyles.devTokenInput}
+                    onChangeText={(token) => { this._handleBarCodeRead({ data: token }); }}
+                  />
+                }
+              </View>
+            )}
+            notAuthorizedView={(
+              <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer]}>
+                <Text style={mainStyles.loginText}>No access to camera</Text>
+                <Button onPress={this._loadInitialState} title={'Request Access'} />
+              </View>
+            )}
+          />
         </View>
       );
     } else {
