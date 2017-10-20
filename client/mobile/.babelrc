@@ -1,11 +1,16 @@
 {
-  "presets": ["babel-preset-expo"],
+  "presets": [
+    "babel-preset-react-native-stage-0/decorator-support"
+  ],
   "plugins": [
     "babel-plugin-inline-import-graphql-ast"
   ],
   "env": {
     "development": {
-      "plugins": ["babel-plugin-inline-import-graphql-ast", "transform-react-jsx-source"]
+      "plugins": [
+        "babel-plugin-inline-import-graphql-ast",
+        "transform-react-jsx-source"
+      ]
     }
   }
 }
