@@ -554,6 +554,7 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* SlackCoderTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
+				8D9EF3DE1F9AC5CC00556CFA /* Recovered References */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -577,6 +578,16 @@
 				8D9A0CD51F99ADB500F77E8C /* libReactNativeConfig.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		8D9EF3DE1F9AC5CC00556CFA /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				3E22D37003C042B58F5CB4F6 /* libRCTCamera.a */,
+				81BF921F65E746CFA9756C8A /* libReactNativePermissions.a */,
+				0BC79BBB1FF846A3850FEB07 /* libReactNativeConfig.a */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		8DD9C72B1F999B45008BF890 /* Products */ = {
