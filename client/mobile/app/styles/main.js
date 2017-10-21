@@ -19,6 +19,11 @@ export default tabStyles = StyleSheet.create({
     fontSize: 36,
     textAlign: 'center'
   },
+  loginSubText: {
+    fontSize: 24,
+    textAlign: 'center',
+    color: 'gray'
+  },
   logo: {
     width: 125,
     height: 125,
