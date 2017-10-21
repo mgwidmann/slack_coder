@@ -3,4 +3,5 @@ import websocketNetworkInterface from '../shared/graphql/websocketNetworkInterfa
 import createSocket from './socket';
 import Config from 'react-native-config';
 
-export default configureClient(websocketNetworkInterface(`ws://${Config.SLACK_CODER_HOST}/socket`, createSocket));
+const wss = Config.SLACK_CODER_WEBSOCKET_PROTOCOL;
+export default configureClient(websocketNetworkInterface(`${wss}://${Config.SLACK_CODER_HOST}/socket`, createSocket));
