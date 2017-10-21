@@ -6,8 +6,13 @@ import Permissions from 'react-native-permissions';
 import mainStyles from '../styles/main';
 
 class Login extends Component {
-  state = {
-    hasCameraPermission: null,
+  constructor(props) {
+    super(props);
+    this.state = {
+      hasCameraPermission: null,
+    };
+    this._loadInitialState = this._loadInitialState.bind(this);
+    this._handleBarCodeRead = this._handleBarCodeRead.bind(this);
   }
 
   componentDidMount() {
