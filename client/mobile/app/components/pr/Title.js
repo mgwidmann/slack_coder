@@ -1,18 +1,18 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
 
-export default class Title extends Component {
-  render() {
-    const { image, title } = this.props;
-    return (
-      <View style={styles.titleView}>
-        {image && (<Image source={{uri: image}} style={styles.avatar} />)}
-        <Text style={styles.title} numberOfLines={3}>
+const Title = ({ image, title, branch }) => {
+  return (
+    <View style={styles.titleView}>
+      {image && (<Image source={{uri: image}} style={styles.avatar} />)}
+      <View style={styles.titleContainer}>
+        <Text style={styles.title} numberOfLines={2}>
           {title}
         </Text>
+        <Text style={styles.branchText}>{branch}</Text>
       </View>
-    );
-  }
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -20,6 +20,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'flex-start'
+  },
+  titleContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'flex-end'
+  },
+  branchText: {
+    fontSize: 12,
+    color: '#BBBBCC'
   },
   avatar: {
     width: 60,
@@ -35,3 +44,5 @@ const styles = StyleSheet.create({
     paddingLeft: 3
   }
 });
+
+export default Title;

@@ -1,26 +1,27 @@
-import React, { Component } from 'react';
-import { Text, View, TouchableHighlight, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, TouchableHighlight, StyleSheet } from 'react-native';
+
+import synchronizePR from '../../shared/graphql/mutations/synchronize';
 import Title from './pr/Title';
 import StatusText from './pr/StatusText';
 import RepoText from './pr/RepoText';
+import ExpandedPRRow from './pr/ExpandedPRRow';
 
-export default ({ pr, togglePRRow, expandedPr }) => {
+const PRRow = ({ pr, togglePRRow, expandedPr, synchronize }) => {
   return (
     <View>
       <TouchableHighlight style={styles.rowView} onPress={() => togglePRRow(pr) } activeOpacity={0.9} underlayColor={'#EEE'}>
         <View style={styles.titleView}>
-          <Title image={pr.user && pr.user.avatarUrl} title={pr.title} />
+          <Title image={pr.user && pr.user.avatarUrl} title={pr.title} branch={pr.baseBranch} />
           <StatusText status={pr.buildStatus} link={pr.buildUrl}>
-            <RepoText repo={pr.repo} />
+            <RepoText repo={pr.repository} />
           </StatusText>
         </View>
       </TouchableHighlight>
-      <View style={[{display: expandedPr == pr.id ? 'flex' : 'none'}, styles.hiddenView]}>
-        <Text>Shows up when clicked</Text>
-      </View>
+      <ExpandedPRRow show={expandedPr == pr.id} githubUrl={pr.htmlUrl} analysisUrl={pr.analysisUrl} synchronize={synchronize} />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   rowView: {
@@ -37,8 +38,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between'
-  },
-  hiddenView: {
-    height: 150
   }
 });
+
+export default synchronizePR(PRRow);
