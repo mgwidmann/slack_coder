@@ -41,7 +41,7 @@ const PRTabs = ({ togglePRRow, expandedPr }) => {
       </MonitorsOpenPRs>
       {/* <PRView tabLabel='Hidden' dispatch={dispatch} tab={'hidden'} prs={pullRequests.hidden || []} /> */}
     </ScrollableTabView>
-  )
+  );
 }
 
 export default PRTabs;

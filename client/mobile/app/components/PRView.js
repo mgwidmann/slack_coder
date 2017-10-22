@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ListView } from 'react-native';
+
 import PRRow from './PRRow';
 import Loading from './Loading';
 
@@ -12,8 +13,8 @@ const PRView = ({ tab, pullRequests, loading, togglePRRow, expandedPr, children 
     return <PRRow key={pr.id} pr={pr} tab={tab} togglePRRow={togglePRRow} expandedPr={expandedPr} />;
   }
 
-  if (loading) {
-    return <Loading />;
+  if (loading || !pullRequests) {
+    return <Loading main={false} />;
   } else if (pullRequests.length == 0) {
     return children;
   } else {

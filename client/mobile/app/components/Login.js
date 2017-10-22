@@ -13,26 +13,27 @@ class Login extends Component {
   }
 
   componentDidMount() {
-    this._loadInitialState().done();
+    this._loadInitialState();
   }
 
-  async _loadInitialState() {
-    const value = await AsyncStorage.getItem('@SlackCoder:token');
-    this.props.setToken(value);
+  _loadInitialState() {
+    AsyncStorage.getItem('@SlackCoder:token').then((value) => {
+      this.props.loginWithToken(value);
+    });
   }
 
   _handleBarCodeRead({ data }) {
     AsyncStorage.setItem('@SlackCoder:token', data);
-    this.props.setToken(data);
+    this.props.loginWithToken(data);
   }
 
   render() {
     return (
-      <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer]}>
+      <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer, mainStyles.main]}>
         <QRCodeScanner
           onRead={this._handleBarCodeRead}
           showMarker={true}
-          /* containerStyle={[StyleSheet.absoluteFill, mainStyles.scanner]} */
+          fadeIn={false}
           topContent={(
             <Image source={require('../assets/botlogo.png')} style={[mainStyles.logo]} />
           )}
@@ -48,7 +49,7 @@ class Login extends Component {
             </View>
           )}
           notAuthorizedView={(
-            <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer]}>
+            <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer, mainStyles.main]}>
               <Text style={mainStyles.loginText}>No access to camera</Text>
               <Text style={mainStyles.loginSubText}>Please allow access in settings and try again.</Text>
               <Button onPress={this._loadInitialState} title={'Retry'} />

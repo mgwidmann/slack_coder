@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { PRIMARY_COLOR, SECONDARY_COLOR } from './constants';
+import { PRIMARY_COLOR, SECONDARY_COLOR, FOREGROUND_COLOR } from './constants';
 
 
 export default tabStyles = StyleSheet.create({
@@ -13,7 +13,12 @@ export default tabStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: PRIMARY_COLOR,
+  },
+  main: {
+    backgroundColor: PRIMARY_COLOR
+  },
+  secondary: {
+    backgroundColor: FOREGROUND_COLOR
   },
   loginText: {
     fontSize: 36,

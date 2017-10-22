@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import MainView from '../components/MainView';
-import client from '../client';
 import { toggleExpandPR } from '../../shared/actions/pullRequest';
 import { setToken } from '../../shared/actions/token';
 
@@ -21,7 +20,7 @@ const mapDispatchToProps = (dispatch) => {
     togglePRRow: (pr) => {
       dispatch(toggleExpandPR(pr));
     },
-    setToken: (token) => {
+    loginWithToken: (token) => {
       // Keep the token in the store for safe keeping
       dispatch(setToken(token));
     }
