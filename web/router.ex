@@ -25,8 +25,11 @@ defmodule SlackCoder.Router do
     plug SlackCoder.Guardian.AdminPipeline
   end
 
-  pipeline :api do
+  pipeline :public_api do
     plug :accepts, ["json"]
+  end
+
+  pipeline :api do
     plug Guardian.Plug.VerifyHeader, module: SlackCoder.Guardian,
                                      error_handler: SlackCoder.Guardian.AuthErrorHandler
   end
@@ -69,16 +72,22 @@ defmodule SlackCoder.Router do
   end
 
   scope "/api" do
-    pipe_through :api
+    pipe_through :public_api
 
-    post "/github/event", SlackCoder.GithubController, :event
+    get "/token/:token/refresh", SlackCoder.AuthController, :token_refresh
 
     scope "/" do
-      pipe_through :restricted
+      pipe_through :api
 
-      forward "/graphql", Absinthe.Plug, schema: SlackCoder.GraphQL.Schemas.MainSchema
+      post "/github/event", SlackCoder.GithubController, :event
 
-      get "/pull_requests/:owner/:repo/:pr/refresh", SlackCoder.PageController, :synchronize
+      scope "/" do
+        pipe_through :restricted
+
+        forward "/graphql", Absinthe.Plug, schema: SlackCoder.GraphQL.Schemas.MainSchema
+
+        get "/pull_requests/:owner/:repo/:pr/refresh", SlackCoder.PageController, :synchronize
+      end
     end
   end
 

@@ -50,11 +50,18 @@ defmodule SlackCoder.AuthController do
   defp after_login(conn, user) do
     conn = conn
            |> SlackCoder.Guardian.Plug.sign_in(user, %{admin: user.admin})
+           |> SlackCoder.Guardian.Plug.remember_me(user, %{admin: user.admin}, [])
            |> put_flash(:info, "Successfully authenticated.")
 
     SlackCoder.Slack.send_to(user.slack, "Signed in successfully!")
 
     conn
+  end
+
+  def token_refresh(conn, %{"token" => token}) do
+    {:ok, {_old_token, _old_claims}, {new_token, _new_claims}} = SlackCoder.Guardian.exchange token, "refresh", "access"
+    conn
+    |> json(%{token: new_token})
   end
 
 end
