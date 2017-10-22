@@ -6,3 +6,17 @@ export function setToken(value) {
     token: value
   };
 }
+
+export function refreshToken(url) {
+  return (dispatch) => {
+    fetch(url)
+    .then((response) => response.json())
+    .then(({ token }) => {
+      dispatch(setToken(token));
+    })
+    .catch((e) => {
+      console.error("Unable to refresh token at URL", url, "\n", e);
+      dispatch(setToken(null));
+    })
+  };
+}
