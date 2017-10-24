@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { AsyncStorage } from 'react-native';
 
 import Menu from '../components/Menu';
-import { setToken } from '../../shared/actions/token';
+import { logout } from '../../shared/actions/login';
 
 const mapStateToProps = (state, props) => {
   return {
@@ -15,7 +15,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     logout: () => {
       AsyncStorage.removeItem('@SlackCoder:token');
-      dispatch(setToken(null));
+      dispatch(logout());
     }
   };
 }

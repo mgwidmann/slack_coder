@@ -7,7 +7,6 @@ import Login from './Login';
 import PRTabs from './PRTabs';
 
 const MainView = ({ loggedIn, loading, loginWithToken, togglePRRow, expandedPr }) => {
-  // Cannot use null/undefined to determine difference between unknown and no value
   if (loggedIn && !loading) {
     return (
       <View style={{ flex: 1 }}>

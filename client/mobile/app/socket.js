@@ -4,9 +4,12 @@ export default (uri, options) => {
   let socket = new Socket(uri, { params: { token: options.token } });
   socket.onError((_error) => {
     console.log("Token is invalid, unable to connect to websocket");
-    if (options.logout) {
-      options.logout();
-    }
+  });
+  socket.onOpen(() => {
+    options.login && options.login();
+  });
+  socket.onClose(() => {
+    options.logout && options.logout();
   });
   
   if (options.token) {

@@ -8,18 +8,7 @@ import mainStyles from '../styles/main';
 class Login extends Component {
   constructor(props) {
     super(props);
-    this._loadInitialState = this._loadInitialState.bind(this);
     this._handleBarCodeRead = this._handleBarCodeRead.bind(this);
-  }
-
-  componentDidMount() {
-    this._loadInitialState();
-  }
-
-  _loadInitialState() {
-    AsyncStorage.getItem('@SlackCoder:token').then((value) => {
-      this.props.loginWithToken(value);
-    });
   }
 
   _handleBarCodeRead({ data }) {
@@ -28,6 +17,15 @@ class Login extends Component {
   }
 
   render() {
+    if (this.props.offline) {
+      return (
+        <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer, mainStyles.main]}>
+          <Image source={require('../assets/botlogo.png')} style={[mainStyles.logo]} />
+          <Text style={mainStyles.loginText}>Looks like you're offline.</Text>
+          <Text>Please reconnect and try again.</Text>
+        </View>
+      );
+    }
     return (
       <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer, mainStyles.main]}>
         <QRCodeScanner
@@ -52,7 +50,6 @@ class Login extends Component {
             <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer, mainStyles.main]}>
               <Text style={mainStyles.loginText}>No access to camera</Text>
               <Text style={mainStyles.loginSubText}>Please allow access in settings and try again.</Text>
-              <Button onPress={this._loadInitialState} title={'Retry'} />
             </View>
           )}
         />

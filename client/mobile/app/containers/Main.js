@@ -3,12 +3,13 @@ import { connect } from 'react-redux';
 
 import MainView from '../components/MainView';
 import { toggleExpandPR } from '../../shared/actions/pullRequest';
-import { setToken } from '../../shared/actions/token';
+import { login } from '../../shared/actions/login';
 
 const mapStateToProps = (state, props) => {
   return {
-    loggedIn: state.token && state.token != '',
-    loading: state.graphql.loading,
+    offline: state.login.offline,
+    loggedIn: state.login.loggedIn,
+    loading: state.graphql.loading || state.login.loading,
     error: state.graphql.error,
     expandedPr: state.expandedPr,
     ...props
@@ -22,7 +23,7 @@ const mapDispatchToProps = (dispatch) => {
     },
     loginWithToken: (token) => {
       // Keep the token in the store for safe keeping
-      dispatch(setToken(token));
+      dispatch(login(token));
     }
   }
 }
