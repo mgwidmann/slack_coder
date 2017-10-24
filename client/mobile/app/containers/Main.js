@@ -7,7 +7,6 @@ import { login } from '../../shared/actions/login';
 
 const mapStateToProps = (state, props) => {
   return {
-    offline: state.login.offline,
     loggedIn: state.login.loggedIn,
     loading: state.graphql.loading || state.login.loading,
     error: state.graphql.error,
