@@ -25,6 +25,19 @@ class PRView extends Component {
     }
   }
 
+  renderSeparator() {
+    return (
+      <View
+        style={{
+          height: 1,
+          backgroundColor: "#CED0CE",
+          marginLeft: 10,
+          marginRight: 10
+        }}
+      />
+    );
+  }
+
   renderPR({ item: pr }) {
     let { tab, togglePRRow, expandedPr, subscribe } = this.props;
     return <PRRow key={pr.id} pr={pr} tab={tab} togglePRRow={togglePRRow} expandedPr={expandedPr} subscribe={subscribe} />;
@@ -44,6 +57,7 @@ class PRView extends Component {
           renderItem={this.renderPR}
           keyExtractor={(pr) => { return pr.id }}
           extraData={expandedPr}
+          ItemSeparatorComponent={this.renderSeparator}
         />
       )
     }

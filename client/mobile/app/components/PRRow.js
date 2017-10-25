@@ -42,9 +42,6 @@ class PRRow extends Component {
 
 const styles = StyleSheet.create({
   rowView: {
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#BBBBCC',
     padding: 5,
     marginLeft: 5,
     marginRight: 5,
