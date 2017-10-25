@@ -1,12 +1,8 @@
 import React, { Component } from 'react';
-import { AppState, View, Text, StyleSheet, ListView } from 'react-native';
+import { AppState, View, Text, StyleSheet, FlatList } from 'react-native';
 
 import PRRow from './PRRow';
 import Loading from './Loading';
-
-const dataSource = new ListView.DataSource({
-  rowHasChanged: (r1, r2) => r1 != r2
-});
 
 class PRView extends Component {
   constructor(props) {
@@ -29,13 +25,13 @@ class PRView extends Component {
     }
   }
 
-  renderPR(pr) {
+  renderPR({ item: pr }) {
     let { tab, togglePRRow, expandedPr, subscribe } = this.props;
     return <PRRow key={pr.id} pr={pr} tab={tab} togglePRRow={togglePRRow} expandedPr={expandedPr} subscribe={subscribe} />;
   }
 
   render() {
-    let { pullRequests, loading, children } = this.props;
+    let { pullRequests, loading, expandedPr, children } = this.props;
 
     if (loading || !pullRequests) {
       return <Loading main={false} />;
@@ -43,9 +39,11 @@ class PRView extends Component {
       return children;
     } else {
       return (
-        <ListView
-          dataSource={dataSource.cloneWithRows(pullRequests)}
-          renderRow={this.renderPR}
+        <FlatList
+          data={pullRequests}
+          renderItem={this.renderPR}
+          keyExtractor={(pr) => { return pr.id }}
+          extraData={expandedPr}
         />
       )
     }
