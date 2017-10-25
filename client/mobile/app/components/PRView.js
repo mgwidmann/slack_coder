@@ -30,9 +30,8 @@ class PRView extends Component {
   }
 
   renderPR(pr) {
-    console.log(this.props);
-    let { tab, togglePRRow, expandedPr } = this.props;
-    return <PRRow key={pr.id} pr={pr} tab={tab} togglePRRow={togglePRRow} expandedPr={expandedPr} />;
+    let { tab, togglePRRow, expandedPr, subscribe } = this.props;
+    return <PRRow key={pr.id} pr={pr} tab={tab} togglePRRow={togglePRRow} expandedPr={expandedPr} subscribe={subscribe} />;
   }
 
   render() {

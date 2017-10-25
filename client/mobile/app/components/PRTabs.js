@@ -18,7 +18,7 @@ const PRTabs = ({ togglePRRow, expandedPr }) => {
       tabBarActiveTextColor={FOREGROUND_COLOR}
       tabBarUnderlineStyle={mainStyles.tabBarUnderline}
       >
-      <MineOpenPRs tabLabel='Main' tab='main' togglePRRow={togglePRRow} expandedPr={expandedPr}>
+      <MineOpenPRs tabLabel='Main' tab='mine' togglePRRow={togglePRRow} expandedPr={expandedPr}>
         <View style={[prStyles.emptyView]}>
           <Text style={[prStyles.emptyMainText]}>
             Looks like you have no pull requests!
