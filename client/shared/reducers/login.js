@@ -1,4 +1,15 @@
-import { SET_TOKEN, SET_LOGGED_IN, SET_LOGGED_OUT, SET_OFFLINE, SET_LOADING } from '../actions/constants/login';
+import {
+  SET_TOKEN,
+  SET_LOGGED_IN,
+  SET_LOGGED_OUT,
+  SET_RECONNECTING,
+  SET_ONLINE,
+  SET_OFFLINE,
+  SET_LOADING,
+  ONLINE,
+  OFFLINE,
+  RECONNECTING
+} from '../actions/constants/login';
 
 const initialState = {
   token: null,
@@ -27,12 +38,22 @@ export default function(state = initialState, action) {
         loading: false,
         loggedIn: false
       };
+    case SET_ONLINE:
+      return {
+        ...state,
+        connection: ONLINE
+      }
+    case SET_RECONNECTING:
+      return {
+        ...state,
+        connection: RECONNECTING
+      }
     case SET_OFFLINE:
       return {
         ...state,
         loggedIn: false,
         loading: false,
-        offline: true
+        connection: OFFLINE
       }
     case SET_LOADING:
       return {

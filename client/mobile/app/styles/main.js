@@ -3,9 +3,6 @@ import { PRIMARY_COLOR, SECONDARY_COLOR, FOREGROUND_COLOR } from './constants';
 
 
 export default tabStyles = StyleSheet.create({
-  tabBarContainer: {
-    marginTop: 20
-  },
   tabBarUnderline: {
     backgroundColor: SECONDARY_COLOR
   },

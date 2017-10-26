@@ -1,18 +1,26 @@
-import {Socket} from "phoenix";
+import { Socket } from "phoenix";
+import { connectionOnline, connectionOffline, reconnect, token } from './network';
 
 export default (uri, options) => {
-  let socket = new Socket(uri, { params: { token: options.token } });
+  let timeoutTimer = null;
+  let socket = new Socket(uri, { params: { token: token() } });
   socket.onError((_error) => {
     console.log("Token is invalid, unable to connect to websocket");
   });
   socket.onOpen(() => {
-    options.login && options.login();
+    connectionOnline();
   });
   socket.onClose(() => {
-    options.logout && options.logout();
+    reconnect();
+    clearTimeout(timeoutTimer);
+    timeoutTimer = setTimeout(() => {
+      if (!socket.isConnected()) {
+        connectionOffline();
+      }
+    }, 5000)
   });
   
-  if (options.token) {
+  if (token()) {
     socket.connect();
   }
 

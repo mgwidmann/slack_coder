@@ -5,10 +5,7 @@ import { ApolloProvider } from 'react-apollo';
 import Main from './app/containers/Main';
 import store from './app/store';
 import client from './app/client';
-import configureNetwork from './app/configureNetwork';
-import { setToken, setLoggedIn } from './shared/actions/login';
-
-configureNetwork(client, store);
+import { login } from './shared/actions/login';
 
 // Show requests in chrome debugger tools
 // GLOBAL.XMLHttpRequest = GLOBAL.originalXMLHttpRequest || GLOBAL.XMLHttpRequest;
@@ -22,9 +19,8 @@ class App extends Component {
 
   async _loadToken() {
     const token = await AsyncStorage.getItem('@SlackCoder:token');
-    store.dispatch(setToken(token));
-    if (token) {
-      store.dispatch(setLoggedIn());
+    if (token && token !== '') {
+      store.dispatch(login(token));
     }
   }
 

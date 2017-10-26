@@ -1,4 +1,13 @@
-import { SET_TOKEN, SET_LOGGED_IN, SET_LOGGED_OUT, SET_OFFLINE } from './constants/login';
+import {
+  SET_TOKEN,
+  SET_LOGGED_IN,
+  SET_LOGGED_OUT,
+  SET_ONLINE,
+  SET_OFFLINE,
+  SET_RECONNECTING
+} from './constants/login';
+
+// LOGIN / LOGOUT actions
 
 export function login(token) {
   return (dispatch) => {
@@ -14,29 +23,43 @@ export function logout() {
   };
 }
 
-export function setToken(value) {
+function setToken(value) {
   return {
     type: SET_TOKEN,
     token: value
   };
 }
 
-export function setLoggedIn() {
+function setLoggedIn() {
   return {
     type: SET_LOGGED_IN
-  }
+  };
 }
 
-export function setLoggedOut() {
+function setLoggedOut() {
   return {
     type: SET_LOGGED_OUT
-  }
+  };
 }
 
-export function setOffline() {
+// CONNECTION actions
+
+export function online() {
+  return {
+    type: SET_ONLINE
+  };
+}
+
+export function reconnecting() {
+  return {
+    type: SET_RECONNECTING
+  };
+}
+
+export function offline() {
   return {
     type: SET_OFFLINE
-  }
+  };
 }
 
 export function refreshToken(url) {
@@ -44,14 +67,14 @@ export function refreshToken(url) {
     fetch(url)
     .then((response) => response.json())
     .then(({ token }) => {
+      dispatch(setToken(token || null));
       if (token) {
         dispatch(setLoggedIn());
       }
-      dispatch(setToken(token || null));
     })
     .catch((e) => {
       dispatch(setToken(null));
-      dispatch(setOffline());
+      dispatch(offline());
     })
   };
 }

@@ -13,7 +13,6 @@ const PRTabs = ({ togglePRRow, expandedPr }) => {
   return (
     <ScrollableTabView
       tabBarPosition="bottom"
-      style={mainStyles.tabBarContainer}
       tabBarBackgroundColor={PRIMARY_COLOR}
       tabBarActiveTextColor={FOREGROUND_COLOR}
       tabBarUnderlineStyle={mainStyles.tabBarUnderline}

@@ -4,11 +4,14 @@ import { connect } from 'react-redux';
 import MainView from '../components/MainView';
 import { toggleExpandPR } from '../../shared/actions/pullRequest';
 import { login } from '../../shared/actions/login';
+import { OFFLINE, RECONNECTING } from '../../shared/actions/constants/login';
 
 const mapStateToProps = (state, props) => {
   return {
     loggedIn: state.login.loggedIn,
     loading: state.graphql.loading || state.login.loading,
+    offline: state.login.connection === OFFLINE,
+    reconnecting: state.login.connection === RECONNECTING,
     error: state.graphql.error,
     expandedPr: state.expandedPr,
     ...props
