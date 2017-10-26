@@ -7,7 +7,10 @@ import { logout } from '../../shared/actions/login';
 
 const mapStateToProps = (state, props) => {
   return {
-    ...props
+    ...props,
+    navigateSettings: () => {
+      props.navigation.navigate('Settings')
+    }
   };
 }
 

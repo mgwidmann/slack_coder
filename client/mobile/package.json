@@ -32,6 +32,7 @@
     "react-native-qrcode-scanner": "^0.0.22",
     "react-native-scrollable-tab-view": "^0.8.0",
     "react-native-vector-icons": "^4.4.2",
+    "react-navigation": "^1.0.0-beta.15",
     "react-redux": "^5.0.6",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.2.0"

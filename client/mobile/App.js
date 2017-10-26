@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { AsyncStorage } from 'react-native';
 import { ApolloProvider } from 'react-apollo';
 
-import Main from './app/containers/Main';
+// import Main from './app/containers/Main';
+import Navigator from './app/containers/Navigator';
 import store from './app/store';
 import client from './app/client';
 import { login } from './shared/actions/login';
@@ -27,7 +28,7 @@ class App extends Component {
   render() {
     return (
       <ApolloProvider client={client} store={store}>
-        <Main />
+        <Navigator />
       </ApolloProvider>
     );
   }

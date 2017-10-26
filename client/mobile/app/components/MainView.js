@@ -7,13 +7,13 @@ import Login from './Login';
 import PRTabs from './PRTabs';
 import ConnectionStatus from './ConnectionStatus';
 
-const MainView = ({ loggedIn, loading, offline, reconnecting, loginWithToken, togglePRRow, expandedPr }) => {
+const MainView = ({ loggedIn, loading, offline, reconnecting, loginWithToken, togglePRRow, expandedPr, navigation }) => {
   if (loggedIn && !loading) {
     return (
       <View style={styles.mainContainer}>
         <ConnectionStatus offline={offline} reconnecting={reconnecting} />
         <PRTabs togglePRRow={togglePRRow} expandedPr={expandedPr} />
-        <MenuContainer/>
+        <MenuContainer navigation={navigation} />
       </View>
     )
   } else if (loading) {
