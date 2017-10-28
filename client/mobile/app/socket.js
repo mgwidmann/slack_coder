@@ -19,10 +19,6 @@ export default (uri, options) => {
       }
     }, 5000)
   });
-  
-  if (token()) {
-    socket.connect();
-  }
 
   return socket;
 }
