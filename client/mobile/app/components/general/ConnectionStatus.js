@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-import { SECONDARY_COLOR } from '../styles/constants';
+import { SECONDARY_COLOR } from '../../styles/constants';
 
 const ConnectionStatus = ({ offline, reconnecting }) => {
   if (offline || reconnecting) {

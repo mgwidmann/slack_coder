@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { View, TouchableHighlight, StyleSheet } from 'react-native';
 
-import synchronizePR from '../../shared/graphql/mutations/synchronize';
-import Title from './pr/Title';
-import StatusText from './pr/StatusText';
-import RepoText from './pr/RepoText';
-import ExpandedPRRow from './pr/ExpandedPRRow';
+import synchronizePR from '../../../shared/graphql/mutations/synchronize';
+import Title from './Title';
+import StatusText from './StatusText';
+import RepoText from './RepoText';
+import ExpandedPRRow from './ExpandedPRRow';
 
 class PRRow extends Component {
   componentDidMount() {

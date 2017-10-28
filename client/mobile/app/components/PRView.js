@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { AppState, View, Text, StyleSheet, FlatList } from 'react-native';
 
-import PRRow from './PRRow';
-import Loading from './Loading';
+import PRRow from './pr/PRRow';
+import Loading from './general/Loading';
 
 class PRView extends Component {
   constructor(props) {

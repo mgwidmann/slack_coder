@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, Animated, Easing } from 'react-native';
-import mainStyles from '../styles/main';
-import { PRIMARY_COLOR, FOREGROUND_COLOR } from '../styles/constants';
+import mainStyles from '../../styles/main';
+import { PRIMARY_COLOR, FOREGROUND_COLOR } from '../../styles/constants';
 
 export default class Loading extends Component {
   constructor (props) {
@@ -48,7 +48,7 @@ export default class Loading extends Component {
     // });
     return (
       <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer, this.props.main === false ? mainStyles.secondary : mainStyles.main]}>
-        <Animated.Image source={require('../assets/botlogo.png')} style={[mainStyles.logo, { transform: [{rotate: spin}] }]} />
+        <Animated.Image source={require('../../assets/botlogo.png')} style={[mainStyles.logo, { transform: [{rotate: spin}] }]} />
       </View>
     );
   }

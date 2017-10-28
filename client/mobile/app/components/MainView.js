@@ -2,10 +2,10 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
 import MenuContainer from '../containers/Menu';
-import Loading from './Loading';
-import Login from './Login';
-import PRTabs from './PRTabs';
-import ConnectionStatus from './ConnectionStatus';
+import Loading from './general/Loading';
+import Login from './general/Login';
+import PRTabs from './pr/PRTabs';
+import ConnectionStatus from './general/ConnectionStatus';
 
 const MainView = ({ loggedIn, loading, offline, reconnecting, loginWithToken, togglePRRow, expandedPr, navigation }) => {
   if (loggedIn && !loading) {

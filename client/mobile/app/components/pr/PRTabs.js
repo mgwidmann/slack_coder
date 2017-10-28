@@ -2,11 +2,11 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import ScrollableTabView from 'react-native-scrollable-tab-view';
 
-import { PRIMARY_COLOR, SECONDARY_COLOR, FOREGROUND_COLOR } from '../styles/constants';
-import mainStyles from '../styles/main';
-import prStyles from '../styles/pullRequests';
-import MineOpenPRs from './pr/MineOpenPRs';
-import MonitorsOpenPRs from './pr/MonitorsOpenPRs';
+import { PRIMARY_COLOR, SECONDARY_COLOR, FOREGROUND_COLOR } from '../../styles/constants';
+import mainStyles from '../../styles/main';
+import prStyles from '../../styles/pullRequests';
+import MineOpenPRs from './MineOpenPRs';
+import MonitorsOpenPRs from './MonitorsOpenPRs';
 
 
 const PRTabs = ({ togglePRRow, expandedPr }) => {

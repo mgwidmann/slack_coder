@@ -3,7 +3,7 @@ import { AsyncStorage, StyleSheet, View, Image, Text, TextInput, Button } from '
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import Permissions from 'react-native-permissions';
 
-import mainStyles from '../styles/main';
+import mainStyles from '../../styles/main';
 
 class Login extends Component {
   constructor(props) {
@@ -20,7 +20,7 @@ class Login extends Component {
     if (this.props.offline) {
       return (
         <View style={[mainStyles.tabBarContainer, mainStyles.loginContainer, mainStyles.main]}>
-          <Image source={require('../assets/botlogo.png')} style={[mainStyles.logo]} />
+          <Image source={require('../../assets/botlogo.png')} style={[mainStyles.logo]} />
           <Text style={mainStyles.loginText}>Looks like you're offline.</Text>
           <Text>Please reconnect and try again.</Text>
         </View>
@@ -33,7 +33,7 @@ class Login extends Component {
           showMarker={true}
           fadeIn={false}
           topContent={(
-            <Image source={require('../assets/botlogo.png')} style={[mainStyles.logo]} />
+            <Image source={require('../../assets/botlogo.png')} style={[mainStyles.logo]} />
           )}
           bottomContent={(
             <View>
