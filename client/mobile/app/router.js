@@ -7,14 +7,17 @@ const Router = StackNavigator({
   Main: {
     screen: MainScreen,
     path: '',
+    navigationOptions: {
+      header: null,
+    }
   },
   Settings: {
     screen: SettingsScreen,
     path: 'settings',
+    headerMode: 'screen',
   },
 }, {
   initialRouteName: 'Main',
-  headerMode: 'none',
   cardStyle: {
     backgroundColor: 'white',
   }

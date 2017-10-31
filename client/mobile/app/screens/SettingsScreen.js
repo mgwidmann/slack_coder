@@ -1,12 +1,3 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import Settings from '../containers/Settings';
 
-const Settings = () => {
-  return (
-    <View>
-      <Text>Settings Page</Text>
-    </View>
-  );
-}
-
-export default Settings
+export default Settings;
