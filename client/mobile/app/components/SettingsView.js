@@ -21,7 +21,7 @@ SettingsView.navigationOptions = ({ navigation: { state: { params }}}) => {
   return {
     headerTitle: (
       <View style={styles.headerImageContainer}>
-        {params && <Image source={{uri: params.currentUser.avatarUrl}} style={styles.headerImage} />}
+        <Image source={{uri: params.currentUser.avatarUrl}} style={styles.headerImage} />
       </View>
     ),
     headerRight: (
