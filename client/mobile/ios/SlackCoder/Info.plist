@@ -39,6 +39,8 @@
 	<string>SlackCoder uses a QR code scanner to log you in.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+	<key>NSMainNibFile</key>
+	<string>LaunchScreen</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>FontAwesome.ttf</string>
