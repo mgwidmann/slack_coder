@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { View, Text, Image, StyleSheet, Button } from 'react-native';
 import { NavigationActions } from 'react-navigation';
+import { CheckBox } from 'react-native-elements'
 
 import { PRIMARY_COLOR } from '../styles/constants';
 
@@ -12,6 +13,7 @@ class SettingsView extends Component {
       <View style={styles.container}>
         <Text style={styles.name}>{currentUser.name}</Text>
         <Text style={styles.githubName}>{currentUser.github}</Text>
+        <CheckBox title='Mute all notifications' />
       </View>
     );
   }

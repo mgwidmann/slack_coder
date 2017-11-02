@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { AsyncStorage } from 'react-native';
 import { ApolloProvider } from 'react-apollo';
+import './ReactotronConfig';
 
 import Router from './app/router';
 import store from './app/store';

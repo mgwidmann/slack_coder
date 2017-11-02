@@ -1,4 +1,5 @@
 import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
+import Reactotron from 'reactotron-react-native';
 import thunkMiddleware from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 import client from './client';
@@ -9,9 +10,13 @@ let middleware = [
   client.middleware()
 ]
 
+let createReduxStore;
 if (__DEV__) {
   const loggerMiddleware = createLogger({ predicate: (getState, action) => true, collapsed: true });
   middleware.push(loggerMiddleware);
+  createReduxStore = Reactotron.createStore;
+} else {
+  createReduxStore = createStore;
 }
 
 function configureStore(initialState) {
@@ -19,7 +24,7 @@ function configureStore(initialState) {
     applyMiddleware(...middleware),
     (typeof window.__REDUX_DEVTOOLS_EXTENSION__ !== 'undefined') ? window.__REDUX_DEVTOOLS_EXTENSION__() : f => f
   );
-  return createStore(reducers, initialState, enhancer);
+  return createReduxStore(reducers, initialState, enhancer);
 }
 
 let initialStore = {};
