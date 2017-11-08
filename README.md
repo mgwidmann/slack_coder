@@ -11,11 +11,11 @@ SlackCoder
 
 #### Build Success
 
-[![Success](build-success.png)]()
+[![Success](build-success-notification.png)]()
 
 #### Build Failure
 
-[![Failure](build-failure.png)]()
+[![Failure](build-failure-notification.png)]()
 
 #### Merge Conflict
 
