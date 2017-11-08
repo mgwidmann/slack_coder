@@ -23,11 +23,11 @@ SlackCoder
 
 #### Merged
 
-[![Merged](pull-request-merged.png)]()
+[![Merged](pull-request-merged-notification.png)]()
 
 #### Closed
 
-[![Closed](pull-request-closed.png)]()
+[![Closed](pull-request-closed-notification.png)]()
 
 #### Stale (Disabled)
 
