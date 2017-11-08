@@ -5,37 +5,37 @@ SlackCoder
 
 ### Web Dashboard
 
-[![Web Dashboard](https://github.com/mgwidmann/slack_coder/master/web-dashboard.png)]()
+[![Web Dashboard](web-dashboard.png)]()
 
 ### Slack Notifications
 
 #### Build Success
 
-[![Success](https://github.com/mgwidmann/slack_coder/master/build-success.png)]()
+[![Success](build-success.png)]()
 
 #### Build Failure
 
-[![Failure](https://github.com/mgwidmann/slack_coder/master/build-failure.png)]()
+[![Failure](build-failure.png)]()
 
 #### Merge Conflict
 
-[![Conflict](https://github.com/mgwidmann/slack_coder/master/merge-conflict-notification.png)]()
+[![Conflict](merge-conflict-notification.png)]()
 
 #### Merged
 
-[![Merged](https://github.com/mgwidmann/slack_coder/master/pull-request-merged.png)]()
+[![Merged](pull-request-merged.png)]()
 
 #### Closed
 
-[![Closed](https://github.com/mgwidmann/slack_coder/master/pull-request-closed.png)]()
+[![Closed](pull-request-closed.png)]()
 
 #### Stale (Disabled)
 
-[![Stale](https://github.com/mgwidmann/slack_coder/master/pull-request-stale-notification.png)]()
+[![Stale](pull-request-stale-notification.png)]()
 
 #### Active (Disabled)
 
-[![Active](https://github.com/mgwidmann/slack_coder/master/pull-request-active-notification.png)]()
+[![Active](pull-request-active-notification.png)]()
 
 ### Development Setup
 
