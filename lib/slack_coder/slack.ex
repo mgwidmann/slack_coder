@@ -66,9 +66,25 @@ defmodule SlackCoder.Slack do
     end
   end
 
+  @doc """
+  Get the current state of the slack worker. Useful for debugging purposes.
+  """
+  def state() do
+    send :state, {:state, self()}
+    receive do
+      state -> state
+    end
+  end
+
   @doc false
   def handle_info({:slack, pid}, slack, state) when is_pid(pid) do
     send pid, slack
+    {:ok, state}
+  end
+
+  @doc false
+  def handle_info({:state, pid}, _slack, state) when is_pid(pid) do
+    send pid, state
     {:ok, state}
   end
 
@@ -186,16 +202,22 @@ defmodule SlackCoder.Slack do
   # TODO: Would like to extract this to a separate module and/or process
   @doc false
   # Caretaker says yes to confirm name
+  @wait_retry_message_time 60_000
   def handle_event(%{type: "message", text: yes, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{:user, username, {github, message}} | users]} = state) when yes in ["yes", "y", "YES", "Y"] do
     resolve_user_update(github, username)
-    send_message("Confirmed!", im(slack, user_id).id, slack)
-    send_to(username, message)
+    send_message("Confirmed! `#{github}`'s slack name has been updated to `@#{username}`.", im(slack, user_id).id, slack)
+    # Getting a reply of this whole flow with the users name replaced with the slack ID. Hopefully waiting should resolve the update
+    # for the slack IM data so that it won't happen, otherwise its a bug. Hard to repro.
+    Task.start fn ->
+      Process.sleep(@wait_retry_message_time)
+      send_to(username, message)
+    end
     {:ok, Map.put(state, :undeliverable, users)}
   end
   # Caretaker says no to confirm name
-  def handle_event(%{type: "message", text: no, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{:user, _username, {github, _message} = undeliverable} | users]} = state) when no in ["no", "n", "NO", "N"] do
+  def handle_event(%{type: "message", text: no, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{:user, _username, {github, _message}} | _users]} = state) when no in ["no", "n", "NO", "N"] do
     send_message("Whops! So then who is #{github}?", im(slack, user_id).id, slack)
-    {:ok, Map.put(state, :undeliverable, [undeliverable | users])}
+    {:ok, state}
   end
   # Caretaker answers incorrectly
   def handle_event(%{type: "message", text: _wrong_username, user: user_id}, slack, %{caretaker_id: user_id, undeliverable: [{:user, username, {github_user, _message}} | _]} = state) do
