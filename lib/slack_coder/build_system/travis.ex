@@ -3,6 +3,7 @@ defmodule SlackCoder.BuildSystem.Travis do
   alias SlackCoder.BuildSystem.Travis.Build
   alias SlackCoder.BuildSystem.Travis.Job
   require Logger
+  import HTTPoison.Retry
 
   def build_info(owner, repo, build) do
     "/repos/#{owner}/#{repo}/builds/#{build}"
@@ -25,6 +26,7 @@ defmodule SlackCoder.BuildSystem.Travis do
   def job_log(%SlackCoder.BuildSystem.Build{id: id}, pr) when is_integer(id) do
     "/jobs/#{id}/log"
     |> Job.get()
+    |> autoretry()
     |> handle_job_fetch()
     |> put_job_id(id)
     |> case do
