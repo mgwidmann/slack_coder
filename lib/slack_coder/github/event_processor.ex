@@ -143,8 +143,8 @@ defmodule SlackCoder.Github.EventProcessor do
       PullRequest.unstale(pid)
     else
       case SlackCoder.Repo.one(PR.by_number(pr.owner, pr.repo, pr.number)) do
-        nil -> nil
-        %PR{opened: false} -> :ok
+        nil -> Logger.warn("PR Review comment added to non-existent PR: #{inspect pr}")
+        %PR{opened: false} -> :ok # Not opened, ignore
         %PR{} = pr -> Logger.warn("PR Review comment added to open PR but worker not found: \n#{inspect pr}")
       end
     end
@@ -172,10 +172,17 @@ defmodule SlackCoder.Github.EventProcessor do
   defp do_process(:status, %{"context" => analysis_system, "state" => state, "target_url" => url, "sha" => sha}) when analysis_system in @analysis_systems do
     ShaMapper.find(sha)
     |> PullRequest.status(:analysis, sha, url, state)
+
+    :ok # Branch builds not tied to a PR will hit here, no need process
   end
 
   # Nothing to do for pings, already responded with a 200 so just exit
   defp do_process(:ping, _params) do
+    # Ignore
+    :ok
+  end
+
+  defp do_process(:watch, _params) do
     # Ignore
     :ok
   end
