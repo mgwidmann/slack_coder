@@ -47,6 +47,11 @@ config :slack_coder, SlackCoder.Guardian,
   serializer: SlackCoder.Guardian,
   secret_key: "nUzHV60AayAhzalp8iRhB5FokH7tcVv67ozi6PTjO0PZcUtyO4uoQRfcrVk5bc54"
 
+config :httpoison_retry,
+  wait: 15_000,
+  max_attempts: 5,
+  include_404s: true
+
 config :scrivener_html,
   routes_helper: SlackCoder.Router.Helpers
 

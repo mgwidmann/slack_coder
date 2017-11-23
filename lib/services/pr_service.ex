@@ -26,7 +26,14 @@ defmodule SlackCoder.Services.PRService do
     |> Repo.insert_or_update()
     |> case do
       {:ok, pr} ->
-        {:ok, pr |> check_failed() |> notifications() |> broadcast(Map.to_list(changeset.changes), changeset.data.id == nil)}
+        pr_worker = self()
+        pr = pr |> notifications() |> broadcast(Map.to_list(changeset.changes), changeset.data.id == nil)
+        # This could take some time with the autoretry, so don't hold up the PR worker or others tryig to
+        # contact the worker will time out since the PR worker can be sleeping
+        Task.Supervisor.start_child SlackCoder.TaskSupervisor, fn ->
+          GenServer.cast(pr_worker, {:save, pr |> check_failed()})
+        end
+        {:ok, pr}
       errored_changeset ->
         Logger.error "Unable to save PR: #{inspect errored_changeset}\n#{inspect changeset.data}"
         errored_changeset

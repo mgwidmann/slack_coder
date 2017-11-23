@@ -42,6 +42,11 @@ config :logger,
 # and calculating stacktraces is usually expensive.
 config :phoenix, :stacktrace_depth, 20
 
+# Make dev mode more likely to fail but with still a little bit of error protection
+config :httpoison_retry,
+  wait: 1_000,
+  max_attempts: 2
+
 database = if(System.get_env("DATA_DB_USER") == "nanobox", do: "gonano", else: "slack_coder_dev")
 # Configure your database
 config :slack_coder, SlackCoder.Repo,

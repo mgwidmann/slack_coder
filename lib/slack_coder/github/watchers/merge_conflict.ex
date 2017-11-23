@@ -16,7 +16,7 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
     GenServer.start_link(__MODULE__, %{prs: []}, name: __MODULE__)
   end
 
-  @normal_wait_time 60 * 5 * 1_000
+  @normal_wait_time 60 * 1 * 1_000
   def init(state) do
     Process.send_after(self(), :check_conflicts, @normal_wait_time)
     {:ok, state}
@@ -95,28 +95,38 @@ defmodule SlackCoder.Github.Watchers.MergeConflict do
     {:noreply, state}
   end
   def handle_info(:check_conflicts, %{prs: prs} = state) do
-    remaining_prs =
-      case SlackCoder.Github.query(@mergeable_query, variable_params(prs)) do
-        {:ok, %{"data" => data}} when is_map(data) ->
-          response_prs = Map.values(data) |> Enum.map(&(&1["pullRequest"])) |> Enum.filter(&(&1))
+    # This could take some time with the autoretry, so don't hold up the genserver or others tryig to
+    # contact the genserver will time out since the genserver can be sleeping
+    s = self()
+    Task.Supervisor.start_child SlackCoder.TaskSupervisor, fn ->
+      remaining_prs =
+        case SlackCoder.Github.query(@mergeable_query, variable_params(prs)) do
+          {:ok, %{"data" => data}} when is_map(data) ->
+            response_prs = Map.values(data) |> Enum.map(&(&1["pullRequest"])) |> Enum.filter(&(&1))
 
-          Enum.reject(prs, fn(pr) ->
-            response = Enum.find(response_prs, &(&1["number"] == pr.number && &1["repository"]["name"] == pr.repo && &1["repository"]["owner"]["login"] == pr.owner))
-            if response && response["mergeable"] != @unknown do
-              Logger.debug [IO.ANSI.green, IO.ANSI.bright, "[MergeConflict] ", IO.ANSI.normal, IO.ANSI.default_color, "Status of PR-", to_string(pr.number), " ", response["mergeable"]]
-              pr
-              |> Github.find_watcher()
-              |> PullRequest.update_sync(%{"mergeable_state" => response["mergeable"] |> convert_mergeable()})
-            end
-          end)
-        %HTTPoison.Error{reason: :timeout} ->
-          # Ignore (Rate limiting)
-          prs
-        error ->
-          Logger.warn "Received unexpected response from Github: #{inspect error}"
-          prs
-      end
+            Enum.reject(prs, fn(pr) ->
+              response = Enum.find(response_prs, &(&1["number"] == pr.number && &1["repository"]["name"] == pr.repo && &1["repository"]["owner"]["login"] == pr.owner))
+              if response && response["mergeable"] != @unknown do
+                Logger.debug [IO.ANSI.green, IO.ANSI.bright, "[MergeConflict] ", IO.ANSI.normal, IO.ANSI.default_color, "Status of PR-", to_string(pr.number), " ", response["mergeable"]]
+                pr
+                |> Github.find_watcher()
+                |> PullRequest.update_sync(%{"mergeable_state" => response["mergeable"] |> convert_mergeable()})
+              end
+            end)
+          %HTTPoison.Error{reason: :timeout} ->
+            # Ignore (Rate limiting)
+            prs
+          error ->
+            Logger.warn "Received unexpected response from Github: #{inspect error}"
+            prs
+        end
+      send(s, {:check_conflict_complete, remaining_prs})
+    end
 
+    {:noreply, state}
+  end
+
+  def handle_info({:check_conflict_complete, remaining_prs}, state) do
     Process.send_after(self(), :check_conflicts, check_conflict_timeout(remaining_prs))
     {:noreply, Map.put(state, :prs, remaining_prs)}
   end
