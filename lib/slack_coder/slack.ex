@@ -70,7 +70,7 @@ defmodule SlackCoder.Slack do
   Get the current state of the slack worker. Useful for debugging purposes.
   """
   def state() do
-    send :state, {:state, self()}
+    send :slack, {:state, self()}
     receive do
       state -> state
     end
