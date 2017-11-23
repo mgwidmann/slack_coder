@@ -8,6 +8,7 @@ defmodule SlackCoder.BuildSystem.Travis do
   def build_info(owner, repo, build) do
     "/repos/#{owner}/#{repo}/builds/#{build}"
     |> Build.get()
+    |> autoretry()
     |> handle_build_fetch()
   end
 
@@ -49,6 +50,7 @@ defmodule SlackCoder.BuildSystem.Travis do
     {"Location", redirect} = Enum.find(headers, &(match?({"Location", _}, &1)))
     redirect
     |> HTTPoison.get()
+    |> autoretry()
     |> handle_job_fetch()
   end
   defp handle_job_fetch({ok_or_error, response}) when ok_or_error in ~w(ok error)a do

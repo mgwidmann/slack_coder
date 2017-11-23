@@ -5,6 +5,7 @@ defmodule SlackCoder.Github do
   alias SlackCoder.Services.UserService
   alias SlackCoder.Github.ShaMapper
   import SlackCoder.Github.TimeHelper
+  import HTTPoison.Retry
 
   def client do
     Tentacat.Client.new(%{
@@ -16,6 +17,7 @@ defmodule SlackCoder.Github do
   def query(query, variables, client \\ client()) do
     "https://#{client.auth.user}:#{client.auth.password}@api.github.com/graphql"
     |> HTTPoison.post(Poison.encode!(%{query: query, variables: variables}))
+    |> autoretry()
     |> extract_response(query)
   end
 
