@@ -63,9 +63,16 @@ defmodule SlackCoder.Guardian do
   defmodule AuthErrorHandler do
     import Plug.Conn
 
-    def auth_error(conn, {type, _reason}, _opts) do
-      body = Poison.encode!(%{message: to_string(type)})
-      send_resp(conn, 401, body)
+    def auth_error(conn, {type, reason}, _opts) do
+      case Phoenix.Controller.get_format(conn) do
+        "json" ->
+          body = Poison.encode!(%{message: type, reason: reason})
+          conn
+          |> send_resp(401, body)
+          |> halt()
+        "html" ->
+          conn # Let front end handle
+      end
     end
   end
 end
