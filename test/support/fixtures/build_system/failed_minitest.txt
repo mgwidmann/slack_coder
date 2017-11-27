@@ -4,7 +4,7 @@ Run options: --seed 26781
 
 \u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[32m.\u001B[0m\u001B[31mE\u001B[0m
 
-\u001B[31mError:
+Error:
 UserTest::ProfileEditing#test_admin_can_edit:
 NameError: uninitialized constant User::Profile
     lib/user/profile/editable.rb:40:in `<class:User>'
@@ -16,7 +16,7 @@ bin/rails test test/user/profile/edit_test.rb:33
 
 \u001B[31mE\u001B[0m
 
-\u001B[31mError:
+Error:
 UserTest::ProfileEditing#test_user_can_edit:
 NoMethodError: undefined method `profile' for #<User:0x00007f5068edb8a8>
     test/user/profile/edit_test.rb:51:in `test_user_can_edit'

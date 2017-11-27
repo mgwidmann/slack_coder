@@ -42,16 +42,18 @@ defmodule SlackCoder.BuildSystem.LogParser do
     end)
   end
 
-  @seed_regex ~r/Run options: .*?--seed (?<seed>\d+).*?/
+  @seed_regex ~r/Run options: .*--seed (?<seed>\d+).*/
   defp find_minitest_seed(results) do
     results
-    |> Enum.filter(&match?("Run options:" <> _, &1))
+    |> Enum.filter(&match?("Run options: " <> _, &1))
     |> List.first()
     |> case do
       s when is_binary(s) ->
         seed = Regex.named_captures(@seed_regex, s)["seed"]
-        {seed, _} = Integer.parse(seed)
-        seed
+        if seed do
+          {seed, _} = Integer.parse(seed)
+          seed
+        end
       _ -> nil
     end
   end
@@ -89,10 +91,15 @@ defmodule SlackCoder.BuildSystem.LogParser do
   defp find_minitest_failure([], acc), do: acc
   defp find_minitest_failure(["bin/rails test " <> file_line | rest], acc) do
     %{"file" => file, "line" => line} = Regex.named_captures(@file_line_matcher, file_line)
-    error_index = Enum.find_index(rest, &match?("Error:", &1)) || 0
-    ["Error:", description, _error_message | _stack] = Enum.slice(rest, 0, error_index + 1) |> Enum.reverse()
-    description = String.trim_trailing(description, ":")
-    find_minitest_failure(rest, [{file, fix_line(line), description} | acc])
+    error_index = Enum.find_index(rest, &match?("Error:", &1))
+    acc = if error_index do
+      ["Error:", description, _error_message | _stack] = Enum.slice(rest, 0, error_index + 1) |> Enum.reverse()
+      description = String.trim_trailing(description, ":")
+      [{file, fix_line(line), description} | acc]
+    else
+      acc
+    end
+    find_minitest_failure(rest, acc)
   end
   defp find_minitest_failure([_|rest], acc), do: find_minitest_failure(rest, acc)
 
