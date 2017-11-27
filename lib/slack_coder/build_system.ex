@@ -11,7 +11,7 @@ defmodule SlackCoder.BuildSystem do
   require Logger
 
   defmodule Build do
-    defstruct [:id, :repository_id, :result]
+    defstruct [:id, :url, :result]
   end
   defmodule File do
     defstruct [:id, :type, :seed, :file, :system, :failure_log_id]
