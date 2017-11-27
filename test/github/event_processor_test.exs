@@ -151,10 +151,13 @@ defmodule SlackCoder.Github.EventProcessorTest do
 
       # Begin actual test
       EP.process(:status, Map.merge(Fixtures.PRs.status_failed(), %{"number" => pr.number, "sha" => @sha, "target_url" => "https://travis-ci.com/#{pr.owner}/#{pr.repo}/builds/4"}))
+      Process.sleep(100)
       assert %PR{build_status: "failure", last_failed_sha: @sha, last_failed_jobs: [%File{}, %File{}]} = PullRequest.fetch pid
       EP.process(:status, Map.merge(Fixtures.PRs.status_pending(), %{"number" => pr.number, "sha" => @sha, "target_url" => "https://travis-ci.com/#{pr.owner}/#{pr.repo}/builds/4"}))
+      Process.sleep(100)
       assert %PR{build_status: "pending"} = PullRequest.fetch pid
       EP.process(:status, Map.merge(Fixtures.PRs.status_success(), %{"number" => pr.number, "sha" => @sha, "target_url" => "https://travis-ci.com/#{pr.owner}/#{pr.repo}/builds/4"}))
+      Process.sleep(100)
       assert %PR{build_status: "success"} = PullRequest.fetch pid
 
       Process.sleep(100) # Wait for random failure service to finish processing
