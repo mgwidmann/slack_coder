@@ -108,6 +108,10 @@ defmodule SlackCoder.GraphQL.Schemas.MainSchema do
       arg :sort, :random_failure_sort_field
       @desc "Sort direction"
       arg :dir, :direction
+      @desc "The owner of the repoistory"
+      arg :owner, :string
+      @desc "The repository name"
+      arg :repository
       resolve &SlackCoder.GraphQL.Resolvers.RandomFailureResolver.list/3
     end
   end

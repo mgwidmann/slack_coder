@@ -39,6 +39,12 @@ defmodule SlackCoder.Models.RandomFailure do
       limit: 1
   end
 
+  def by_repo(query \\ __MODULE__, owner, repo) do
+    import Ecto.Query
+    from q in query,
+      where: q.owner == ^owner and q.repo == ^repo
+  end
+
   def unresolved(query \\ __MODULE__) do
     import Ecto.Query
     from q in query, where: q.resolved == ^false

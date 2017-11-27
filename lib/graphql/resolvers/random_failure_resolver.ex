@@ -9,10 +9,16 @@ defmodule SlackCoder.GraphQL.Resolvers.RandomFailureResolver do
   def list(_, params, _) do
     failures = RandomFailure
                |> RandomFailure.unresolved()
+               |> specific_repository(params)
                |> order_clause(params)
                |> Repo.paginate(params)
     {:ok, failures}
   end
+
+  defp specific_repository(query, %{owner: owner, repository: repo}) do
+    RandomFailure.by_repo(query, owner, repo)
+  end
+  defp specific_repository(query, _), do: query
 
   defp order_clause(query, %{sort: :count} = params) do
     dir = params[:dir] || :desc
