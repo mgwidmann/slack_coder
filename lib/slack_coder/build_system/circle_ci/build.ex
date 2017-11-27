@@ -12,7 +12,7 @@ defmodule SlackCoder.BuildSystem.CircleCI.Build do
   defp result(_), do: :unknown
 
   defp process_url(url) do
-    "https://circleci.com/api/v1.1" <> url <> "?circle-token=" <> Application.get_env(:slack_coder, :circle_ci_token)
+    "https://circleci.com/api/v1.1/#{url}?circle-token=#{Application.get_env(:slack_coder, :circle_ci_token)}"
   end
 
   defp process_response_body(body) when is_binary(body) do
