@@ -17,12 +17,20 @@ defmodule SlackCoder.BuildSystem.CircleCI.Build do
   end
 
   defp process_response_body(body) when is_binary(body) do
-    decoded = Poison.decode!(body)
-    build_num = decoded["build_num"]
-    decoded["steps"]
+    body
+    |> Poison.decode!()
+    |> handle_body()
+  end
+
+  def handle_body(%{"build_num" => build_num, "steps" => steps}) do
+    steps
     |> Enum.flat_map(&(&1["actions"]))
     |> Enum.filter(&(&1["type"] == "test"))
     |> Enum.map(&__MODULE__.new(&1, build_num))
+  end
+  def handle_body(body) do
+    Logger.warn "Received unexpected response from CircleCI: \n#{inspect body}"
+    []
   end
 
   defp process_request_headers(headers) do
