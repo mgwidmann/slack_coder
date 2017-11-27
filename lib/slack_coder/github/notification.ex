@@ -105,7 +105,7 @@ defmodule SlackCoder.Github.Notification do
     files
     |> Enum.group_by(&(&1.seed))
     |> Enum.map(fn {seed, files} ->
-      "bin/rails test #{files |> Enum.map(&(&1.file)) |> files_to_string()} TESTOPTS=\"--seed #{}\""
+      "bin/rails test #{files |> Enum.map(&(&1.file)) |> files_to_string()} TESTOPTS=\"--seed #{seed}\""
     end)
     |> Enum.join("\n")
   end
