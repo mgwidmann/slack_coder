@@ -11,6 +11,7 @@ defmodule SlackCoder.BuildSystem.CircleCI.Build do
   defp result("failed"), do: :failure
   defp result(_), do: :unknown
 
+  defp process_url("/" <> url), do: process_url(url)
   defp process_url(url) do
     "https://circleci.com/api/v1.1/#{url}?circle-token=#{Application.get_env(:slack_coder, :circle_ci_token)}"
   end
