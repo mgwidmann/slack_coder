@@ -101,6 +101,14 @@ defmodule SlackCoder.Github.Notification do
   def executable({:cucumber, files}) do
     "bundle exec cucumber#{files |> Enum.map(&(&1.file)) |> files_to_string()}"
   end
+  def executable({:minitest, files}) do
+    files
+    |> Enum.group_by(&(&1.seed))
+    |> Enum.map(fn {seed, files} ->
+      "bin/rails test #{files |> Enum.map(&(&1.file)) |> files_to_string()} TESTOPTS=\"--seed #{}\""
+    end)
+    |> Enum.join("\n")
+  end
 
   defp files_to_string(list, acc \\ "")
   defp files_to_string([], acc), do: acc

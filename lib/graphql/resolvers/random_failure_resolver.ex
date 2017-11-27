@@ -45,11 +45,13 @@ defmodule SlackCoder.GraphQL.Resolvers.RandomFailureResolver do
   for t <- ~w(rspec cucumber)a do
     defp command_for_type(unquote(t)), do: "bundle exec #{unquote(t)}"
   end
+  defp command_for_type(:minitest), do: "bin/rails test"
   defp command_for_type(type), do: type
 
   for t <- ~w(rspec)a do
     defp seed_for_type(unquote(t), seed), do: " --seed #{seed}"
   end
+  defp seed_for_type(:minitest, seed), do: " TESTOPTS=\"--seed #{seed}\""
   defp seed_for_type(_, _), do: nil
 
   def resolve(_, %{id: id}, _) do

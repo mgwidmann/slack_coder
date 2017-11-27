@@ -7,7 +7,7 @@ defmodule Fixtures do
   end
 
   defmodule Builds do
-    for file <- ~w(failed_job)a do
+    for file <- ~w(failed_rspec_and_cucumber failed_jest failed_minitest)a do
       Module.put_attribute(__MODULE__, file, File.read!("test/support/fixtures/build_system/#{file}.txt"))
       def unquote(file)(), do: unquote(Macro.escape Module.get_attribute(__MODULE__, file))
     end
